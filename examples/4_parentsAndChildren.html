@@ -14,7 +14,7 @@ g.start();
 //Declare global sprites, objects, and variables
 //that you wnat to access in all the game functions and states
 
-var cat, star, message;
+var cat, star, square, message, localMessage, globalMessage;
 
 //A `setup` function that will run only once.
 //Use it for intilaization tasks
@@ -24,9 +24,43 @@ function setup() {
   g.backgroundColor = "white";
   g.canvas.style.border = "1px black dashed";
 
-  //Make a sprite from a tileset
-  cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
+  //Make a square, position it, and give it a drop shadow
+  square = g.rectangle(128, 128, "lightblue", "black", 1);
+  square.shadow = true;
 
+  //Use the stage's `put.center` method to put the square
+  //in the center of the stage. You can also use `put.top`,
+  //`put.right`, `put.bottom` and `put.left`. If you want to offset
+  //the position, use x and y offset values as the second and third
+  //arguments: `sprite.put.top(anySprite, -10, -5)` 
+  g.stage.put.center(square);
+
+  //Make the cat sprite from a tileset
+  cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
+  cat.shadow = true;
+
+  //Add the cat as a child of the square, and put it in the center of
+  //the square
+  square.addChild(cat);
+  square.put.center(cat);
+
+  //Create some text that will display the cat's local position
+  localMessage = g.text("", "11px sans-serif", "black");
+
+  //Add the text as a child of the square
+  square.addChild(localMessage);
+
+  //Use the text's `localX` and `localY` values to set its top left
+  //corner position relative to the square's top left corner
+  localMessage.localX = -8;
+  localMessage.localY = -20;
+
+  //Create some text that will display the cat's global position
+  globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
+  g.stage.put.bottom(globalMessage, 0, -20);
+  console.log(globalMessage.width)
+
+/*
   //Center the cat
   cat.x = g.canvas.width / 2 - cat.halfWidth;
   cat.y = g.canvas.height / 2 - cat.halfHeight;
@@ -38,6 +72,8 @@ function setup() {
 
   //Make the star a child of the cat
   cat.addChild(star);
+
+
 
   //Check to see what the children of the `stage` and `cat` are
   console.log("g.stage.children: " + g.stage.children);
@@ -56,6 +92,7 @@ function setup() {
   cat.addChild(star);
 
   cat.rotation = 0.5;
+  */
 
   //Assign key `press` methods
   g.key.leftArrow.press = function() {
@@ -109,10 +146,24 @@ function setup() {
 
 //The `play` function will run in a loop
 function play() {
-
+ 
+  //Move the cat
   g.move(cat);
 
-  cat.rotation += 0.01;
+  //Display the cat's `localX` and `localY` coordinates. These are
+  //relative to the square, which is the cat's parent.
+  localMessage.content 
+    = "cat.localX: " + cat.localX + ", " 
+    + "cat.localY: " + cat.localY;
+
+  //Display the cat's global `x` and global `y` coordinates. These are
+  //relative to the `stage`, which is the root container for all the
+  //sprites and groups.
+  globalMessage.content 
+    = "cat.x: " + cat.x + ", " 
+    + "cat.y: " + cat.y;
+
+  //cat.rotation += 0.01;
 
   //You can also move a sprite the good old-fashioned way
   //cat.x += cat.vx;
@@ -123,7 +174,7 @@ function play() {
   //defined by the last 4 argumants. If the sprite hits the edges of
   //that space, `contain` returns useful a string that will tell you which
   //side the sprite hit: "left", "right". "top" or "bottom".
-
+  /*
   var catHitsEdges = g.contain(cat, 0, 0, g.canvas.width, g.canvas.height);
 
   //Display the edge of canvas that the cat hit
@@ -132,6 +183,7 @@ function play() {
       = "The cat hit the " + catHitsEdges + " of the canvas";
     g.stage.addChild(star);
   }
+  */
 }
 
 </script>

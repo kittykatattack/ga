@@ -46,11 +46,17 @@ function setup() {
 
   //`circle` argumenets:
   //diameter, fillstyle, stroketyle, lineWidth, x, y 
-  ball = g.circle(32, "Plum", "PowderBlue", 4, 100, 45);
+  ball = g.circle(42, "Plum", "PowderBlue", 8, 95, 45);
 
   //`line` arguments:
   //strokeStyle, lineWidth, ax, ay, bx, by
   line = g.line("Yellow", 4, 162, 52, 220, 94);
+
+  //If you need to you can reposition the line's by its x/y top left corner
+  //point. This changes the position of the line without changing its
+  //length
+  //line.x = 100;
+  //line.y = 100;
 
   //Define two circular paths for the start and end points of the line
   //to follow
@@ -99,6 +105,19 @@ function setup() {
   //`stage` object's `children` array
   console.log("stage.children: " + g.stage.children);
 
+  //Make any sprite interactive by setting its 
+  //`interactive` property to `true`. You can then assign
+  //`press` and `release` actions to sprites. You can also
+  //access its `state` and `action` properties.
+  ball.interactive = true;
+  ball.press = function() {
+    //An array of color names
+    var colors = ["Gold", "Lavender", "Crimson", "DarkSeaGreen"];
+    //Set the ball's `fillStyle` and `strokeStyle` to a random color
+    ball.fillStyle = colors[g.random(0, 3)];
+    ball.strokeStyle = colors[g.random(0, 3)];
+  };
+
   //Change the state to `play`
   g.state = play;  
 }
@@ -116,6 +135,14 @@ function play() {
   //Make the rocket rotate towards the star
   //`angle` returns the angle between two sprites, in radians.
   rocket.rotation = g.angle(rocket, star);
+
+  //Make the star invisible if the pointer is "over"
+  //the ball or being pressed "down" on it
+  if (ball.state === "over" || ball.state === "down") {
+    star.visible = false;
+  } else {
+    star.visible = true;
+  }
 
   //Display the position of the pointer
   pointerDisplay.content 
