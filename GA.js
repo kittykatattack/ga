@@ -20,11 +20,7 @@ function GA(width, height, setup, assetsToLoad, load) {
   //for all the sprites and other groups. Groups don't have
   //default positions or size, you need to assign their dimensions
   //after you've created them
-  ga.stage = group();
-  ga.stage.width = ga.canvas.width;
-  ga.stage.height = ga.canvas.height;
-  ga.stage.x = 0;
-  ga.stage.y = 0;
+  ga.stage = makeStage();
  
   //Initialize the pointer 
   ga.pointer = makePointer();
@@ -255,6 +251,16 @@ function GA(width, height, setup, assetsToLoad, load) {
     return o;
   }
 
+  function makeStage() {
+    var stage = group();
+    stage.width = ga.canvas.width;
+    stage.height = ga.canvas.height;
+    stage.gx = 0;
+    stage.gy = 0;
+    stage.parent = stage;
+    return stage; 
+  }
+
   //Common properties for all the display objects
   function addProperties(sprite) {
     sprite.vx = 0; 
@@ -273,8 +279,8 @@ function GA(width, height, setup, assetsToLoad, load) {
     sprite._rotation = 0;
     sprite._visible = true;
     sprite._alpha = 1;
-    sprite._x = 0;
-    sprite._y = 0;
+    sprite._gx = 0;
+    sprite._gy = 0;
     sprite._layer = 0;
     sprite._draggable = undefined;
     sprite._circular = false;
@@ -309,105 +315,105 @@ function GA(width, height, setup, assetsToLoad, load) {
       center: function(anotherSprite, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.x + sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
-        anotherSprite.y = (sprite.y + sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
+        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
       },
       //Position another sprite above this sprite
       top: function(anotherSprite, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.x + sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
-        anotherSprite.y = (sprite.y - anotherSprite.height) + yOffset;
+        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
+        anotherSprite.y = (anotherSprite.height) + yOffset;
       },
       //Position another sprite to the left of this sprite
       right: function(anotherSprite, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.x + sprite.width) + xOffset;
-        anotherSprite.y = (sprite.y + sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        anotherSprite.x = (sprite.width) + xOffset;
+        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
       },
       //Position another sprite below this sprite
       bottom: function(anotherSprite, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.x + sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
+        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
         anotherSprite.y = (sprite.y + sprite.height) + yOffset;
       },
       //Position another sprite below this sprite
       left: function(anotherSprite, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.x - anotherSprite.width) + xOffset;
-        anotherSprite.y = (sprite.y + sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        anotherSprite.x = (anotherSprite.width) + xOffset;
+        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
       },
     };
 
     //Getters and setters for various game engine properties
     Object.defineProperties(sprite, {
       //`x` and `y` getters and setters move child sprites
-      x: {
+      gx: {
         get: function() {
-          return this._x;
+          return this._gx;
         },
         set: function(value) {
-          var currentX = this.x;
+          var currentX = this.gx;
           if (this.children && this.children.length > 0) {
             this.children.forEach(function(child) {
               //The offset is equal to the difference between the 
               //container's `currentX` position and its new `value`
               var offset = value - currentX;
-              child.x += offset;
+              child.gx += offset;
             });
           }
           //Set the new x value
-          this._x = value;
+          this._gx = value;
         },
         enumerable: true, configurable: true
       },
-      y: {
+      gy: {
         get: function() {
-          return this._y;
+          return this._gy;
         },
         set: function(value) {
-          var currentY = this.y;
+          var currentY = this.gy;
           if (this.children && this.children.length > 0) {
             this.children.forEach(function(child) {
               //The offset is equal to the difference between the 
               //container's `currentX` position and its new `value`
               var offset = value - currentY;
-              child.y += offset;
+              child.gy += offset;
             });
           }
           //Set the new x value
-          this._y = value;
+          this._gy = value;
         },
         enumerable: true, configurable: true
       },
       //Get and set the cat's local x and y position
       //relative to its parent
-      localX: {
+      x: {
         get: function() {
-          if (this.parent.x > 0) {
-            return this.x - this.parent.x;
+          if (this.parent.gx > 0) {
+            return this.gx - this.parent.gx;
           } else {
-            return Math.abs(this.parent.x) + this.x;
+            return Math.abs(this.parent.gx) + this.gx;
           }
         },
-        set: function(value) {
-          this.x = this.parent.x + value;
+        set: function(value){
+          this.gx = this.parent.gx + value;
         },
         enumerable: true, configurable: true
       },
-      localY: {
+      y: {
         get: function() {
-          if (this.parent.y > 0) {
-            return this.y - this.parent.y;
+          if (this.parent.gy > 0) {
+            return this.gy - this.parent.gy;
           } else {
-            return Math.abs(this.parent.y) + this.y;
+            return Math.abs(this.parent.gy) + this.gy;
           }
         },
         set: function(value) {
-          this.y = this.parent.y + value;
+          this.gy = this.parent.gy + value;
         },
         enumerable: true, configurable: true
       },
@@ -543,6 +549,30 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+      localBounds: {
+        get: function() {
+          var rectangle = {
+            x: 0, 
+            y: 0, 
+            width: this.width, 
+            height: this.height
+          }; 
+          return rectangle;
+        },
+        enumerable: true, configurable: true
+      },
+      globalBounds: {
+        get: function() {
+          rectangle = {
+            x: this.gx, 
+            y: this.gy, 
+            width: this.gx + this.width, 
+            height: this.gy + this.height
+          }; 
+          return rectangle;
+        },
+        enumerable: true, configurable: true
+      },
     });
   }
 
@@ -585,13 +615,13 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.lineWidth = lineWidth || 0;
     //Add extra sprite properties
     addProperties(o);
+    //Add the sprite to the stage
+    ga.stage.addChild(o);
     //Set the sprite's getters
     o.x = x || 0;
     o.y = y || 0;
     //Make it a container object
     makeContainer(o);
-    //Add the sprite to the stage
-    ga.stage.addChild(o);
     return o;
   };
 
@@ -607,6 +637,8 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.lineWidth = lineWidth || "none";
     //Add some extra properties to the sprite
     addProperties(o);
+    //Add the sprite to the stage
+    ga.stage.addChild(o);
     //Set the sprite's getters
     o.x = x || 0;
     o.y = y || 0;
@@ -614,8 +646,6 @@ function GA(width, height, setup, assetsToLoad, load) {
     makeCircular(o);
     //Make it a container object
     makeContainer(o);
-    //Add the sprite to the stage
-    ga.stage.addChild(o);
     return o;
   };
 
@@ -635,6 +665,8 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.lineJoin = "round";
     //Add some extra properties to the sprite
     addProperties(o);
+    //Add the sprite to the stage
+    ga.stage.addChild(o);
     //Measure the width and height of the line, and its
     //figure out its top left corner x y position
     Object.defineProperties(o, {
@@ -654,7 +686,7 @@ function GA(width, height, setup, assetsToLoad, load) {
       //Calculate the line's `x` and `y` properties (the line's top left
       //corner.) This will let you reposition the line using `x` and
       //`y` without changing its length.
-      x: {
+      gx: {
         get: function() {
           return Math.min(o.ax, o.bx);
         },
@@ -676,7 +708,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
-      y: {
+      gy: {
         get: function() {
           return Math.min(o.ay, o.by);
         },
@@ -696,10 +728,9 @@ function GA(width, height, setup, assetsToLoad, load) {
             o.ay += offset;
           }
         },
+        enumerable: true, configurable: true
       }
     });
-    //Add the sprite to the stage
-    ga.stage.addChild(o);
     return o;
   };
 
@@ -849,13 +880,13 @@ function GA(width, height, setup, assetsToLoad, load) {
     }
     //Add extra sprite properties
     addProperties(o);
+    //Add the sprite to the stage
+    ga.stage.addChild(o);
     //Set the sprite's getters
     o.x = 0;
     o.y = 0;
     //If the sprite has more than one frame, add a state player
     if (o.frames.length > 0) ga.addStatePlayer(o);
-    //Add the sprite to the stage
-    ga.stage.addChild(o);
     return o;
   };
 
@@ -1123,10 +1154,10 @@ function GA(width, height, setup, assetsToLoad, load) {
       //area of the canvas
       if (
         sprite.visible
-        && sprite.x + sprite.width > 0
-        && sprite.x < canvas.width
-        && sprite.y + sprite.height > 0
-        && sprite.y < canvas.height
+        && sprite.gx + sprite.width > 0
+        && sprite.gx < canvas.width
+        && sprite.gy + sprite.height > 0
+        && sprite.gy < canvas.height
         || sprite.type === "group"
       ) {
         //Draw the different sprite types
@@ -1149,8 +1180,8 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowBlur = sprite.shadowBlur;
           }
           ctx.translate(
-            Math.floor(sprite.centerX),
-            Math.floor(sprite.centerY)
+            Math.floor(sprite.gx + sprite.halfWidth),
+            Math.floor(sprite.gy + sprite.halfHeight)
           );
           ctx.rotate(sprite.rotation);
           ctx.beginPath();
@@ -1185,8 +1216,8 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowBlur = sprite.shadowBlur;
           }
           ctx.translate(
-            Math.floor(sprite.centerX),
-            Math.floor(sprite.centerY)
+            Math.floor(sprite.gx + sprite.halfWidth),
+            Math.floor(sprite.gy + sprite.halfHeight)
           );
           ctx.rotate(sprite.rotation);
           ctx.beginPath();
@@ -1240,7 +1271,7 @@ function GA(width, height, setup, assetsToLoad, load) {
           ctx.font = sprite.font;
           ctx.fillStyle = sprite.fillStyle;
           ctx.textBaseline = sprite.textBaseline;
-          ctx.fillText(sprite.content, sprite.x, sprite.y);
+          ctx.fillText(sprite.content, sprite.gx, sprite.gy);
           ctx.restore();
         }
 
@@ -1260,8 +1291,8 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowBlur = sprite.shadowBlur;
           }
           ctx.translate(
-            Math.floor(sprite.centerX),
-            Math.floor(sprite.centerY)
+            Math.floor(sprite.gx + sprite.halfWidth),
+            Math.floor(sprite.gy + sprite.halfHeight)
           );
           ctx.rotate(sprite.rotation);
           ctx.drawImage(
@@ -1937,7 +1968,12 @@ function GA(width, height, setup, assetsToLoad, load) {
   ---------
   */
 
-  ga.contain = function(s, x, y, width, height, bounce, extra){
+  ga.contain = function(s, bounds, bounce, extra){
+
+    var x = bounds.x,
+        y = bounds.y,
+        width = bounds.width,
+        height = bounds.height;
 
     //The `collision` object is used to store which 
     //side of the containing rectangle the sprite hits

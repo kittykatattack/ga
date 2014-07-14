@@ -50,15 +50,15 @@ function setup() {
   //Add the text as a child of the square
   square.addChild(localMessage);
 
+  console.log(localMessage.x)
   //Use the text's `localX` and `localY` values to set its top left
   //corner position relative to the square's top left corner
-  localMessage.localX = -8;
-  localMessage.localY = -20;
+  localMessage.x = 4;
+  localMessage.y = 2;
 
   //Create some text that will display the cat's global position
   globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
   g.stage.put.bottom(globalMessage, 0, -20);
-  console.log(globalMessage.width)
 
 /*
   //Center the cat
@@ -150,24 +150,33 @@ function play() {
   //Move the cat
   g.move(cat);
 
-  //Display the cat's `localX` and `localY` coordinates. These are
-  //relative to the square, which is the cat's parent.
-  localMessage.content 
-    = "cat.localX: " + cat.localX + ", " 
-    + "cat.localY: " + cat.localY;
-
-  //Display the cat's global `x` and global `y` coordinates. These are
-  //relative to the `stage`, which is the root container for all the
-  //sprites and groups.
-  globalMessage.content 
-    = "cat.x: " + cat.x + ", " 
-    + "cat.y: " + cat.y;
-
-  //cat.rotation += 0.01;
-
   //You can also move a sprite the good old-fashioned way
   //cat.x += cat.vx;
   //cat.y += cat.vy;
+
+  //Display the cat's local `x` and local `y` coordinates. These are
+  //relative to the square, which is the cat's parent.
+  localMessage.content 
+    = "cat.x: " + cat.x + ", " 
+    + "cat.y: " + cat.y;
+
+  //Display the cat's global `gx` and global `gy` coordinates. These are
+  //relative to the `stage`, which is the root container for all the
+  //sprites and groups.
+  globalMessage.content 
+    = "cat.gx: " + cat.gx + ", " 
+    + "cat.gy: " + cat.gy;
+
+  //Contain the cat inside the square's boundary
+  var catHitsEdges = g.contain(cat, square.localBounds);
+
+  //Display the edge of canvas that the cat hit
+  if (catHitsEdges) {
+    message.content 
+      = "The cat hit the " + catHitsEdges + " of the square";
+  }
+  //cat.rotation += 0.01;
+
 
   //Contain the cat inside the canvas
   //'contain` constrains the sprite's movement to a rectangular space
@@ -175,14 +184,7 @@ function play() {
   //that space, `contain` returns useful a string that will tell you which
   //side the sprite hit: "left", "right". "top" or "bottom".
   /*
-  var catHitsEdges = g.contain(cat, 0, 0, g.canvas.width, g.canvas.height);
 
-  //Display the edge of canvas that the cat hit
-  if (catHitsEdges) {
-    message.content 
-      = "The cat hit the " + catHitsEdges + " of the canvas";
-    g.stage.addChild(star);
-  }
   */
 }
 
