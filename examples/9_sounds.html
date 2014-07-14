@@ -1,0 +1,87 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Sounds</title>
+<body>
+<script src="../ga.js"></script>
+<script>
+
+//Create a new GA instance, and start it.
+//Pre-load sounds in the constructor array.
+var g = GA(
+  256, 256, setup, 
+  [
+    "sounds/shoot.wav",
+    "sounds/music.wav",
+    "sounds/explosion.wav",
+    "fonts/PetMe64.ttf"
+  ]
+);
+g.start();
+
+//A `setup` function that will run only once.
+//Use it for intilaization tasks
+function setup() {
+
+  //Access the sounds
+  var shoot = g.sound("sounds/shoot.wav"),
+      explosion = g.sound("sounds/explosion.wav");
+      music = g.sound("sounds/music.wav");
+
+  //Setup the sounds
+  //Make the music loop
+  music.loop = true;
+
+  //Set the pan
+  shoot.pan = 0.8;
+  music.pan = -0.8;
+
+  //Set the volume
+  shoot.volume = 0.5;
+  music.volume = 0.3;
+
+  //Create the keyboard objects
+  var one = g.keyboard(49),
+      a = g.keyboard(65),
+      b = g.keyboard(66),
+      c = g.keyboard(67),
+      d = g.keyboard(68);
+
+  //Create `press` actions for each to control the sound
+  one.press = function(){
+    shoot.play();
+  };
+  a.press = function(){
+    //Allow the music to start playing only once
+    if (!music.isPlaying) music.play(); 
+  };
+  b.press = function(){
+    music.pause();
+  };
+  c.press = function(){
+    music.restart();
+  };
+  d.press = function(){
+    music.playFrom(10);
+  };
+
+  //There's no multiline support for text (yet!) so let's
+  //do it caveman style for now:
+  var f = "10px PetMe64";
+  var c = "YellowGreen";
+  g.text("To shoot, press 1", f, c, 10, 10);
+  g.text("To control music:", f, c, 10, 50);
+  g.text("a - Play", f, c, 10, 70);
+  g.text("b - Pause", f, c, 10, 90);
+  g.text("c - Restart", f, c, 10, 110);
+  g.text("d - Go to 10 sec. mark", f, c, 10, 130);
+
+  //g.state = play;    
+}
+
+//The `play` function will run in a loop
+function play() {
+  //...but we don't need a game loop in this example, yay! :)
+}
+
+</script>
+</body>

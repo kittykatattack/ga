@@ -1,0 +1,138 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Basic display elements</title>
+<body>
+<script src="../ga.js"></script>
+<script>
+
+//Create a new GA instance, and start it.
+//Pre-load images in the array.
+var g = GA(
+  256, 256, setup, 
+  [
+    "images/platforms.png",
+    "images/rocket.png",
+    "fonts/puzzler.otf",
+    "fonts/PetMe64.ttf"
+  ]
+);
+g.start();
+
+//Declare global sprites, objects, and variables
+//that you wnat to access in all the game functions and states
+
+var box, ball, line, message, 
+    pathA, pathB, rocket, star,
+    pointerDisplay;
+
+//A `setup` function that will run only once.
+//Use it for intilaization tasks
+function setup() {
+
+  //Set an optional fps for the game.
+  //The frame rate will default to 60 fps is you don't set it
+  //g.fps = 12;
+
+  //Optionally hide the mouse pointer
+  //g.hidePointer();
+
+  //Optionally change the background color
+  //g.backgroundColor = "DarkGray";
+
+  //`rectangle` arguments: 
+  //width, height, fillColor, strokeColor, lineWidth, x, y
+  box = g.rectangle(32, 32, "cyan", "white", 4, 32, 32);
+  box.rotation = 0.5;
+
+  //`circle` argumenets:
+  //diameter, fillstyle, stroketyle, lineWidth, x, y 
+  ball = g.circle(32, "Plum", "PowderBlue", 4, 100, 45);
+
+  //`line` arguments:
+  //strokeStyle, lineWidth, ax, ay, bx, by
+  line = g.line("Yellow", 4, 162, 52, 220, 94);
+
+  //Define two circular paths for the start and end points of the line
+  //to follow
+  pathA = {centerX: line.ax, centerY: line.ay, radius:10, angle:0};
+  pathB = {centerX: line.bx, centerY: line.by, radius:10, angle:0};
+ 
+  //`text` arguments:
+  //content, font, fillStyle, x, y
+  //The font family name will be the same as the font's file name
+  message = g.text("Hello World!", "14px puzzler", "white");
+  message.x = 80;
+  message.y = 10;
+
+  //`sprite` arguments:
+  //source, sourceX, sourceY, sourceWidth, sourceHeight
+  //Create a sprite from a single image by supplying the 
+  //image name as the first argument
+  rocket = g.sprite("images/rocket.png");
+  rocket.x = g.canvas.width / 2 - rocket.halfWidth;
+  rocket.y = 138;
+  rocket.width = 50;
+  rocket.height = 50;
+  rocket.rotation = 5.5;
+
+  //You can make a sprite from a tileset image by
+  //supplying a `frame` object as an argument to the sprite. 
+  //`frame` arguments:
+  //sourceImage, sourceX, sourceY, sourceWidth, sourceHeight
+  var starFrame = g.frame("images/platforms.png", 32, 0, 32, 32);
+  star = g.sprite(starFrame);
+
+  //You can add `radius` and `diameter` properties
+  //to a sprite by setting its `circular` property
+  //to `true`.
+  star.circular = true;
+  console.log("star.radius: " + star.radius)
+  console.log("star.diameter: " + star.diameter)
+  //Set `circular` back to false if you want to remove
+  //the `radius` and `diameter` properties.
+
+  pointerDisplay = g.text("", "8px PetMe64", "white");
+  pointerDisplay.x = 10;
+  pointerDisplay.y = 235;
+
+  //Every time you create a sprite it's added to the
+  //`stage` object's `children` array
+  console.log("stage.children: " + g.stage.children);
+
+  //Change the state to `play`
+  g.state = play;  
+}
+
+//The `play` function will run in a loop
+function play() {
+ 
+  //Make the box rotate
+  box.rotation += 0.01;
+
+  //Make the star ease towards the pointer.
+  //`ease` arguments: follower, leader, speed
+  g.ease(star, g.pointer, 0.1);
+
+  //Make the rocket rotate towards the star
+  //`angle` returns the angle between two sprites, in radians.
+  rocket.rotation = g.angle(rocket, star);
+
+  //Display the position of the pointer
+  pointerDisplay.content 
+    = "pointer.x: " + g.pointer.x + " "
+    + "pointer.y: " + g.pointer.y;
+
+  //Define the speed at which the start and end points
+  //of the line should circle
+  pathA.angle += 0.02;
+  pathB.angle -= 0.03;
+
+  //Make the line start and end points follow the circular paths
+  line.ax = pathA.centerX + Math.cos(pathA.angle) * pathA.radius;
+  line.ay = pathA.centerY + Math.sin(pathA.angle) * pathA.radius;
+  line.bx = pathB.centerX + Math.cos(pathB.angle) * pathB.radius;
+  line.by = pathB.centerY + Math.sin(pathB.angle) * pathB.radius;
+}
+
+</script>
+</body>

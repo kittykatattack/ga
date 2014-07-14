@@ -1,0 +1,125 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Basic display elements</title>
+<body>
+<script src="../ga.js"></script>
+<script>
+
+//Create a new GA instance, and start it.
+//Pre-load images in the array.
+var g = GA(
+  256, 256, setup, 
+  [
+    "fonts/puzzler.otf"
+  ]
+);
+g.start();
+
+//Declare global sprites, objects, and variables
+//that you wnat to access in all the game functions and states
+
+var sceneOne,
+    blackSquare,
+    messageOne,
+    sceneTwo,
+    blueSquare,
+    messageTwo,
+    forward, 
+    reverse,
+    direction;
+
+//A `setup` function that will run only once.
+//Use it for intilaization tasks
+function setup() {
+
+  g.backgroundColor = "white";
+  g.canvas.style.border = "1px black dashed";
+
+  //Make a black square and some text
+  //Position them at the top left corner
+  blackSquare = g.rectangle(128, 128, "black");
+
+  messageOne = g.text("One", "16px puzzler", "white");
+  messageOne.position.set(40, 52);
+
+  //Group the sprites
+  sceneOne = g.group(blackSquare, messageOne);
+
+  //Alternatively, create an empty group and use
+  //the `add` convenience method
+  //sceneOne = g.group();
+  //sceneOne.add(blackSquare, message);
+
+  //Make a blue square and some text
+  //Position them in the same place.
+  blueSquare = g.rectangle(128, 128, "cyan");
+
+  messageTwo = g.text("Two", "16px puzzler", "red");
+  messageTwo.position.set(40, 52);
+
+  //Group the sprites
+  sceneTwo = g.group(blueSquare, messageTwo);
+
+  //Move `sceneTwo` to the bottom left corner
+  sceneTwo.x = 128;
+  sceneTwo.y = 128;
+
+  //You can change the depth layers of sprites
+  //or groups using the `layer` property
+  //sceneOne.layer = 1;
+  //sceneTwo.layer = 2;
+
+  //Set up the tween functions
+  forward = function() { 
+    //Ease from one position to another using `slide`
+    //`slide` arguments:
+    //sprite, destinationX, destinationY, speed
+    g.slide(sceneOne, 128, 128, 0.05); 
+    g.slide(sceneTwo, 0, 0, 0.05); 
+    //`fadeOut` arguments:
+    //sprite, fadeSpeed
+    g.fadeOut(sceneOne, 0.02);
+  };
+  reverse = function() {
+    g.slide(sceneOne, 0, 0, 0.05); 
+    g.slide(sceneTwo, 128, 128, 0.05); 
+    g.fadeIn(sceneOne, 0.02);
+  };
+  direction = forward;
+
+  //Wait 2 seconds then change the state to `play`
+  g.wait(2000, function(){
+    g.state = play;    
+  });
+}
+
+//The `play` function will run in a loop
+function play() {
+ 
+ //Make the scenes move in the current direction
+ direction(); 
+
+ //Reverse the direction after a 2 second pause if the scenes have reached
+ //their destinations
+ if (Math.floor(sceneOne.x) === 127){
+   g.wait(2000, function(){
+     direction = reverse;
+   });
+ }
+ if (Math.floor(sceneTwo.x) === 127){
+   g.wait(2000, function(){
+     direction = forward;
+   });
+ }
+
+ //Use `easeProperty` to tween any single properties. `easeProperty`
+ //returns a value that you can apply incrementally to the property
+ //that you want to change,
+ //`easePropery` arguments:
+ //property, destinationValue, speed
+ //sceneOne.x += g.easeProperty(sceneOne.x, 100, 0.05);
+
+}
+
+</script>
+</body>
