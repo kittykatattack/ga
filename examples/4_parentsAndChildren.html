@@ -14,7 +14,8 @@ g.start();
 //Declare global sprites, objects, and variables
 //that you wnat to access in all the game functions and states
 
-var cat, star, square, message, localMessage, globalMessage;
+var cat, star, square, message, star, ball, line, 
+    localMessage, globalMessage;
 
 //A `setup` function that will run only once.
 //Use it for intilaization tasks
@@ -42,7 +43,10 @@ function setup() {
   //Add the cat as a child of the square, and put it in the center of
   //the square
   square.addChild(cat);
-  square.put.center(cat);
+  //square.put.center(cat);
+  square.put.bottom(cat, 0, -cat.height);
+
+  //square.alpha = 0.2;
 
   //Create some text that will display the cat's local position
   localMessage = g.text("", "11px sans-serif", "black");
@@ -50,50 +54,45 @@ function setup() {
   //Add the text as a child of the square
   square.addChild(localMessage);
 
-  console.log(localMessage.x)
   //Use the text's `localX` and `localY` values to set its top left
   //corner position relative to the square's top left corner
   localMessage.x = 4;
   localMessage.y = 2;
 
+  //Make a star sprite and add it a a child of the cat
+  star = g.sprite(g.frame("images/platforms.png", 32, 0, 32, 32));
+
+  //Scale the sprite's size down to 50%
+  star.scaleX = 0.5;
+  star.scaleY = 0.5;
+
+  //Add the star to the cat and position it to the right of the cat  
+  cat.addChild(star);
+  cat.put.right(star);
+
+  //Add an `angle` property to the star that we'll use to 
+  //help make the star rotate around the cat
+  star.angle = 0;
+
+  //Circles and lines work too
+  /*
+  ball = g.circle(32, "LightPink");
+  ball.shadow = true;
+  square.addChild(ball);
+  ball.x = 32;
+  ball.y = 32;
+
+  line = g.line("black", 4, 0, 0, 32, 32);
+  star.addChild(line);
+  line.x = 0;
+  line.y = 0;
+  */
+
   //Create some text that will display the cat's global position
   globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
   g.stage.put.bottom(globalMessage, 0, -20);
 
-/*
-  //Center the cat
-  cat.x = g.canvas.width / 2 - cat.halfWidth;
-  cat.y = g.canvas.height / 2 - cat.halfHeight;
-
-  //Make a star
-  star = g.sprite(g.frame("images/platforms.png", 32, 0, 32, 32));
-  star.x = cat.x;
-  star.y = cat.y + cat.height + 12;
-
-  //Make the star a child of the cat
-  cat.addChild(star);
-
-
-
-  //Check to see what the children of the `stage` and `cat` are
-  console.log("g.stage.children: " + g.stage.children);
-  console.log("cat.children: " + cat.children);
-  //Both the `stage` and `cat` have one child
-
-  //Add the star to the stage
-  g.stage.addChild(star);
-
-  //Check to see what the children of the `stage` and `cat` are
-  console.log("g.stage.children: " + g.stage.children);
-  console.log("cat.children: " + cat.children);
-  //The `stage` has 2 children and the `cat` has none
-
-  //Add the star back to the cat
-  cat.addChild(star);
-
-  cat.rotation = 0.5;
-  */
-
+  //Keyboard control
   //Assign key `press` methods
   g.key.leftArrow.press = function() {
     //Change the cat's velocity when the key is pressed
@@ -153,6 +152,9 @@ function play() {
   //You can also move a sprite the good old-fashioned way
   //cat.x += cat.vx;
   //cat.y += cat.vy;
+  
+  //Rotate the square
+  square.rotation += 0.005;
 
   //Display the cat's local `x` and local `y` coordinates. These are
   //relative to the square, which is the cat's parent.
@@ -175,18 +177,15 @@ function play() {
     message.content 
       = "The cat hit the " + catHitsEdges + " of the square";
   }
-  //cat.rotation += 0.01;
 
+  //Make the star rotate
+  star.rotation += 0.2;
 
-  //Contain the cat inside the canvas
-  //'contain` constrains the sprite's movement to a rectangular space
-  //defined by the last 4 argumants. If the sprite hits the edges of
-  //that space, `contain` returns useful a string that will tell you which
-  //side the sprite hit: "left", "right". "top" or "bottom".
-  /*
-
-  */
+  //Update the star's angle and make it rotate around the cat
+  star.angle += 0.05;
+  g.rotateAround(star, cat, 32, star.angle);
 }
+
 
 </script>
 </body>

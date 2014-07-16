@@ -1,0 +1,59 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Drag and drop</title>
+<body>
+<script src="../ga.js"></script>
+<script>
+
+//Create a new GA instance, and start it.
+//Pre-load images in the array.
+var g = GA(
+  256, 256, setup, 
+  [
+    "images/cat.png",
+    "images/tiger.png",
+    "images/hedgehog.png",
+    "fonts/puzzler.otf"
+  ]
+);
+g.start();
+
+//Declare global sprites, objects, and variables
+//that you want to access in all the game functions and states
+
+var cat, hedgehog, tiger;
+
+//A `setup` function that will run only once.
+//Use it for intilaization tasks
+function setup() {
+
+  g.backgroundColor = "white";
+  g.canvas.style.border = "1px black dashed";
+
+  //Important! Set the `g.dragAndDrop` to `true` to enable it.
+  g.dragAndDrop = true;
+
+  //Create three sprites and set their `draggable` property to `true`
+  cat = g.sprite("images/cat.png");
+  cat.draggable = true;
+
+  tiger = g.sprite("images/tiger.png");
+  tiger.draggable = true;
+  tiger.position.set(64, 64);
+
+  hedgehog = g.sprite("images/hedgehog.png");
+  hedgehog.draggable = true;
+  hedgehog.position.set(128, 128);
+  
+  //Buttons remain interactive even if there's no game loop running.
+  //g.state = play;    
+}
+
+//The `play` function will run in a loop
+function play() {
+  //No code here, but the loop still needs to run so that the sprites
+  //can move
+}
+
+</script>
+</body>

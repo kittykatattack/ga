@@ -32,7 +32,9 @@ function setup() {
   //`filmStrip` to autmatically create an array of x,y
   //coordinates for each animation frame.
   //`filmStrip` arguments:
-  //imageName, frameWidth, frameHeight
+  //imageName, frameWidth, frameHeight, spacing
+  //(Use the final optional `spacing` argument if there is any default
+  //spacing (padding) around tileset frame images)
   var walkingAnimation = g.filmStrip("images/walkcycle.png", 64, 64);
 
   //Use the film strip to create a sprite

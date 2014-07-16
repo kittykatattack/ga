@@ -1,3 +1,11 @@
+/*
+Welcome's to Ga's source code!
+If you're reading this to find out how to use Ga, you've come to the wrong place. You should take a look inside the `examples` folder. But if you want to find out how ga works, this is the place to be!
+Everything is in one big, hulking gainormous file.
+Why?
+Because One is better than Many.
+Just use your text editor's search function to find what you're looking for.
+*/
 function GA(width, height, setup, assetsToLoad, load) {
   var ga = {};
 
@@ -7,9 +15,10 @@ function GA(width, height, setup, assetsToLoad, load) {
   */
 
   //Make the canvas element and add it to the DOM
+  var dips = 1//window.devicePixelRatio;
   ga.canvas = document.createElement("canvas");
-  ga.canvas.setAttribute("width", width);
-  ga.canvas.setAttribute("height", height);
+  ga.canvas.setAttribute("width", width * dips);
+  ga.canvas.setAttribute("height", height * dips);
   ga.canvas.style.backgroundColor = "black";
   document.body.appendChild(ga.canvas);
   
@@ -33,6 +42,14 @@ function GA(width, height, setup, assetsToLoad, load) {
 
   //An array to hold all the button sprites
   ga.buttons = [];
+  
+  //Set `dragAndDrop` to `false` by default
+  //(Change it to `true` and set the `draggable` property on sprites
+  //to `true` to enable drag and drop
+  ga.dragAndDrop = false;
+
+  //An array to store the draggable sprites
+  ga.draggableSprites = [];
 
   //Set the game `state`
   ga.state = undefined;
@@ -108,6 +125,10 @@ function GA(width, height, setup, assetsToLoad, load) {
           ga.canvas.style.cursor = "pointer";
         }
       }
+    }
+    //Update the pointer for drag and drop
+    if(ga.dragAndDrop) {
+      ga.pointer.updateDragAndDrop();
     }
   }
 
@@ -221,6 +242,21 @@ function GA(width, height, setup, assetsToLoad, load) {
         o.removeChild(sprite);
       });
     };
+    //Swap the depth layer positions of two child sprites
+    o.swapChildren = function(child1, child2) {
+      var index1 = o.children.indexOf(child1),
+          index2 = o.children.indexOf(child2);
+      if (index1 !== -1 && index2 !== -1) {
+        //Swap the indexes
+        child1.childIndex = index2;
+        child2.childIndex = index1;
+        //Swap the array positions
+        this.children[index1] = child2;
+        this.children[index2] = child1;
+      } else {
+        throw new Error(child + " Both object must be a child of the caller " + o);
+      }
+    }
   }
 
   function group(spritesToGroup) {
@@ -253,6 +289,7 @@ function GA(width, height, setup, assetsToLoad, load) {
 
   function makeStage() {
     var stage = group();
+    stage.stage = true;
     stage.width = ga.canvas.width;
     stage.height = ga.canvas.height;
     stage.gx = 0;
@@ -266,6 +303,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     sprite.vx = 0; 
     sprite.vy = 0;
     sprite.parent = undefined;
+    sprite.stage = false;
     //Optional drop shadow properties.
     //Set `shadow` to `true` if you want the sprite do display a
     //shadow.
@@ -276,13 +314,15 @@ function GA(width, height, setup, assetsToLoad, load) {
     sprite.shadowBlur = 3;
     //The sprite's private properties that are just used for internal
     //calculations and should be changed or accessed through a matching getter/setter
-    sprite._rotation = 0;
-    sprite._visible = true;
+    sprite.rotation = 0;
+    sprite.visible = true;
     sprite._alpha = 1;
+    sprite._draggable = undefined;
+    sprite._scaleX;
+    sprite._scaleY;
     sprite._gx = 0;
     sprite._gy = 0;
     sprite._layer = 0;
-    sprite._draggable = undefined;
     sprite._circular = false;
     sprite._interactive = false;
     //Make it a container object so that you can use
@@ -308,43 +348,50 @@ function GA(width, height, setup, assetsToLoad, load) {
 
     //The `put` object contains methods that help you positon a
     //another sprite in and around this sprite.
+    //Get a short form reference to the sprite to make the code more
+    //compact and easier to read
+    var a = sprite;
     sprite.put = {
       //Center a sprite inside this sprite. `xOffset` and `yOffset`
       //arguments determine by how much the other sprite's poistion
-      //should be offset from the center
-      center: function(anotherSprite, xOffset, yOffset) {
+      //should be offset from the center. These methods use the
+      //sprites' global coordinates (`gx` and `gy`)
+
+      //In all these functions, `b` is the second sprite that is being
+      //positioned relative to the first sprite, `a`
+      center: function(b, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
-        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        b.gx = (a.gx + a.halfWidth - b.halfWidth) + xOffset;
+        b.gy = (a.gy + a.halfHeight - b.halfHeight) + yOffset;
       },
-      //Position another sprite above this sprite
-      top: function(anotherSprite, xOffset, yOffset) {
+      //Position another a above this a
+      top: function(b, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
-        anotherSprite.y = (anotherSprite.height) + yOffset;
+        b.gx = (a.gx + a.halfWidth - b.halfWidth) + xOffset;
+        b.gy = (a.gx + b.height) + yOffset;
       },
-      //Position another sprite to the left of this sprite
-      right: function(anotherSprite, xOffset, yOffset) {
+      //Position another a to the left of this a
+      right: function(b, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.width) + xOffset;
-        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        b.gx = (a.gx + a.width) + xOffset;
+        b.gy = (a.gy + a.halfHeight - b.halfHeight) + yOffset;
       },
-      //Position another sprite below this sprite
-      bottom: function(anotherSprite, xOffset, yOffset) {
+      //Position another a below this a
+      bottom: function(b, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (sprite.halfWidth - anotherSprite.halfWidth) + xOffset;
-        anotherSprite.y = (sprite.y + sprite.height) + yOffset;
+        b.gx = (a.gx + a.halfWidth - b.halfWidth) + xOffset;
+        b.gy = (a.gy + a.height) + yOffset;
       },
-      //Position another sprite below this sprite
-      left: function(anotherSprite, xOffset, yOffset) {
+      //Position another a below this a
+      left: function(b, xOffset, yOffset) {
         xOffset = xOffset || 0;
         yOffset = yOffset || 0;
-        anotherSprite.x = (anotherSprite.width) + xOffset;
-        anotherSprite.y = (sprite.halfHeight - anotherSprite.halfHeight) + yOffset;
+        b.gx = (a.gx + b.width) + xOffset;
+        b.gy = (a.gy + a.halfHeight - b.halfHeight) + yOffset;
       },
     };
 
@@ -389,8 +436,8 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
-      //Get and set the cat's local x and y position
-      //relative to its parent
+      //Get and set the local x and y position
+      //relative to the sprite's parent.
       x: {
         get: function() {
           if (this.parent.gx > 0) {
@@ -420,19 +467,21 @@ function GA(width, height, setup, assetsToLoad, load) {
       //`alpha` getter/setter
       alpha: {
         get: function() {
-          return this._alpha;
+          //Use the parent's alpha if this sprite isn't a child of the
+          //stage
+          if (this.parent.stage === false) {
+            return this.parent.alpha;
+          } else {
+            return this._alpha;
+          }
         },
         set: function(value) {
-          if (this.children && this.children.length > 0) {
-            this.children.forEach(function(child) {
-              child.alpha = value;
-            });
-          }
           //Set the new x value
           this._alpha = value;
         },
         enumerable: true, configurable: true
       },
+      /*
       //`visible` getter/setter
       visible: {
         get: function() {
@@ -455,24 +504,28 @@ function GA(width, height, setup, assetsToLoad, load) {
           return this._rotation;
         },
         set: function(value) {
+          //Set the new rotation value
+          this._rotation = value;
           if (this.children && this.children.length > 0) {
+            var self = this;
             this.children.forEach(function(child) {
-              /*
-              child.rotation = value;
-              var radius = ga.distance(child, child.parent), 
-                  angle = value;
-              var vx = child.centerX - child.parent.centerX;
-              var vy = child.centerY - child.parent.centerY;
-             //child.x = Math.cos(angle) * vx - Math.sin(angle) * vy + child.parent.centerX;
-             //child.y = Math.sin(angle) * vx + Math.cos(angle) * vy + child.parent.centerY;
-             */
+              var c = child;
+                  p = child.parent;
+                  vx = c.centerX - p.centerX,
+                  vy = c.centerY - p.centerY,
+                  m = Math.sqrt(vx * vx + vy * vy);
+                  angle = Math.atan2(vy, vx);
+                  //child.x = child.centerX + Math.cos(self.rotation) * m;
+                  //child.y = child.centerY + Math.sin(self.rotation) * m;
+                  child.x -= Math.cos(self.rotation) / Math.PI;
+                  child.y -= Math.sin(self.rotation) / Math.PI;
+                  //child.rotation += value;
             });
           }
-          //Set the new x value
-          this._rotation = value;
         },
         enumerable: true, configurable: true
       },
+      */
       halfWidth: {
         get: function() {
           return this.width / 2;
@@ -482,6 +535,26 @@ function GA(width, height, setup, assetsToLoad, load) {
       halfHeight: {
         get: function() {
           return this.height / 2;
+        },
+        enumerable: true, configurable: true
+      },
+      scaleX: {
+        get: function() {
+          return this._scaleX;
+        },
+        set: function(value){
+          this.width *= value;
+          this._scaleX = value;
+        },
+        enumerable: true, configurable: true
+      },
+      scaleY: {
+        get: function() {
+          return this._scaleY;
+        },
+        set: function(value){
+          this.height *= value;
+          this._scaleX = value;
         },
         enumerable: true, configurable: true
       },
@@ -524,6 +597,24 @@ function GA(width, height, setup, assetsToLoad, load) {
             delete this.diameter;
             delete this.radius;
             this._circular = false;
+          }
+        },
+        enumerable: true, configurable: true
+      },
+      draggable: {
+        get: function() {
+          return this._draggable;
+        },
+        set: function(value) {
+          //If it's `true` push the sprite into the `draggableSprites`
+          //array
+          if (value === true) {
+            ga.draggableSprites.push(this);
+            this._draggable = true;
+          }
+          //If it's `false`, remove it from the `draggableSprites` array
+          if (value === false) {
+            ga.draggableSprites.splice(ga.draggableSprites.getIndex(this), 1);
           }
         },
         enumerable: true, configurable: true
@@ -673,13 +764,13 @@ function GA(width, height, setup, assetsToLoad, load) {
       //Calculate the `width` and `height` properties
       width: {
         get: function() {
-          return o.bx - o.ax; 
+          return Math.abs(o.bx - o.ax); 
         },
         enumerable: true, configurable: true
       },
       height: {
         get: function() {
-          return o.by - o.ay;
+          return Math.abs(o.by - o.ay);
         },
         enumerable: true, configurable: true
       },
@@ -692,7 +783,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         set: function(value) {
           //Find the current x value (the x point closest to the left)
-          var currentX = this.x;
+          var currentX = this.gx;
           //Figure out the difference between the current
           //x value and the new x value
           var offset = value - currentX;
@@ -714,7 +805,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         set: function(value) {
           //Find the current y value (the y point closest to the top)
-          var currentY = this.y;
+          var currentY = this.gy;
           //Figure out the difference between the current
           //y value and the new y value
           var offset = value - currentY;
@@ -743,6 +834,8 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.font = font || "12px sans-serif";
     o.fillStyle = fillStyle || "red";
     o.textBaseline = "top";
+    //Add extra sprite properties
+    addProperties(o);
     //Measure the width and height of the text
     Object.defineProperties(o, {
       width: {
@@ -758,10 +851,12 @@ function GA(width, height, setup, assetsToLoad, load) {
         enumerable: true, configurable: true
       }
     });
-    //Add extra sprite properties
-    addProperties(o);
     //Add the sprite to the stage
     ga.stage.addChild(o);
+    //Set the object's x and y setters
+    o.x = x || 0;
+    o.y = y || 0;
+    //Return the object
     return o;
   };
 
@@ -792,8 +887,10 @@ function GA(width, height, setup, assetsToLoad, load) {
   //`filmStrip` to autmatically create an array of x,y
   //coordinates for each animation frame.
   //`filmStrip` arguments:
-  //imageName, frameWidth, frameHeight
-  ga.filmStrip = function(imageName, frameWidth, frameHeight){
+  //imageName, frameWidth, frameHeight, spacing
+  //(The last `spacing` argument should be included if there's any
+  //default spacing (padding) around tileset images)
+  ga.filmStrip = function(imageName, frameWidth, frameHeight, spacing){
     var image = g.assets[imageName],
         positions = [],
         //Find out how many columns and rows there are in the image
@@ -802,12 +899,25 @@ function GA(width, height, setup, assetsToLoad, load) {
         //Find the total number of frames
         numberOfFrames = columns * rows;    
 
+    if(spacing) {
+    
+    }
+
     for(var i = 0; i < numberOfFrames; i++) {
       //Find the correct row and column for each frame
       //and figure out its x and y position
       var x, y;
       x = (i % columns) * frameWidth;
       y = Math.floor(i / columns) * frameHeight;
+
+      //Compensate for any optional spacing (padding) around the tiles if
+      //there is any. This bit of code accumlates the spacing offsets from the 
+      //left side of the tileset and adds them to the current tile's position 
+      if (spacing && spacing > 0) {
+        x += spacing + (spacing * i % columns); 
+        y += spacing + (spacing * Math.floor(i / columns));
+      }
+
       //Add the x and y value of each frame to the `positions` array
       positions.push([x, y]);
     }
@@ -838,6 +948,10 @@ function GA(width, height, setup, assetsToLoad, load) {
     //Use that sub-image to make the sprite. If it doesn't contain a
     //`data` property, then it must be a single frame
     if(source.image && !source.data) {
+      //Throw an error if the source is not an image file
+      if (!(ga.assets[source.image] instanceof Image)) {
+        throw new Error(source.image + "is not an image file");
+      }
       o.source = ga.assets[source.image];
       o.sourceX = source.x;
       o.sourceY = source.y;
@@ -925,31 +1039,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     //Ga's game loop
     o.update = function(pointer, canvas) {
       //Figure out if the pointer is touching the button
-      var hit = false;
-      //Is the sprite rectangular?
-      if (!o.circular) {
-        //Get the postion of the sprite's edges
-        var left = o.x,
-            right = o.x + o.width,
-            top = o.y,
-            bottom = o.y + o.height;
-
-        //Find out if the point is intersecting the rectangle
-        hit = pointer.x > left && pointer.x < right && pointer.y > top && pointer.y < bottom;
-      }
-      //Is the sprite circular?
-      else {
-        //Find the distance between the point and the
-        //center of the circle
-        var vx = pointer.x - sprite.centerX,
-            vy =  pointer.y - sprite.centerY,
-            magnitude = Math.sqrt(vx * vx + vy * vy);
-
-        //The point is intersecting the circle if the magnitude
-        //(distance) is less than the circle's radius
-        hit = magnitude < sprite.radius;
-      }
-      
+      var hit = ga.pointer.hitTestSprite(o);
       //1. Figure out the current state
       if (pointer.isUp) {
         //Up state
@@ -969,7 +1059,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         }
         //Down state
         if (pointer.isDown) {
-          o.state = "down"
+          o.state = "down";
           //Show the thrid frame if this sprite is a button and it
           //has only three frames, or show the second frame if it
           //only has two frames
@@ -1012,7 +1102,7 @@ function GA(width, height, setup, assetsToLoad, load) {
           o.action = "released";
         }
       }
-    }
+    };
   }
   
   //A convenience method that lets you access images by their file names
@@ -1162,8 +1252,8 @@ function GA(width, height, setup, assetsToLoad, load) {
       ) {
         //Draw the different sprite types
         //Rectangle
+        ctx.save();
         if (sprite.type === "rectangle") {      
-          ctx.save();
           //Add an optional camera
           if (camera && camera.initialized && sprite.scroll) {
             ctx.translate(-camera.x, -camera.y);
@@ -1179,10 +1269,17 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowOffsetY = sprite.shadowOffsetY;
             ctx.shadowBlur = sprite.shadowBlur;
           }
-          ctx.translate(
-            Math.floor(sprite.gx + sprite.halfWidth),
-            Math.floor(sprite.gy + sprite.halfHeight)
-          );
+          if (sprite.parent.stage === true) {
+            ctx.translate(
+              Math.floor(sprite.gx + sprite.halfWidth),
+              Math.floor(sprite.gy + sprite.halfHeight)
+            );
+          } else {
+            ctx.translate(
+              Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
+              Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+            );
+          }
           ctx.rotate(sprite.rotation);
           ctx.beginPath();
           //Draw the rectangle around the context's center point
@@ -1194,12 +1291,10 @@ function GA(width, height, setup, assetsToLoad, load) {
           );
           if (sprite.strokeStyle !== "none") ctx.stroke();
           if (sprite.fillStyle !== "none") ctx.fill();
-          ctx.restore();
         }
 
         //Circle
         if (sprite.type === "circle") {      
-          ctx.save();
           //Add an optional camera
           if (camera && camera.initialized && sprite.scroll) {
             ctx.translate(-camera.x, -camera.y);
@@ -1215,21 +1310,26 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowOffsetY = sprite.shadowOffsetY;
             ctx.shadowBlur = sprite.shadowBlur;
           }
-          ctx.translate(
-            Math.floor(sprite.gx + sprite.halfWidth),
-            Math.floor(sprite.gy + sprite.halfHeight)
-          );
+          if (sprite.parent.stage === true) {
+            ctx.translate(
+              Math.floor(sprite.gx + sprite.halfWidth),
+              Math.floor(sprite.gy + sprite.halfHeight)
+            );
+          } else {
+            ctx.translate(
+              Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
+              Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+            );
+          }
           ctx.rotate(sprite.rotation);
           ctx.beginPath();
           ctx.arc(0, 0, sprite.radius, 0, 6.28, false);
           if (sprite.strokeStyle !== "none") ctx.stroke();
           if (sprite.fillStyle !== "none") ctx.fill();
-          ctx.restore();
         }
         
         //Line
         if (sprite.type === "line") {      
-          ctx.save();
           //Add an optional camera
           if (camera && camera.initialized && sprite.scroll) {
             ctx.translate(-camera.x, -camera.y);
@@ -1245,17 +1345,26 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowOffsetY = sprite.shadowOffsetY;
             ctx.shadowBlur = sprite.shadowBlur;
           }
+          if (sprite.parent.stage === true) {
+            ctx.translate(
+              Math.floor(sprite.gx),
+              Math.floor(sprite.gy)
+            );
+          } else {
+            ctx.translate(
+              Math.floor(sprite.gx - sprite.parent.gx - sprite.parent.halfWidth),
+              Math.floor(sprite.gy - sprite.parent.gy - sprite.parent.halfHeight)
+            );
+          }
           ctx.beginPath();
-          ctx.moveTo(sprite.ax, sprite.ay);
-          ctx.lineTo(sprite.bx, sprite.by);
+          ctx.moveTo(0, 0);
+          ctx.lineTo(sprite.width, sprite.height);
           if (sprite.strokeStyle !== "none") ctx.stroke();
           if (sprite.fillStyle !== "none") ctx.fill();
-          ctx.restore();
         }
         
         //Text
         if (sprite.type === "text") {      
-          ctx.save();
           //Add an optional camera
           if (camera && camera.initialized && sprite.scroll) {
             ctx.translate(-camera.x, -camera.y);
@@ -1271,13 +1380,19 @@ function GA(width, height, setup, assetsToLoad, load) {
           ctx.font = sprite.font;
           ctx.fillStyle = sprite.fillStyle;
           ctx.textBaseline = sprite.textBaseline;
-          ctx.fillText(sprite.content, sprite.gx, sprite.gy);
-          ctx.restore();
+          if (sprite.parent.stage === true) {
+            ctx.fillText(sprite.content, sprite.gx, sprite.gy);
+          } else {
+            ctx.fillText(
+              sprite.content, sprite.gx - sprite.parent.gx - sprite.parent.halfWidth, 
+              sprite.gy - sprite.parent.gy - sprite.parent.halfHeight
+            );
+          }
         }
 
         //Sprite
         if (sprite.type === "sprite") {      
-          ctx.save();
+          //ctx.save();
           //Add an optional camera
           if (camera && camera.initialized && sprite.scroll) {
             ctx.translate(-camera.p.x, -camera.p.y);
@@ -1290,10 +1405,17 @@ function GA(width, height, setup, assetsToLoad, load) {
             ctx.shadowOffsetY = sprite.shadowOffsetY;
             ctx.shadowBlur = sprite.shadowBlur;
           }
-          ctx.translate(
-            Math.floor(sprite.gx + sprite.halfWidth),
-            Math.floor(sprite.gy + sprite.halfHeight)
-          );
+          if (sprite.parent.stage === true) {
+            ctx.translate(
+              Math.floor(sprite.gx + sprite.halfWidth),
+              Math.floor(sprite.gy + sprite.halfHeight)
+            );
+          } else {
+            ctx.translate(
+              Math.floor(sprite.x + sprite.halfWidth - sprite.parent.halfWidth),
+              Math.floor(sprite.y + sprite.halfHeight - sprite.parent.halfHeight)
+            );
+          }
           ctx.rotate(sprite.rotation);
           ctx.drawImage(
             sprite.source,
@@ -1303,7 +1425,7 @@ function GA(width, height, setup, assetsToLoad, load) {
             Math.floor(-sprite.halfHeight),
             sprite.width, sprite.height
           );
-          ctx.restore();
+          //ctx.restore();
         }
 
         //Group
@@ -1325,6 +1447,7 @@ function GA(width, height, setup, assetsToLoad, load) {
             displaySprite(child);
           }
         }
+        ctx.restore();
       }
     }
   };
@@ -1465,6 +1588,11 @@ function GA(width, height, setup, assetsToLoad, load) {
     //Properties to help measure the time between up and down states
     o.downTime = 0;
     o.elapsedTime = 0;
+    //A `dragSprite` property to help with drag and drop
+    o.dragSprite = null;
+    //The drag offsets to help drag sprites
+    o.dragOffsetX = 0;
+    o.dragOffsetY = 0;
      
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
@@ -1567,6 +1695,86 @@ function GA(width, height, setup, assetsToLoad, load) {
     );
     //Disable the default pan and zoom actions on the ga.canvas
     ga.canvas.style.touchAction = "none";
+
+    o.hitTestSprite = function(sprite) {
+      var hit = false;
+      //Is the sprite rectangular?
+      if (!sprite.circular) {
+        //Get the postion of the sprite's edges using global
+        //coordinates
+        var left = sprite.gx,
+            right = sprite.gx + sprite.width,
+            top = sprite.gy,
+            bottom = sprite.gy + sprite.height;
+
+        //Find out if the point is intersecting the rectangle
+        hit = o.x > left && o.x < right && o.y > top && o.y < bottom;
+      }
+      //Is the sprite circular?
+      else {
+        //Find the distance between the point and the
+        //center of the circle
+        var vx = o.x - sprite.gx + sprite.halfWidth,
+            vy =  o.y - sprite.gy + sprite.halfHeight,
+            magnitude = Math.sqrt(vx * vx + vy * vy);
+
+        //The point is intersecting the circle if the magnitude
+        //(distance) is less than the circle's radius
+        hit = magnitude < sprite.radius;
+      }
+      return hit;
+    };
+
+    o.updateDragAndDrop = function() {
+      if (o.isDown) {
+        //Capture the co-ordinates at which the pointer was 
+        //pressed down and find out if it's touching a sprite
+        if (o.dragSprite === null) {
+          //Loop through the draggable sprites in reverse to start searching at the bottom of the stack
+          for (var i = ga.draggableSprites.length - 1; i > -1; i--) {
+            var sprite = ga.draggableSprites[i];  
+            //Check for a collision with the pointer using hitTestPoint
+            if (o.hitTestSprite(sprite) && sprite.draggable) {
+              //Calculate the difference between the pointer's 
+              //position and the sprite's position
+              o.dragOffsetX = o.x - sprite.gx;
+              o.dragOffsetY = o.y - sprite.gy;
+              //Set the sprite as the pointer's `dragSprite` property
+              o.dragSprite = sprite;
+              //The next two lines re-order the `sprites` array so that the
+              //selected sprite is displayed above all the others.
+              //First, splice the sprite out of its current position in
+              //its parent's `children` array
+              var children = sprite.parent.children;
+              children.splice(children.indexOf(sprite), 1);
+              //Next, push the `dragSprite` to the end of its `children` array so that it's 
+              //displayed last, above all the other sprites 
+              children.push(sprite);
+              break;
+            }
+          }
+        } else {
+          //If the pointer is down and it has a `dragSprite`, make the sprite follow the pointer's
+          //position, with the calculated offset
+          o.dragSprite.x = o.x - o.dragOffsetX;
+          o.dragSprite.y = o.y - o.dragOffsetY;
+        }
+      }
+      //If the pointer is up, drop the `dragSprite` by setting it to `null`
+      if (o.isUp) {
+        o.dragSprite = null;
+      }
+      //Change the mouse arrow pointer to a hand if it's over a sprite
+      ga.draggableSprites.some(function(sprite) {
+        if (o.hitTestSprite(sprite) && sprite.draggable) {
+          ga.canvas.style.cursor = "pointer";
+          return true;
+        } else {
+          ga.canvas.style.cursor = "auto";
+          return false;
+        }
+      });
+    }
 
     //Return the pointer
     return o;
@@ -1902,6 +2110,20 @@ function GA(width, height, setup, assetsToLoad, load) {
       follower.x += (vx / distance) * speed;
       follower.y += (vy / distance) * speed;
     }
+  };
+
+  //rotateAround
+  //Make a sprite rotate around another sprite
+  ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
+    rotatingSprite.x 
+      = cat.centerX - centerSprite.x 
+      + (distance * Math.cos(star.angle)) 
+      - rotatingSprite.halfWidth;
+
+    rotatingSprite.y 
+      = cat.centerY - centerSprite.y 
+      + (distance *  Math.sin(star.angle)) 
+      - rotatingSprite.halfWidth;
   };
 
   /*

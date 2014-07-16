@@ -92,13 +92,18 @@ function play() {
   //cat.x += cat.vx;
   //cat.y += cat.vy;
 
-  //Contain the cat inside the canvas
-  //'contain` constrains the sprite's movement to a rectangular space
-  //defined by the last 4 argumants. If the sprite hits the edges of
-  //that space, `contain` returns useful a string that will tell you which
-  //side the sprite hit: "left", "right". "top" or "bottom".
+  /*
+  Contain the cat inside the canvas
+  'contain` constrains the sprite's movement to a rectangular space
+  defined by the `localBounds` property of any object.
+  (`localBounds` returns an object with `x`, `y`, `width` and `height`
+  properties). 
+  If the sprite hits the edges of
+  that space, `contain` returns useful a string that will tell you which
+  side the sprite hit: "left", "right". "top" or "bottom".
+  */
 
-  var catHitsEdges = g.contain(cat, 0, 0, g.canvas.width, g.canvas.height);
+  var catHitsEdges = g.contain(cat, g.stage.localBounds);
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {
