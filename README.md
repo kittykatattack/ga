@@ -36,7 +36,7 @@ feature list:
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
   `gotoAndStop` to go to a specific frame number. Use `fps` to set the
-  frame rate for sprite animation which is independent from the game's
+  frame rate for sprite animations which is independent from the game's
   frame rate.
 - Interactive `button` sprites with `up`, `over` and `down` states.
 - Any sprite can be set as `interactive` to receive mouse and touch
@@ -45,7 +45,7 @@ feature list:
   sprites.
 - Easy-to-use keyboard key bindings. The arrow and space keys are
   built-in, and you can easily define your own with the `keyboard`
-  function.
+  method.
 - A built-in universal `pointer` that works with both the mouse and
   touch.
 - Import and play sounds using a built-in WebAudio API sound manager.
@@ -60,7 +60,7 @@ feature list:
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
 - Yes, Ga is mobile friendly!
-- Yes, Ga is only 6k compressed and gzipped!
+- Yes, Ga is only 6k minified and gzipped!
 
 Coming very soon (this will be in new file called plugins.js):
 

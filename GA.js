@@ -113,7 +113,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     }
 
     //Render the canvas
-    ga.render(ga.canvas);
+    render(ga.canvas);
 
     //Update all the buttons in the game
     if (ga.buttons.length > 0) {
@@ -713,6 +713,21 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.y = y || 0;
     //Make it a container object
     makeContainer(o);
+    //Add a `render` method that explains to the canvas how to draw
+    //a rectangle
+    o.render = function(ctx) {
+      ctx.beginPath();
+      //Draw the rectangle around the context's center `0` point
+      ctx.rect(
+        Math.floor(-o.halfWidth),
+        Math.floor(-o.halfHeight),
+        o.width,
+        o.height
+      );
+      if (o.strokeStyle !== "none") ctx.stroke();
+      if (o.fillStyle !== "none") ctx.fill();
+    };
+    //Return the rectangle
     return o;
   };
 
@@ -735,6 +750,14 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.y = y || 0;
     //Add `diameter` and `radius` getters and setters
     makeCircular(o);
+    //Add a `render` method that explains to the canvas how to draw
+    //a circle
+    o.render = function(ctx) {
+      ctx.beginPath();
+      ctx.arc(0, 0, o.radius, 0, 6.28, false);
+      if (o.strokeStyle !== "none") ctx.stroke();
+      if (o.fillStyle !== "none") ctx.fill();
+    };
     //Make it a container object
     makeContainer(o);
     return o;
@@ -822,6 +845,16 @@ function GA(width, height, setup, assetsToLoad, load) {
         enumerable: true, configurable: true
       }
     });
+    //Add a `render` method that explains to the canvas how to draw
+    //a line
+    o.render = function(ctx) {
+      ctx.beginPath();
+      ctx.moveTo(-o.halfWidth, -o.halfHeight);
+      ctx.lineTo(o.halfWidth, o.halfHeight);
+      if (o.strokeStyle !== "none") ctx.stroke();
+      if (o.fillStyle !== "none") ctx.fill();
+    };
+    //Return the line
     return o;
   };
 
@@ -849,14 +882,25 @@ function GA(width, height, setup, assetsToLoad, load) {
           return ga.canvas.ctx.measureText("M").width;
         },
         enumerable: true, configurable: true
-      }
+      },
     });
     //Add the sprite to the stage
     ga.stage.addChild(o);
     //Set the object's x and y setters
     o.x = x || 0;
     o.y = y || 0;
-    //Return the object
+    //Add a `render` method that explains to the canvas how to draw text
+    o.render = function(ctx) {
+      ctx.translate(-o.halfWidth, -o.halfHeight)
+      ctx.font = o.font;
+      ctx.textBaseline = o.textBaseline;
+      ctx.fillText(
+        o.content,
+        0,
+        0        
+      );
+    };
+    //Return the text sprite
     return o;
   };
 
@@ -1001,6 +1045,19 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.y = 0;
     //If the sprite has more than one frame, add a state player
     if (o.frames.length > 0) ga.addStatePlayer(o);
+    //A `render` method that describes how to draw the sprite
+    o.render = function(ctx) {
+      ctx.rotate(o.rotation);
+      ctx.drawImage(
+        o.source,
+        o.sourceX, o.sourceY,
+        o.sourceWidth, o.sourceHeight,
+        Math.floor(-o.halfWidth),
+        Math.floor(-o.halfHeight),
+        o.width, o.height
+      );
+    };
+    //Return the sprite
     return o;
   };
 
@@ -1226,8 +1283,97 @@ function GA(width, height, setup, assetsToLoad, load) {
   If the canvas contains a camera, it will be used to scroll the game world.
       
   */
-
-  ga.render = function(canvas) {
+  function render (canvas) {
+    //Get a reference to the context
+    var ctx = canvas.ctx;
+    //Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //Display the all the sprites 
+    for (var i = 0; i < ga.stage.children.length; i++) {  
+      var sprite = ga.stage.children[i];
+      displaySprite(sprite);
+    }
+    function displaySprite(sprite) {
+      //Only draw sprites if they're visible and inside the
+      //area of the canvas
+      if (
+        sprite.visible
+        && sprite.gx + sprite.width > 0
+        && sprite.gx < canvas.width
+        && sprite.gy + sprite.height > 0
+        && sprite.gy < canvas.height
+        || sprite.type === "group"
+      ) {
+        //Draw the different sprite types
+        //Rectangle
+        ctx.save();
+        //Shape properties
+        ctx.strokeStyle = sprite.strokeStyle;
+        ctx.lineWidth = sprite.lineWidth;
+        ctx.fillStyle = sprite.fillStyle;
+        ctx.globalAlpha = sprite.alpha;
+        //Add a shadow if the sprite's `shadow` property is `true`
+        if(sprite.shadow) {
+          ctx.shadowColor = sprite.shadowColor;
+          ctx.shadowOffsetX = sprite.shadowOffsetX;
+          ctx.shadowOffsetY = sprite.shadowOffsetY;
+          ctx.shadowBlur = sprite.shadowBlur;
+        }
+        
+        ctx.translate(
+          Math.floor(sprite.gx + sprite.parent.gx + sprite.halfWidth),
+          Math.floor(sprite.gy + sprite.parent.gy + sprite.halfHeight)
+        );
+        
+        /*
+        ctx.translate(
+          Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
+          Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+        );
+        */
+        /*
+        if (sprite.parent.stage === true) {
+          ctx.translate(
+            Math.floor(sprite.gx + sprite.halfWidth),
+            Math.floor(sprite.gy + sprite.halfHeight)
+          );
+        } else {
+          ctx.translate(
+            Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
+            Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+          );
+        }
+        */
+        ctx.rotate(sprite.rotation);
+        //Use the sprite's custom `render` method to figure out how to
+        //draw the sprite
+        sprite.render(ctx);
+        
+        //Group
+        if (sprite.type === "group") {
+          //Display the children of the group
+          if (sprite.children && sprite.children.length > 0) {
+            for (var j = 0; j < sprite.children.length; j++) {  
+              var child = sprite.children[j];
+              displaySprite(child);
+            }
+          }
+        }
+        
+        //If the sprite contains child sprites in its
+        //`children` array, display them
+        if (sprite.children && sprite.children.length > 0) {
+          for (var k = 0; k < sprite.children.length; k++) {  
+            var child = sprite.children[k];
+            displaySprite(child);
+          }
+        }
+        ctx.restore();
+      }
+    }
+  }
+  /*
+  function render (canvas) {
     //Get a reference to the context
     var ctx = canvas.ctx;
     //Get a reference to the camera, if it exists
@@ -1450,7 +1596,8 @@ function GA(width, height, setup, assetsToLoad, load) {
         ctx.restore();
       }
     }
-  };
+  }
+  */
 
   /*
   Game engine objects
