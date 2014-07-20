@@ -1,9 +1,17 @@
 <!doctype html> 
 <meta charset = "utf-8"> 
-<title>Keyboard movement</title>
+<title>Parents and children</title>
 <body>
 <script src="../ga.js"></script>
+<script src="../plugins.js"></script>
 <script>
+
+/*
+This file requires these convenience functions from `plugins.js`:
+`move`
+`contain`
+`rotateAround`
+*/
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
@@ -12,7 +20,7 @@ var g = GA(256, 256, setup, ["images/platforms.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var cat, star, square, message, star, ball, line, 
     localMessage, globalMessage, collisionMessage;
@@ -158,7 +166,7 @@ function setup() {
 function play() {
  
   //Move the cat
-  g.move(cat);
+  move(cat);
 
   //You can also move a sprite the good old-fashioned way
   //cat.x += cat.vx;
@@ -182,7 +190,7 @@ function play() {
     + "cat.gy: " + cat.gy;
 
   //Contain the cat inside the square's boundary
-  var catHitsEdges = g.contain(cat, square.localBounds);
+  var catHitsEdges = contain(cat, square.localBounds);
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {
@@ -195,7 +203,7 @@ function play() {
 
   //Update the star's angle and make it rotate around the cat
   star.angle += 0.05;
-  g.rotateAround(star, cat, 32, star.angle);
+  rotateAround(star, cat, 32, star.angle);
 }
 
 

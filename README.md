@@ -1,7 +1,7 @@
 Ga
 ===
 
-* "Ga!" *
+*"Ga!"*
 *- A baby's exclamation of surprise.*
 
 Ga is a minimalist game engine for making HTML5 games or any other
@@ -39,7 +39,7 @@ Here's Ga's full feature list:
   a `stage`, and `addChild`/`removeChild` methods), local and global coordinates, and depth layers.
 - `group` sprites together to make game scenes. 
 - A game loop with a user-definable `fps` and fully customizable and
-  easy-to-use game state manager.
+  drop-dead-simple game state manager.
 - Tileset (spritesheet) support using `frame` and `filmStrip` methods to make
   sprites using tileset frames.
 - A keyframe animation and state manager for sprites. Use `show` to
@@ -69,13 +69,17 @@ Here's Ga's full feature list:
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
+- A plugins.js file full of extra features. Just copy/paste the code you
+  want to use into your game. Or, if you're not worried about the file size,
+  just link the whole thing.
 - Yes, Ga is mobile friendly!
-- Yes, Ga is less than 6k minified and gzipped!
+- Yes, the core GA.js engine is less than 6k minified and gzipped!
+  It's all you need to start making any game.
 
 Coming very soon... 
 -------------------
 
-(These will be in new file called plugins.js):
+(These will be in plugins.js):
 
 - A complete 2D geometric and tile-based collision system.
 - Tiled Editor map support (for both flat 2D and isometric maps).
@@ -87,14 +91,17 @@ Ga's philosophy and technical constraints
 
 - The GA.js core game engine file can't ever be bigger that 6.5k
   minified and zipped. This makes it suitable for making games for micro game
-  competitions, like [js13k](http://js13kgames.com). But, more importantly, this constraint also avoids feature-creep and keeps
+  competitions, like [js13k](http://js13kgames.com). But, more
+  importantly, this constraint also discourages feature-creep and keeps
   the engine lean and focused.
 - The API has to be fun, intuitive and expressive with as little
   boilerplate code as possible. Game designers should be 
   free to explore their imaginations without tripping over a tangled
   and messy API. Less typing, Less thinking!
 - The source code must be easily readable and comment-rich so that
-  everyone can learn from it.
+  everyone can learn from it. It should also be architecturally flat
+  so that anyone can rip it apart and easily drop it into something
+  else.
 - Any special features, like Tiled Editor support, can be added to the
   plugins.js file, so that game developers can pick and choose  a
   minimal custom set of components they want for specific games without bloating the core engine.
@@ -103,13 +110,14 @@ Minifying, crushing and compressing
 -----------------------------------
 
 The Ga repository doesn't include the minified and compressed version
-of the source code, because you should probably optimize that yourself
-to get the smallest possible file size. I recommend
+of the source code, because you should probably optimize that yourself. I recommend
 first minifying the code using with [Google Closure
-Compiler](http://closure-compiler.appspot.com/home). Next, take that
-minified code and run it through
-[JSCrush](http://www.iteral.com/jscrush/). Finally, zip the code with
-gzip. The combination of these three tools will give you the smallest possible file size.
+Compiler](http://closure-compiler.appspot.com/home) or
+[UglifyJS2](https://github.com/mishoo/UglifyJS2). Then, zip it.
+
+For more agressive optimization, you could further try running the
+minified code through
+[JSCrush](http://www.iteral.com/jscrush/). 
 
 Contributions and Licencing
 ---------------------------

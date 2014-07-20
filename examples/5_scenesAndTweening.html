@@ -3,7 +3,17 @@
 <title>Basic display elements</title>
 <body>
 <script src="../ga.js"></script>
+<script src="../plugins.js"></script>
 <script>
+
+/*
+This file requires these convenience functions from `plugins.js`:
+`slide`
+`fadeOut`
+`fadeIn`
+`wait`
+`easeProperty`
+*/
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
@@ -16,7 +26,7 @@ var g = GA(
 g.start();
 
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var sceneOne,
     blackSquare,
@@ -88,22 +98,22 @@ function setup() {
     //Ease from one position to another using `slide`
     //`slide` arguments:
     //sprite, destinationX, destinationY, speed
-    g.slide(sceneOne, 128, 128, 0.05); 
-    g.slide(sceneTwo, 0, 0, 0.05); 
+    slide(sceneOne, 128, 128, 0.05); 
+    slide(sceneTwo, 0, 0, 0.05); 
     //`fadeOut` arguments:
     //sprite, fadeSpeed
-    g.fadeOut(sceneOne, 0.02);
+    fadeOut(sceneOne, 0.02);
   };
   reverse = function() {
-    g.slide(sceneOne, 0, 0, 0.05); 
-    g.slide(sceneTwo, 128, 128, 0.05); 
+    slide(sceneOne, 0, 0, 0.05); 
+    slide(sceneTwo, 128, 128, 0.05); 
     //Use `fadeIn` to fade in a group or sprite
-    g.fadeIn(sceneOne, 0.02);
+    fadeIn(sceneOne, 0.02);
   };
   direction = forward;
 
   //Wait 2 seconds then change the state to `play`
-  g.wait(2000, function(){
+  wait(2000, function(){
     g.state = play;    
   });
 }
@@ -117,12 +127,12 @@ function play() {
  //Reverse the direction after a 2 second pause if the scenes have reached
  //their destinations
  if (Math.floor(sceneOne.x) === 127){
-   g.wait(2000, function(){
+   wait(2000, function(){
      direction = reverse;
    });
  }
  if (Math.floor(sceneTwo.x) === 127){
-   g.wait(2000, function(){
+   wait(2000, function(){
      direction = forward;
    });
  }
@@ -132,7 +142,7 @@ function play() {
  //that you want to change,
  //`easePropery` arguments:
  //property, destinationValue, speed
- //blackSquare.x += g.easeProperty(blackSquare.x, 100, 0.05);
+ //blackSquare.x += easeProperty(blackSquare.x, 100, 0.05);
 
 }
 

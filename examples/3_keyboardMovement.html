@@ -1,10 +1,16 @@
-
 <!doctype html> 
 <meta charset = "utf-8"> 
 <title>Keyboard movement</title>
 <body>
 <script src="../ga.js"></script>
+<script src="../plugins.js"></script>
 <script>
+
+/*
+This file requires these convenience functions from `plugins.js`:
+`move`
+`contain`
+*/
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
@@ -13,7 +19,7 @@ var g = GA(256, 256, setup, ["images/platforms.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var cat, message;
 
@@ -110,7 +116,7 @@ function play() {
   Or, just move one sprite at a time, like this:
   */
 
-  g.move(cat);
+  move(cat);
 
   //Of course you can also move a sprite the good old-fashioned way if
   //really want to!
@@ -128,7 +134,7 @@ function play() {
   side the sprite hit: "left", "right". "top" or "bottom".
   */
 
-  var catHitsEdges = g.contain(cat, g.stage.localBounds);
+  var catHitsEdges = contain(cat, g.stage.localBounds);
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {

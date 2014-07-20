@@ -3,7 +3,15 @@
 <title>Basic display elements</title>
 <body>
 <script src="../ga.js"></script>
+<script src="../plugins.js"></script>
 <script>
+
+/*
+This file requires these convenience functions from `plugins.js`:
+`ease`
+`angle`
+`rotatePoint`
+*/
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
@@ -19,7 +27,7 @@ var g = GA(
 g.start();
 
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var box, ball, line, message, 
     pathA, pathB, rocket, star,
@@ -142,11 +150,11 @@ function play() {
 
   //Make the star ease towards the pointer.
   //`ease` arguments: follower, leader, speed
-  g.ease(star, g.pointer, 0.1);
+  ease(star, g.pointer, 0.1);
 
   //Make the rocket rotate towards the star
   //`angle` returns the angle between two sprites, in radians.
-  rocket.rotation = g.angle(rocket, star);
+  rocket.rotation = angle(rocket, star);
 
   //Make the star invisible if the pointer is "over"
   //the ball or being pressed "down" on it
@@ -168,14 +176,14 @@ function play() {
   //`rotatePoint` arguments:
   //pointX, pointY, rotationRadius, angleOfRotation
   line.angleA += 0.02;
-  var rotatingA = g.rotatePoint(162, 52, 10, line.angleA);
+  var rotatingA = rotatePoint(162, 52, 10, line.angleA);
   line.ax = rotatingA.x;
   line.ay = rotatingA.y;
 
   //Make the line's `bx` and `by` point rotate counter
   //clockwise around point 222, 94
   line.angleB -= 0.03;
-  var rotatingB = g.rotatePoint(220, 94, 10, line.angleB);
+  var rotatingB = rotatePoint(220, 94, 10, line.angleB);
   line.bx = rotatingB.x;
   line.by = rotatingB.y;
 }

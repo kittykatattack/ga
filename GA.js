@@ -306,9 +306,28 @@ function GA(width, height, setup, assetsToLoad, load) {
         this.children[index1] = child2;
         this.children[index2] = child1;
       } else {
-        throw new Error(child + " Both object must be a child of the caller " + o);
+        throw new Error(child + " Both objects must be a child of the caller " + o);
       }
     }
+    //Create `add` and `remove` methods to manage child objects
+    o.add = function(sprites) {
+      if(sprites instanceof Array) {
+        sprites.forEach(function(sprite) {
+          o.addChild(sprite);
+        });
+      } else {
+        o.addChild(sprites);
+      }
+    };
+    o.remove = function(sprites) {
+      if(sprites instanceof Array) {
+        sprites.foreach(function(sprite) {
+          o.removechild(sprite);
+        });
+      } else {
+        o.removechild(sprites);
+      }
+    };
     //A `position` object that lets you set the sprite's `x` and `y`
     //values using `sprite.position.set(xValue, yValue)`.
     //`sprite.position.get()` returns an object containing the 
@@ -372,7 +391,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         yOffset = yOffset || 0;
         b.gx = (a.gx + b.width) + xOffset;
         b.gy = (a.gy + a.halfHeight - b.halfHeight) + yOffset;
-      },
+      }
     };
 
     //Getters and setters for various game engine properties
@@ -598,9 +617,21 @@ function GA(width, height, setup, assetsToLoad, load) {
           return rectangle;
         },
         enumerable: true, configurable: true
-      },
+      }
     });
   }
+
+  //`remove` is a global convenience method that will 
+  //remove any sprite from its parent
+  ga.remove = function(sprites) {
+    if(sprites instanceof Array) {
+      sprites.foreach(function(sprite) {
+        sprite.parent.removeChild(sprite);
+      });
+    } else {
+      sprites.parent.removeChild(sprites);
+    }
+  };
 
   //Add `diameter` and `radius` properties to circular sprites
   function makeCircular(o) {
@@ -757,10 +788,14 @@ function GA(width, height, setup, assetsToLoad, load) {
     var o = {};
     o.type = "line";
     //Set the defaults
-    o.ax = ax || 0;
-    o.ay = ay || 0;
-    o.bx = bx || 32;
-    o.by = by || 32;
+    if (!ax && ax !== 0) ax = 0;
+    if (!ay && ay !== 0) ay = 0;
+    if (!bx && bx !== 0) bx = 32;
+    if (!by && by !== 0) by = 32;
+    o.ax = ax;
+    o.ay = ay;
+    o.bx = bx;
+    o.by = by;
     o.strokeStyle = strokeStyle || "red";
     o.lineWidth = lineWidth || 1;
     //The `lineJoin` style.
@@ -871,7 +906,7 @@ function GA(width, height, setup, assetsToLoad, load) {
           return ga.canvas.ctx.measureText("M").width;
         },
         enumerable: true, configurable: true
-      },
+      }
     });
     //Add the sprite to the stage
     ga.stage.addChild(o);
@@ -1023,7 +1058,7 @@ function GA(width, height, setup, assetsToLoad, load) {
         get: function() {
           return o._currentFrame;
         }, 
-        enumerable: false, configurable: false,
+        enumerable: false, configurable: false
       });
     }
     //Add the sprite to the stage
@@ -1878,209 +1913,6 @@ function GA(width, height, setup, assetsToLoad, load) {
     return ga.assets[soundFileName];
   };
 
-  /*
-  Utilities
-  ---------
-  */
-
-  //Move a sprite or an array of sprites by adding its
-  //veloctiy to its position
-  ga.move = function(sprites) {
-    var s;
-    if (sprites instanceof Array === false) {
-      s = sprites;
-      s.x += s.vx;
-      s.y += s.vy;
-    }
-    else {
-      for (var i = 0; i < sprites.length; i++) {
-        s = sprites[i];
-        s.x += s.vx;
-        s.y += s.vy;
-      }
-    }
-  };
-
-  /*
-  distance
-  ----------------
-
-  Find the distance in pixels between two sprites.
-  Parameters: 
-  a. A sprite object with `centerX` and `centerX` properties. 
-  b. A sprite object with `centerY` and `centerY` properties. 
-  The function returns the number of pixels distance between the sprites.
-
-  */
-
-  ga.distance = function(s1, s2) {
-    var vx = s2.centerX - s1.centerX;
-    var vy = s2.centerY - s1.centerY;
-    return Math.sqrt(vx * vx + vy * vy);
-  };
-
-  /*
-  ease
-  ----------------
-
-  Make a sprite ease to the position of another sprite.
-  Parameters: 
-  a. A sprite object with `centerX` and `centerY` properties. This is the `follower`
-  sprite.
-  b. A sprite object with `centerX` and `centerY` properties. This is the `leader` sprite that
-  the follower will chase
-  c. The easing value, such as 0.3. A higher number makes the follower move faster
-
-  */
-  ga.ease = function(follower, leader, speed) {
-    //Figure out the distance between the sprites
-    var vx = leader.centerX - follower.centerX;
-    var vy = leader.centerY - follower.centerY;
-    var distance = Math.sqrt(vx * vx + vy * vy);
-    
-    //Move the follower if it's more than 1 pixel 
-    //away from the leader
-    if (distance >= 1) {
-      follower.x += vx * speed;
-      follower.y += vy * speed;
-    }
-  };
-
-  //Use `easeProperty` to ease any property on a sprite
-  //It returns a value that you can apply to the sprite's property
-  ga.easeProperty = function(start, end, speed) {
-    //Scale any values less than one (important for tweening alpha)
-    var scaleFactor = 1;
-    if (start <= 1) scaleFactor = 100; 
-    //Calculate the distance
-    var distance = end - start;
-    //Move the follower if it's more than 1 pixel 
-    //away from the leader
-    if ((Math.abs(distance) * scaleFactor) >= 1) {
-      return distance * speed;
-    } else {
-      return 0;
-    }
-  };
-
-  //Use `slide` to ease a sprite to a new position
-  ga.slide = function(s, endX, endY, speed) {
-    s.x += ga.easeProperty(s.x, endX, speed);
-    s.y += ga.easeProperty(s.y, endY, speed);
-  };
-
-  //`FadeOut` and `FadeIn`
-  ga.fadeOut = function(s, speed) {
-    if (s.alpha > 0.02) {
-      s.alpha -= speed;
-    } else {
-      s.alpha = 0;
-    }
-  };
-  ga.fadeIn = function(s, speed) {
-    if (s.alpha < 1) {
-      s.alpha += speed;
-    } else {
-      s.alpha = 1;
-    }
-  };
-
-  /*
-  follow
-  ----------------
-
-  Make a sprite move towards another sprite at a regular speed.
-  Parameters: 
-  a. A sprite object with `centerX` and `centerY` properties. This is the `follower`
-  sprite.
-  b. A sprite object with `centerX` and `centerY` properties. This is the `leader` sprite that
-  the follower will chase
-  c. The speed value, such as 3. The is the pixels per frame that the sprite will move. A higher number makes the follower move faster.
-
-  */
-
-  ga.follow = function(follower, leader, speed) {
-    //Figure out the distance between the sprites
-    var vx = leader.centerX - follower.centerX;
-    var vy = leader.centerY - follower.centerY;
-    var distance = Math.sqrt(vx * vx + vy * vy);
-    
-    //Move the follower if it's more than 1 move 
-    //away from the leader
-    if (distance >= speed) {
-      follower.x += (vx / distance) * speed;
-      follower.y += (vy / distance) * speed;
-    }
-  };
-
-  //`rotateAround`
-  //Make a sprite rotate around another sprite
-
-  ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
-    rotatingSprite.x 
-      = centerSprite.centerX - centerSprite.x
-      + (distance * Math.cos(angle)) 
-      - rotatingSprite.halfWidth;
-
-    rotatingSprite.y 
-      = centerSprite.centerY - centerSprite.y 
-      + (distance *  Math.sin(angle)) 
-      - rotatingSprite.halfWidth;
-  };
-  
-  //`rotatePoint`
-  //Make a point rotate around another point
-  
-  ga.rotatePoint = function(pointX, pointY, distance, angle) {
-    var point = {};
-    point.x = pointX + Math.cos(angle) * distance;
-    point.y = pointY + Math.sin(angle) * distance;
-    return point;
-  };
-
-  /*
-  angle
-  -----
-
-  Return the angle in Radians between two sprites.
-  Parameters: 
-  a. A sprite object with `centerX` and `centerY` properties.
-  b. A sprite object with `centerX` and `centerY` properties.
-  You can use it to make a sprite rotate towards another sprite like this:
-
-      box.rotation = angle(box, pointer);
-
-  */
-
-  ga.angle = function(s1, s2) {
-    return Math.atan2(
-      s2.centerY - s1.centerY,
-      s2.centerX - s1.centerX
-    );
-  };
-
-  /*
-  random
-  ------
-
-  Return a random integer between a minimum and maximum value
-  Parameters: 
-  a. An integer.
-  b. An integer.
-  Here's how you can use it to get a random number betwee, 1 and 10:
-
-      random(1, 10);
-
-  */
-  ga.random = function(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
- 
-  //Wait
-  ga.wait = function(duration, callBack) {
-    setTimeout(callBack, duration);
-  };
-  
   
   /*
   Sort functions
@@ -2097,54 +1929,6 @@ function GA(width, height, setup, assetsToLoad, load) {
     }
   }
 
-  /*
-  Collision
-  ---------
-  */
-
-  ga.contain = function(s, bounds, bounce, extra){
-
-    var x = bounds.x,
-        y = bounds.y,
-        width = bounds.width,
-        height = bounds.height;
-
-    //The `collision` object is used to store which 
-    //side of the containing rectangle the sprite hits
-    var collision;
-
-    //Left
-    if (s.x < x) {
-      if (bounce) s.vx *= -1;
-      s.x = x;
-      collision = "left";
-    }
-    //Top
-    if (s.y < y) {
-      if (bounce) s.vy *= -1;
-      s.y = y;
-      collision = "top";
-    }
-    //Right
-    if (s.x + s.width > width) {
-      if (bounce) s.vx *= -1;
-      s.x = width - s.width;
-      collision = "right";
-    }
-    //Bottom
-    if (s.y + s.height > height) {
-      if (bounce) s.vy *= -1;
-      s.y = height - s.height;
-      collision = "bottom";
-    }
-
-    //The the `extra` function runs if there was a collision
-    //and `extra` has been defined
-    if (collision && extra) extra(collision);
-    
-    //Return the `collision` object   
-    return collision;
-  }
 
   //Make the `group` and `keyboard` functions public
   ga.keyboard = keyboard;
