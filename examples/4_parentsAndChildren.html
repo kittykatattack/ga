@@ -15,11 +15,21 @@ g.start();
 //that you wnat to access in all the game functions and states
 
 var cat, star, square, message, star, ball, line, 
-    localMessage, globalMessage;
+    localMessage, globalMessage, collisionMessage;
 
 //A `setup` function that will run only once.
 //Use it for intilaization tasks
 function setup() {
+
+  /*
+  This example illustrates how you can use `addChild` and
+  `removeChild` to make spirtes the children of other sprites.
+  All sprites have local and global x and y coordinates. The local
+  coordinates, `x` and `y`, are relative to the top left corner of the
+  sprite's parent. The global coordinates, `gx` and `gy` are relative
+  to the top left corner of the `stage`. (The `stage` is the root
+  contaniner that contains all the sprites in the game.)
+  */
 
   //Make the background white and add a border to the canvas
   g.backgroundColor = "white";
@@ -40,29 +50,26 @@ function setup() {
   cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
   cat.shadow = true;
 
-  //Add the cat as a child of the square, and put it in the center of
+  //Add the cat as a child of the square, and put it at the bottom of
   //the square
   square.addChild(cat);
-  //square.put.center(cat);
   square.put.bottom(cat, 0, -cat.height);
 
-  //square.alpha = 0.2;
-
-  //Create some text that will display the cat's local position
+  //Create some text that we'll use to display the cat's local position
   localMessage = g.text("", "11px sans-serif", "black");
 
   //Add the text as a child of the square
   square.addChild(localMessage);
 
-  //Use the text's `localX` and `localY` values to set its top left
+  //Use the text's local `x` and local `y` values to set its top left
   //corner position relative to the square's top left corner
   localMessage.x = 4;
   localMessage.y = 2;
 
-  //Make a star sprite and add it a a child of the cat
+  //Make a star sprite and add it as a child of the cat
   star = g.sprite(g.frame("images/platforms.png", 32, 0, 32, 32));
 
-  //Scale the sprite's size down to 50%
+  //Scale the star's size down to 50%
   star.scaleX = 0.5;
   star.scaleY = 0.5;
 
@@ -74,7 +81,15 @@ function setup() {
   //help make the star rotate around the cat
   star.angle = 0;
 
-  //Circles and lines work too
+  //Create some text that will display the cat's global position
+  globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
+  g.stage.put.bottom(globalMessage, 0, -20);
+
+  //Add some text to display the side on which
+  //the cat is colliding with the edges of the sqaure
+  collisionMessage = g.text("Use the arrow keys to move...", "16px sans-serif", "black");
+
+  //Yes, circles and lines work too!
   /*
   ball = g.circle(32, "LightPink");
   ball.shadow = true;
@@ -87,10 +102,10 @@ function setup() {
   line.x = 0;
   line.y = 0;
   */
-
-  //Create some text that will display the cat's global position
-  globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
-  g.stage.put.bottom(globalMessage, 0, -20);
+    
+  //If you change the square's `alpha`, the child sprites inside it will
+  //be similarly affected
+  //square.alpha = 0.2;
 
   //Keyboard control
   //Assign key `press` methods
@@ -135,10 +150,6 @@ function setup() {
     }
   };
 
-  //Add some text to display the side on which
-  //the cat is colliding with the edges of the cavnas
-  message = g.text("Use the arrow keys to move...", "16px sans-serif", "black");
-    
   //Change the state to `play`
   g.state = play;  
 }
@@ -157,7 +168,8 @@ function play() {
   square.rotation += 0.005;
 
   //Display the cat's local `x` and local `y` coordinates. These are
-  //relative to the square, which is the cat's parent.
+  //relative to the square's top left corner. (The square is the cat's
+  //parent.)
   localMessage.content 
     = "cat.x: " + cat.x + ", " 
     + "cat.y: " + cat.y;
@@ -174,7 +186,7 @@ function play() {
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {
-    message.content 
+    collisionMessage.content 
       = "The cat hit the " + catHitsEdges + " of the square";
   }
 

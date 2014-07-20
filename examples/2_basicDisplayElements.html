@@ -48,21 +48,6 @@ function setup() {
   //diameter, fillstyle, stroketyle, lineWidth, x, y 
   ball = g.circle(42, "Plum", "PowderBlue", 8, 95, 45);
 
-  //`line` arguments:
-  //strokeStyle, lineWidth, ax, ay, bx, by
-  line = g.line("Yellow", 4, 162, 52, 220, 94);
-
-  //If you need to you can reposition the line's by its x/y top left corner
-  //point. This changes the position of the line without changing its
-  //length
-  //line.x = 100;
-  //line.y = 100;
-
-  //Define two circular paths for the start and end points of the line
-  //to follow
-  pathA = {centerX: line.ax, centerY: line.ay, radius:10, angle:0};
-  pathB = {centerX: line.bx, centerY: line.by, radius:10, angle:0};
- 
   //`text` arguments:
   //content, font, fillStyle, x, y
   //The font family name will be the same as the font's file name
@@ -75,11 +60,25 @@ function setup() {
   //Create a sprite from a single image by supplying the 
   //image name as the first argument
   rocket = g.sprite("images/rocket.png");
-  rocket.x = g.canvas.width / 2 - rocket.halfWidth;
-  rocket.y = 138;
+
+  /*
+  Use the `put.center` convenience method to put the rocket
+  in the center of the stage. The stage and all sprites can use
+  `put` methods like this.
+  `put.center` arguments:
+  sprite, xOffset, yOffset
+  */
+
+  g.stage.put.center(rocket, 0, 40);
+
+  /*
+  You can also use `put.left`, `put.top`, `put.right` and `put.bottom`
+  to precisely position a sprite around any other sprite.
+  */
+  
+  //Optionally change the rocket's `width` and `height` 
   rocket.width = 50;
   rocket.height = 50;
-  rocket.rotation = 5.5;
 
   //You can make a sprite from a tileset image by
   //supplying a `frame` object as an argument to the sprite. 
@@ -94,15 +93,19 @@ function setup() {
   star.circular = true;
   console.log("star.radius: " + star.radius)
   console.log("star.diameter: " + star.diameter)
-  //Set `circular` back to false if you want to remove
+  //Set `circular` back to `false` if you want to remove
   //the `radius` and `diameter` properties.
+
+  //The game has a `pointer` object with a `x` and `y` property
+  //that tells you the position of the mouse or touch pointer.
+  //Here's how to display the pointer position with a `text` sprite:
 
   pointerDisplay = g.text("", "8px PetMe64", "white");
   pointerDisplay.x = 10;
   pointerDisplay.y = 235;
 
   //Every time you create a sprite it's added to the
-  //`stage` object's `children` array
+  //`stage` object's `children` array.
   console.log("stage.children: " + g.stage.children);
 
   //Make any sprite interactive by setting its 
@@ -118,13 +121,22 @@ function setup() {
     ball.strokeStyle = colors[g.random(0, 3)];
   };
 
-  //Change the state to `play`
+  //`line` arguments:
+  //strokeStyle, lineWidth, ax, ay, bx, by
+  line = g.line("Yellow", 4, 162, 52, 220, 94);
+
+  //We're going to make the line's start and end points
+  //rotate in space. The line will need two new angle properties 
+  //to help us do this. both are initialized to 0
+  line.angleA = 0;
+  line.angleB = 0;
+
+  //Change the game state to `play`
   g.state = play;  
 }
 
 //The `play` function will run in a loop
 function play() {
- 
   //Make the box rotate
   box.rotation += 0.01;
 
@@ -149,16 +161,23 @@ function play() {
     = "pointer.x: " + g.pointer.x + " "
     + "pointer.y: " + g.pointer.y;
 
-  //Define the speed at which the start and end points
-  //of the line should circle
-  pathA.angle += 0.02;
-  pathB.angle -= 0.03;
+  //Make the line's `ax` and `ay` points rotate clockwise around
+  //point 162, 52. Use the `rotatePoint` method to help you do this. 
+  //`rotatePoint` returns an object with `x` and `y` propertites
+  //containing the point's new rotated position.
+  //`rotatePoint` arguments:
+  //pointX, pointY, rotationRadius, angleOfRotation
+  line.angleA += 0.02;
+  var rotatingA = g.rotatePoint(162, 52, 10, line.angleA);
+  line.ax = rotatingA.x;
+  line.ay = rotatingA.y;
 
-  //Make the line start and end points follow the circular paths
-  line.ax = pathA.centerX + Math.cos(pathA.angle) * pathA.radius;
-  line.ay = pathA.centerY + Math.sin(pathA.angle) * pathA.radius;
-  line.bx = pathB.centerX + Math.cos(pathB.angle) * pathB.radius;
-  line.by = pathB.centerY + Math.sin(pathB.angle) * pathB.radius;
+  //Make the line's `bx` and `by` point rotate counter
+  //clockwise around point 222, 94
+  line.angleB -= 0.03;
+  var rotatingB = g.rotatePoint(220, 94, 10, line.angleB);
+  line.bx = rotatingB.x;
+  line.by = rotatingB.y;
 }
 
 </script>

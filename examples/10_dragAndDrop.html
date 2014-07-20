@@ -30,10 +30,10 @@ function setup() {
   g.backgroundColor = "white";
   g.canvas.style.border = "1px black dashed";
 
-  //Important! Set the `g.dragAndDrop` to `true` to enable it.
+  //Important! Set the game's `dragAndDrop` property to `true` to enable it.
   g.dragAndDrop = true;
 
-  //Create three sprites and set their `draggable` property to `true`
+  //Create three sprites from images and set their `draggable` property to `true`
   cat = g.sprite("images/cat.png");
   cat.draggable = true;
 
@@ -49,10 +49,9 @@ function setup() {
   //g.state = play;    
 }
 
-//The `play` function will run in a loop
+//The `play` function will run in a loop...
 function play() {
-  //No code here, but the loop still needs to run so that the sprites
-  //can move
+  //... but we don't need a game loop in this example, yay again!
 }
 
 </script>

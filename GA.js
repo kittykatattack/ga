@@ -1,11 +1,16 @@
 /*
 Welcome's to Ga's source code!
-If you're reading this to find out how to use Ga, you've come to the wrong place. You should take a look inside the `examples` folder. But if you want to find out how ga works, this is the place to be!
+If you're reading this to find out how to use Ga, you've come to the wrong place. 
+You should take a look inside the `examples` folder. 
+There's a lot of cool stuff inside that example folder, so check it out!
+But if you want to find out how Ga works, this is the place to be!
+
 Everything is in one big, hulking gainormous file.
 Why?
-Because One is better than Many.
+Because One Thing is better than Many Things.
 Just use your text editor's search function to find what you're looking for.
 */
+
 function GA(width, height, setup, assetsToLoad, load) {
   var ga = {};
 
@@ -200,12 +205,59 @@ function GA(width, height, setup, assetsToLoad, load) {
     }
   });
 
-  /*
-  Display objects
-  ---------------
-  */
 
-  function makeContainer(o) {
+  function makeStage() {
+    var o = {};
+    makeDisplayObject(o);
+    //Flag this as being the `stage` object. There can
+    //only be one stage
+    o.stage = true;
+    //Set the stage to the same height and width as the canvas
+    //and position it at the top left corner
+    o.width = ga.canvas.width;
+    o.height = ga.canvas.height;
+    o.gx = 0;
+    o.gy = 0;
+    //Make the stage its own parent
+    o.parent = o;
+    return o; 
+  }
+
+  //Common properties for all the display objects
+  function makeDisplayObject(o) {
+    o.vx = 0; 
+    o.vy = 0;
+    o.width = 0;
+    o.height = 0;
+    o.parent = undefined;
+    o.stage = false;
+    //Optional drop shadow properties.
+    //Set `shadow` to `true` if you want the o do display a
+    //shadow.
+    o.shadow = false;
+    o.shadowColor = "rgba(100, 100, 100, 0.5)";
+    o.shadowOffsetX = 3;
+    o.shadowOffsetY = 3;
+    o.shadowBlur = 3;
+    //The o's private properties that are just used for internal
+    //calculations and should be changed or accessed through a matching getter/setter
+    o.rotation = 0;
+    o.visible = true;
+    o._alpha = 1;
+    o._draggable = undefined;
+    o._scaleX;
+    o._scaleY;
+    o._gx = 0;
+    o._gy = 0;
+    o._layer = 0;
+    o._circular = false;
+    o._interactive = false;
+    //Make it a container object so that you can use
+    //`addChild` and `removeChild` to create composite objects
+    //makeContainer(sprite);
+
+    //Add the sprite's container properites so that you can have
+    //a nested parent/child scene graph heirarchy
     //Create a `children` array that contains all the 
     //in this container
     o.children = [];
@@ -257,92 +309,20 @@ function GA(width, height, setup, assetsToLoad, load) {
         throw new Error(child + " Both object must be a child of the caller " + o);
       }
     }
-  }
-
-  function group(spritesToGroup) {
-    var o = {};
-    o.type = "group";
-    //Make the group a container object
-    makeContainer(o);
-    //Set the group's `width` and `height` to 0
-    o.width = 0;
-    o.height = 0;
-    //Add the common sprite properties to the group
-    //the group has a default `width` and `height` of 0, but
-    //you can assign any width and height that you want.
-    addProperties(o);
-    //Add the group to the `stage`, if the stage exists
-    if(ga.stage) {
-      ga.stage.addChild(o);
-    }
-    //Group any sprites that were passed to the group's argumnents
-    //(Important!: This needs to be done after adding the group to the stage)
-    if (spritesToGroup) {
-      var sprites = Array.prototype.slice.call(arguments);
-      sprites.forEach(function(sprite) {
-        o.addChild(sprite);
-      });
-    }
-    //Return the group
-    return o;
-  }
-
-  function makeStage() {
-    var stage = group();
-    stage.stage = true;
-    stage.width = ga.canvas.width;
-    stage.height = ga.canvas.height;
-    stage.gx = 0;
-    stage.gy = 0;
-    stage.parent = stage;
-    return stage; 
-  }
-
-  //Common properties for all the display objects
-  function addProperties(sprite) {
-    sprite.vx = 0; 
-    sprite.vy = 0;
-    sprite.parent = undefined;
-    sprite.stage = false;
-    //Optional drop shadow properties.
-    //Set `shadow` to `true` if you want the sprite do display a
-    //shadow.
-    sprite.shadow = false;
-    sprite.shadowColor = "rgba(100, 100, 100, 0.5)";
-    sprite.shadowOffsetX = 3;
-    sprite.shadowOffsetY = 3;
-    sprite.shadowBlur = 3;
-    //The sprite's private properties that are just used for internal
-    //calculations and should be changed or accessed through a matching getter/setter
-    sprite.rotation = 0;
-    sprite.visible = true;
-    sprite._alpha = 1;
-    sprite._draggable = undefined;
-    sprite._scaleX;
-    sprite._scaleY;
-    sprite._gx = 0;
-    sprite._gy = 0;
-    sprite._layer = 0;
-    sprite._circular = false;
-    sprite._interactive = false;
-    //Make it a container object so that you can use
-    //`addChild` and `removeChild` to create composite objects
-    makeContainer(sprite);
-
     //A `position` object that lets you set the sprite's `x` and `y`
     //values using `sprite.position.set(xValue, yValue)`.
     //`sprite.position.get()` returns an object containing the 
     //sprite's `x` and `y` values.
-    sprite.position = {
+    o.position = {
       set: function(x, y){
-        sprite.x = x;
-        sprite.y = y;
+        o.x = x;
+        o.y = y;
       },
       get: function() {
-        var o = {};
-        o.x = sprite.x;
-        o.y = sprite.y;
-        return o;
+        var point = {};
+        point.x = o.x;
+        point.y = o.y;
+        return point;
       }
     };
 
@@ -350,10 +330,10 @@ function GA(width, height, setup, assetsToLoad, load) {
     //another sprite in and around this sprite.
     //Get a short form reference to the sprite to make the code more
     //compact and easier to read
-    var a = sprite;
-    sprite.put = {
+    var a = o;
+    o.put = {
       //Center a sprite inside this sprite. `xOffset` and `yOffset`
-      //arguments determine by how much the other sprite's poistion
+      //arguments determine by how much the other sprite's position
       //should be offset from the center. These methods use the
       //sprites' global coordinates (`gx` and `gy`)
 
@@ -396,7 +376,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     };
 
     //Getters and setters for various game engine properties
-    Object.defineProperties(sprite, {
+    Object.defineProperties(o, {
       //`x` and `y` getters and setters move child sprites
       gx: {
         get: function() {
@@ -481,51 +461,6 @@ function GA(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
-      /*
-      //`visible` getter/setter
-      visible: {
-        get: function() {
-          return this._visible;
-        },
-        set: function(value) {
-          if (this.children && this.children.length > 0) {
-            this.children.forEach(function(child) {
-              child.visible = value;
-            });
-          }
-          //Set the new x value
-          this._visible = value;
-        },
-        enumerable: true, configurable: true
-      },
-      //`rotation` getter/setter
-      rotation: {
-        get: function() {
-          return this._rotation;
-        },
-        set: function(value) {
-          //Set the new rotation value
-          this._rotation = value;
-          if (this.children && this.children.length > 0) {
-            var self = this;
-            this.children.forEach(function(child) {
-              var c = child;
-                  p = child.parent;
-                  vx = c.centerX - p.centerX,
-                  vy = c.centerY - p.centerY,
-                  m = Math.sqrt(vx * vx + vy * vy);
-                  angle = Math.atan2(vy, vx);
-                  //child.x = child.centerX + Math.cos(self.rotation) * m;
-                  //child.y = child.centerY + Math.sin(self.rotation) * m;
-                  child.x -= Math.cos(self.rotation) / Math.PI;
-                  child.y -= Math.sin(self.rotation) / Math.PI;
-                  //child.rotation += value;
-            });
-          }
-        },
-        enumerable: true, configurable: true
-      },
-      */
       halfWidth: {
         get: function() {
           return this.width / 2;
@@ -614,7 +549,7 @@ function GA(width, height, setup, assetsToLoad, load) {
           }
           //If it's `false`, remove it from the `draggableSprites` array
           if (value === false) {
-            ga.draggableSprites.splice(ga.draggableSprites.getIndex(this), 1);
+            ga.draggableSprites.splice(ga.draggableSprites.indexOf(this), 1);
           }
         },
         enumerable: true, configurable: true
@@ -668,8 +603,8 @@ function GA(width, height, setup, assetsToLoad, load) {
   }
 
   //Add `diameter` and `radius` properties to circular sprites
-  function makeCircular(sprite) {
-    Object.defineProperties(sprite, {
+  function makeCircular(o) {
+    Object.defineProperties(o, {
       diameter: {
         get: function() {
           return this.width;
@@ -693,26 +628,82 @@ function GA(width, height, setup, assetsToLoad, load) {
     });
   }
 
+  //A `group` is a special kind of display objec that doesn't have any
+  //visible content. Intstead, you can use it as a parent container to 
+  //group other sprites. If you don't assign it a `width` and
+  //`height`, the group's width and height will be calclated based on the size
+  //of the largest sprite that group contains 
+  ga.group = function(spritesToGroup) {
+    var o = {};
+    o.type = "group";
+    //Make the group a display object
+    makeDisplayObject(o);
+    //Add the group to the `stage`
+    ga.stage.addChild(o);
+    //Custom `addChild` and `removeChild` methods that recalcuate the
+    //group's width and height based on the size and position of the 
+    //child sprites it contains
+    o.addChild = function(sprite) {
+      //Remove the sprite from its current parent, if it has one
+      if (sprite.parent) {
+        sprite.parent.removeChild(sprite);
+      }
+      //Make this object the sprite's parent and 
+      //add it to this object's `children` array
+      sprite.parent = o;
+      o.children.push(sprite);
+      //Recalcuate the group's width
+      var width = 0;
+      o.children.forEach(function(child) {
+        if(child.x + child.width > width) {
+          width = child.x + child.width;
+        }
+      });
+      o.width = width;
+    };
+    o.removeChild = function(sprite) {
+      if(sprite.parent === o) {
+        o.children.splice(o.children.indexOf(sprite), 1);
+        //recalculate the group's height
+        var height = 0;
+        o.children.forEach(function(child) {
+          if(child.y + child.height > height) {
+            height = child.y + child.height;
+          }
+        });
+      o.height = height;
+      } else {
+        throw new Error(sprite + "is not a child of " + o);
+      }
+    };
+    //Group any sprites that were passed to the group's argumnents
+    //(Important!: This needs to be done after adding the group to the stage)
+    if (spritesToGroup) {
+      var sprites = Array.prototype.slice.call(arguments);
+      sprites.forEach(function(sprite) {
+        o.addChild(sprite);
+      });
+    }
+    //Return the group
+    return o;
+  };
 
   //rectangle
   ga.rectangle = function (width, height, fillStyle, strokeStyle, lineWidth, x, y) {
     var o = {};
-    o.type = "rectangle";
+    //Make this a display object
+    makeDisplayObject(o);
     //Set defaults
     o.width = width || 32;
     o.height = height || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || 0;
-    //Add extra sprite properties
-    addProperties(o);
     //Add the sprite to the stage
     ga.stage.addChild(o);
     //Set the sprite's getters
     o.x = x || 0;
     o.y = y || 0;
-    //Make it a container object
-    makeContainer(o);
     //Add a `render` method that explains to the canvas how to draw
     //a rectangle
     o.render = function(ctx) {
@@ -734,15 +725,14 @@ function GA(width, height, setup, assetsToLoad, load) {
   //circle
   ga.circle = function(diameter, fillStyle, strokeStyle, lineWidth, x, y) {
     var o = {};
-    o.type = "circle";
+    //Make this a display object
+    makeDisplayObject(o);
     //Set defaults
     o.width = diameter || 32;
     o.height = diameter || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || "none";
-    //Add some extra properties to the sprite
-    addProperties(o);
     //Add the sprite to the stage
     ga.stage.addChild(o);
     //Set the sprite's getters
@@ -758,8 +748,7 @@ function GA(width, height, setup, assetsToLoad, load) {
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
     };
-    //Make it a container object
-    makeContainer(o);
+    //Return the circle sprite
     return o;
   };
 
@@ -778,7 +767,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     //Options are "round", "mitre" and "bevel"
     o.lineJoin = "round";
     //Add some extra properties to the sprite
-    addProperties(o);
+    makeDisplayObject(o);
     //Add the sprite to the stage
     ga.stage.addChild(o);
     //Measure the width and height of the line, and its
@@ -868,7 +857,7 @@ function GA(width, height, setup, assetsToLoad, load) {
     o.fillStyle = fillStyle || "red";
     o.textBaseline = "top";
     //Add extra sprite properties
-    addProperties(o);
+    makeDisplayObject(o);
     //Measure the width and height of the text
     Object.defineProperties(o, {
       width: {
@@ -971,7 +960,8 @@ function GA(width, height, setup, assetsToLoad, load) {
   //sprite
   ga.sprite = function(source) {
     var o = {};
-    o.type = "sprite";
+    //Make this a display object
+    makeDisplayObject(o);
     o.frames = [];
     o.loop = true;
     o._currentFrame = 0;
@@ -1036,8 +1026,6 @@ function GA(width, height, setup, assetsToLoad, load) {
         enumerable: false, configurable: false,
       });
     }
-    //Add extra sprite properties
-    addProperties(o);
     //Add the sprite to the stage
     ga.stage.addChild(o);
     //Set the sprite's getters
@@ -1047,7 +1035,6 @@ function GA(width, height, setup, assetsToLoad, load) {
     if (o.frames.length > 0) ga.addStatePlayer(o);
     //A `render` method that describes how to draw the sprite
     o.render = function(ctx) {
-      ctx.rotate(o.rotation);
       ctx.drawImage(
         o.source,
         o.sourceX, o.sourceY,
@@ -1298,12 +1285,12 @@ function GA(width, height, setup, assetsToLoad, load) {
       //area of the canvas
       if (
         sprite.visible
-        && sprite.gx + sprite.width > 0
+        && sprite.gx + sprite.width > -1
         && sprite.gx < canvas.width
-        && sprite.gy + sprite.height > 0
+        && sprite.gy + sprite.height > -1
         && sprite.gy < canvas.height
-        || sprite.type === "group"
       ) {
+
         //Draw the different sprite types
         //Rectangle
         ctx.save();
@@ -1319,285 +1306,52 @@ function GA(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
         }
-        
+        //Position the canvas to the sprite's center point (its
+        //position plus half its width.) This will let us easily
+        //rotate the sprite around its center 
+        /* 
         ctx.translate(
-          Math.floor(sprite.gx + sprite.parent.gx + sprite.halfWidth),
-          Math.floor(sprite.gy + sprite.parent.gy + sprite.halfHeight)
-        );
-        
-        /*
-        ctx.translate(
-          Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
-          Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+          Math.floor(sprite.x + sprite.halfWidth),
+          Math.floor(sprite.y + sprite.halfHeight)
         );
         */
-        /*
         if (sprite.parent.stage === true) {
           ctx.translate(
-            Math.floor(sprite.gx + sprite.halfWidth),
-            Math.floor(sprite.gy + sprite.halfHeight)
+            sprite.gx + sprite.halfWidth,
+            sprite.gy + sprite.halfHeight
           );
         } else {
           ctx.translate(
-            Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
-            Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
+            sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth,
+            sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight
           );
         }
-        */
+        
+        //Rotate the sprite using its `rotation` value
         ctx.rotate(sprite.rotation);
         //Use the sprite's custom `render` method to figure out how to
-        //draw the sprite
-        sprite.render(ctx);
-        
-        //Group
-        if (sprite.type === "group") {
-          //Display the children of the group
-          if (sprite.children && sprite.children.length > 0) {
-            for (var j = 0; j < sprite.children.length; j++) {  
-              var child = sprite.children[j];
-              displaySprite(child);
-            }
-          }
-        }
-        
+        //draw the sprite. This is only run if the sprite actually has
+        //a `render` method. Most do, but `group` sprites don't and
+        //neither does the `stage` object
+        if (sprite.render) sprite.render(ctx);
         //If the sprite contains child sprites in its
-        //`children` array, display them
+        //`children` array, display them by calling this very same
+        //`displaySprite` function again.
         if (sprite.children && sprite.children.length > 0) {
-          for (var k = 0; k < sprite.children.length; k++) {  
-            var child = sprite.children[k];
+          for (var j = 0; j < sprite.children.length; j++) {  
+            //Find the sprite's child
+            var child = sprite.children[j];
+            //display the child
             displaySprite(child);
           }
         }
+        //The context's orginal position will only be restored after
+        //the child sprites have been rendered. This is why the children have
+        //the same rotation and alpha as the parents 
         ctx.restore();
       }
     }
   }
-  /*
-  function render (canvas) {
-    //Get a reference to the context
-    var ctx = canvas.ctx;
-    //Get a reference to the camera, if it exists
-    var camera = camera || canvas.camera;
-    //Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //Display the all the sprites 
-    for (var i = 0; i < ga.stage.children.length; i++) {  
-      var sprite = ga.stage.children[i];
-      displaySprite(sprite);
-    }
-    function displaySprite(sprite) {
-      //Only draw sprites if they're visible and inside the
-      //area of the canvas
-      if (
-        sprite.visible
-        && sprite.gx + sprite.width > 0
-        && sprite.gx < canvas.width
-        && sprite.gy + sprite.height > 0
-        && sprite.gy < canvas.height
-        || sprite.type === "group"
-      ) {
-        //Draw the different sprite types
-        //Rectangle
-        ctx.save();
-        if (sprite.type === "rectangle") {      
-          //Add an optional camera
-          if (camera && camera.initialized && sprite.scroll) {
-            ctx.translate(-camera.x, -camera.y);
-          }
-          ctx.strokeStyle = sprite.strokeStyle;
-          ctx.lineWidth = sprite.lineWidth;
-          ctx.fillStyle = sprite.fillStyle;
-          ctx.globalAlpha = sprite.alpha;
-          //Add a shadow if the sprite's `shadow` property is `true`
-          if(sprite.shadow) {
-            ctx.shadowColor = sprite.shadowColor;
-            ctx.shadowOffsetX = sprite.shadowOffsetX;
-            ctx.shadowOffsetY = sprite.shadowOffsetY;
-            ctx.shadowBlur = sprite.shadowBlur;
-          }
-          if (sprite.parent.stage === true) {
-            ctx.translate(
-              Math.floor(sprite.gx + sprite.halfWidth),
-              Math.floor(sprite.gy + sprite.halfHeight)
-            );
-          } else {
-            ctx.translate(
-              Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
-              Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
-            );
-          }
-          ctx.rotate(sprite.rotation);
-          ctx.beginPath();
-          //Draw the rectangle around the context's center point
-          ctx.rect(
-            Math.floor(-sprite.halfWidth),
-            Math.floor(-sprite.halfHeight),
-            sprite.width,
-            sprite.height
-          );
-          if (sprite.strokeStyle !== "none") ctx.stroke();
-          if (sprite.fillStyle !== "none") ctx.fill();
-        }
-
-        //Circle
-        if (sprite.type === "circle") {      
-          //Add an optional camera
-          if (camera && camera.initialized && sprite.scroll) {
-            ctx.translate(-camera.x, -camera.y);
-          }
-          ctx.strokeStyle = sprite.strokeStyle;
-          ctx.lineWidth = sprite.lineWidth;
-          ctx.fillStyle = sprite.fillStyle;
-          ctx.globalAlpha = sprite.alpha;
-          //Add a shadow if the sprite's `shadow` property is `true`
-          if(sprite.shadow) {
-            ctx.shadowColor = sprite.shadowColor;
-            ctx.shadowOffsetX = sprite.shadowOffsetX;
-            ctx.shadowOffsetY = sprite.shadowOffsetY;
-            ctx.shadowBlur = sprite.shadowBlur;
-          }
-          if (sprite.parent.stage === true) {
-            ctx.translate(
-              Math.floor(sprite.gx + sprite.halfWidth),
-              Math.floor(sprite.gy + sprite.halfHeight)
-            );
-          } else {
-            ctx.translate(
-              Math.floor(sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth),
-              Math.floor(sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight)
-            );
-          }
-          ctx.rotate(sprite.rotation);
-          ctx.beginPath();
-          ctx.arc(0, 0, sprite.radius, 0, 6.28, false);
-          if (sprite.strokeStyle !== "none") ctx.stroke();
-          if (sprite.fillStyle !== "none") ctx.fill();
-        }
-        
-        //Line
-        if (sprite.type === "line") {      
-          //Add an optional camera
-          if (camera && camera.initialized && sprite.scroll) {
-            ctx.translate(-camera.x, -camera.y);
-          }
-          ctx.strokeStyle = sprite.strokeStyle;
-          ctx.lineJoin = sprite.lineJoin;
-          ctx.lineWidth = sprite.lineWidth;
-          ctx.globalAlpha = sprite.alpha;
-          //Add a shadow if the sprite's `shadow` property is `true`
-          if(sprite.shadow) {
-            ctx.shadowColor = sprite.shadowColor;
-            ctx.shadowOffsetX = sprite.shadowOffsetX;
-            ctx.shadowOffsetY = sprite.shadowOffsetY;
-            ctx.shadowBlur = sprite.shadowBlur;
-          }
-          if (sprite.parent.stage === true) {
-            ctx.translate(
-              Math.floor(sprite.gx),
-              Math.floor(sprite.gy)
-            );
-          } else {
-            ctx.translate(
-              Math.floor(sprite.gx - sprite.parent.gx - sprite.parent.halfWidth),
-              Math.floor(sprite.gy - sprite.parent.gy - sprite.parent.halfHeight)
-            );
-          }
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(sprite.width, sprite.height);
-          if (sprite.strokeStyle !== "none") ctx.stroke();
-          if (sprite.fillStyle !== "none") ctx.fill();
-        }
-        
-        //Text
-        if (sprite.type === "text") {      
-          //Add an optional camera
-          if (camera && camera.initialized && sprite.scroll) {
-            ctx.translate(-camera.x, -camera.y);
-          }
-          ctx.globalAlpha = sprite.alpha;
-          //Add a shadow if the sprite's `shadow` property is `true`
-          if(sprite.shadow) {
-            ctx.shadowColor = sprite.shadowColor;
-            ctx.shadowOffsetX = sprite.shadowOffsetX;
-            ctx.shadowOffsetY = sprite.shadowOffsetY;
-            ctx.shadowBlur = sprite.shadowBlur;
-          }
-          ctx.font = sprite.font;
-          ctx.fillStyle = sprite.fillStyle;
-          ctx.textBaseline = sprite.textBaseline;
-          if (sprite.parent.stage === true) {
-            ctx.fillText(sprite.content, sprite.gx, sprite.gy);
-          } else {
-            ctx.fillText(
-              sprite.content, sprite.gx - sprite.parent.gx - sprite.parent.halfWidth, 
-              sprite.gy - sprite.parent.gy - sprite.parent.halfHeight
-            );
-          }
-        }
-
-        //Sprite
-        if (sprite.type === "sprite") {      
-          //ctx.save();
-          //Add an optional camera
-          if (camera && camera.initialized && sprite.scroll) {
-            ctx.translate(-camera.p.x, -camera.p.y);
-          }
-          ctx.globalAlpha = sprite.alpha;
-          //Add a shadow if the sprite's `shadow` property is `true`
-          if(sprite.shadow) {
-            ctx.shadowColor = sprite.shadowColor;
-            ctx.shadowOffsetX = sprite.shadowOffsetX;
-            ctx.shadowOffsetY = sprite.shadowOffsetY;
-            ctx.shadowBlur = sprite.shadowBlur;
-          }
-          if (sprite.parent.stage === true) {
-            ctx.translate(
-              Math.floor(sprite.gx + sprite.halfWidth),
-              Math.floor(sprite.gy + sprite.halfHeight)
-            );
-          } else {
-            ctx.translate(
-              Math.floor(sprite.x + sprite.halfWidth - sprite.parent.halfWidth),
-              Math.floor(sprite.y + sprite.halfHeight - sprite.parent.halfHeight)
-            );
-          }
-          ctx.rotate(sprite.rotation);
-          ctx.drawImage(
-            sprite.source,
-            sprite.sourceX, sprite.sourceY,
-            sprite.sourceWidth, sprite.sourceHeight,
-            Math.floor(-sprite.halfWidth),
-            Math.floor(-sprite.halfHeight),
-            sprite.width, sprite.height
-          );
-          //ctx.restore();
-        }
-
-        //Group
-        if (sprite.type === "group") {
-          //Display the children of the group
-          if (sprite.children && sprite.children.length > 0) {
-            for (var j = 0; j < sprite.children.length; j++) {  
-              var child = sprite.children[j];
-              displaySprite(child);
-            }
-          }
-        }
-        
-        //If the sprite contains child sprites in its
-        //`children` array, display them
-        if (sprite.children && sprite.children.length > 0) {
-          for (var k = 0; k < sprite.children.length; k++) {  
-            var child = sprite.children[k];
-            displaySprite(child);
-          }
-        }
-        ctx.restore();
-      }
-    }
-  }
-  */
 
   /*
   Game engine objects
@@ -2259,18 +2013,29 @@ function GA(width, height, setup, assetsToLoad, load) {
     }
   };
 
-  //rotateAround
+  //`rotateAround`
   //Make a sprite rotate around another sprite
+
   ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
     rotatingSprite.x 
-      = cat.centerX - centerSprite.x 
-      + (distance * Math.cos(star.angle)) 
+      = centerSprite.centerX - centerSprite.x
+      + (distance * Math.cos(angle)) 
       - rotatingSprite.halfWidth;
 
     rotatingSprite.y 
-      = cat.centerY - centerSprite.y 
-      + (distance *  Math.sin(star.angle)) 
+      = centerSprite.centerY - centerSprite.y 
+      + (distance *  Math.sin(angle)) 
       - rotatingSprite.halfWidth;
+  };
+  
+  //`rotatePoint`
+  //Make a point rotate around another point
+  
+  ga.rotatePoint = function(pointX, pointY, distance, angle) {
+    var point = {};
+    point.x = pointX + Math.cos(angle) * distance;
+    point.y = pointY + Math.sin(angle) * distance;
+    return point;
   };
 
   /*
@@ -2383,7 +2148,6 @@ function GA(width, height, setup, assetsToLoad, load) {
 
   //Make the `group` and `keyboard` functions public
   ga.keyboard = keyboard;
-  ga.group = group;
 
   //Return `ga`
   return ga;

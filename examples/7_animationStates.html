@@ -28,23 +28,40 @@ function setup() {
   //Make the forest background
   forest = g.sprite("images/forest.png");
 
-  //If you have a complex animation in a single image,  you can use 
-  //`filmStrip` to autmatically create an array of x,y
-  //coordinates for each animation frame.
-  //`filmStrip` arguments:
-  //imageName, frameWidth, frameHeight, spacing
-  //(Use the final optional `spacing` argument if there is any default
-  //spacing (padding) around tileset frame images)
+  /*
+  If you have a complex animation made up of sequential 
+  tileset frames in a single image,  you can use 
+  `filmStrip` to autmatically create an array of x,y
+  coordinates for each animation frame.
+  `filmStrip` arguments:
+  imageName, frameWidth, frameHeight, spacing
+  (Use the final optional `spacing` argument if there is any default
+  spacing (padding) around tileset frame images)
+  */
+
   var walkingAnimation = g.filmStrip("images/walkcycle.png", 64, 64);
 
-  //Use the film strip to create a sprite
+  //Now intialize the sprite with the film strip to create a sprite
   elf = g.sprite(walkingAnimation);
 
-  //Set the elf's position
+  //The sprite is now loaded up with all 36 frames of the animation
+
+  //Set the elf's x and y position
   elf.position.set(32, 128);
 
-  //Define the elf's animation states. These are names that correspond
-  //to frames and frame sequences in the elf's animation frames.
+  /*
+  Define the elf's animation states. These are names that correspond
+  to frames and frame sequences in the elf's animation frames. It's
+  entirely up to you to decide what you want to call these states.
+  Define animation squences as a 2-value array:
+
+      wallkleft: [startFrame, endFrame]
+
+  The first value is the frame number that the sequence should start
+  at, and the second value is the frame number that the sequence
+  should end at.
+  */
+
   elf.states = {
     up: 0,
     left: 9,
@@ -55,8 +72,11 @@ function setup() {
     walkDown: [19, 26],
     walkRight: [28, 35]
   };
+
+  //Use the `show` method to display the elf's `right` state
+  elf.show(elf.states.right);
  
-  //Create the keyboard objects
+  //Create some keyboard objects
   leftArrow = g.keyboard(37);
   upArrow = g.keyboard(38);
   rightArrow = g.keyboard(39);

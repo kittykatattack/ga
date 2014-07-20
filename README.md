@@ -1,4 +1,7 @@
-** "Ga!" **
+Ga
+===
+
+* "Ga!" *
 *- A baby's exclamation of surprise.*
 
 Ga is a minimalist game engine for making HTML5 games or any other
@@ -13,23 +16,30 @@ requires writing a lot of tedious boilerplate code. You don't' want to
 have to re-write all that stuff for every game you make. But most full-featured HTML5
 game engines, even small and fast ones like
 [Phaser](https://github.com/photonstorm/phaser), are still at least 1
-Megabyte-ish in size.  The goal for Ga was to design a full-featured 2D game engine with a
+Megabyte-ish in size. The goal for Ga was to design a full-featured,
+fun-to-use 2D game engine with a
 compressed file size of no more than 6.5k. 
 
 6.5k?
 
 Yes, it can be done!
 
-Take a look at the `examples` folder to get started. Here's Ga's full
-feature list:
+Take a look at the feature list and the `examples` folder to get started. 
+
+Features
+--------
+
+Here's Ga's full feature list:
 
 - All the most important sprites you need: rectangles, circles, lines,
-  text,
-  image sprites and animated "MovieClip" sprites. You can make any of these
-  sprites with one only line of code.
+  text, image sprites and animated "MovieClip" style sprites. You can make any of these
+  sprites with one only line of code. You can also create your own custom sprite
+  types.
 - A complete scene graph with nested child-parent hierarchies (including
   a `stage`, and `addChild`/`removeChild` methods), local and global coordinates, and depth layers.
-- A game loop with a user-definable `fps` and game state manager.
+- `group` sprites together to make game scenes. 
+- A game loop with a user-definable `fps` and fully customizable and
+  easy-to-use game state manager.
 - Tileset (spritesheet) support using `frame` and `filmStrip` methods to make
   sprites using tileset frames.
 - A keyframe animation and state manager for sprites. Use `show` to
@@ -47,32 +57,37 @@ feature list:
   built-in, and you can easily define your own with the `keyboard`
   method.
 - A built-in universal `pointer` that works with both the mouse and
-  touch.
+  touch. Define as many pointers are you need for multi-touch.
 - Import and play sounds using a built-in WebAudio API sound manager.
   Control sounds with `play`, `pause`, `stop`, `restart`, and
   `playFrom` methods. Change a sound's `volume` and `pan`.
-- Useful tweening functions like `slide`, `fadeIn` and `fadeOut`.
+- Useful built-in tweening functions like `slide`, `fadeIn` and `fadeOut`.
 - A handful of useful convenience functions: `ease`, `follow`,
-  `angle`, `distance`, `rotateAround`, `wait`, `random` and `contain`. Position
+  `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`, `random` and `contain`. Position
   sprites relative to other sprites using `put`.
 - A universal asset loader to pre-load images, fonts and sounds.
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
 - Yes, Ga is mobile friendly!
-- Yes, Ga is only 6k minified and gzipped!
+- Yes, Ga is less than 6k minified and gzipped!
 
-Coming very soon (this will be in new file called plugins.js):
+Coming very soon... 
+-------------------
 
-- A complete 2D geometric collision system.
+(These will be in new file called plugins.js):
+
+- A complete 2D geometric and tile-based collision system.
 - Tiled Editor map support (for both flat 2D and isometric maps).
 - Many more examples including complete game prototypes.
+- Detailed documentation, user guide and tutorials.
 
-Ga's philosophy and technical constraints:
+Ga's philosophy and technical constraints
+-----------------------------------------
 
 - The GA.js core game engine file can't ever be bigger that 6.5k
-  minified and gzipped. This makes it suitable for making games for micro game
-  competitions, like js13k. But, more importantly, this constraint also avoids feature-creep and keeps
+  minified and zipped. This makes it suitable for making games for micro game
+  competitions, like [js13k](http://js13kgames.com). But, more importantly, this constraint also avoids feature-creep and keeps
   the engine lean and focused.
 - The API has to be fun, intuitive and expressive with as little
   boilerplate code as possible. Game designers should be 
@@ -81,8 +96,31 @@ Ga's philosophy and technical constraints:
 - The source code must be easily readable and comment-rich so that
   everyone can learn from it.
 - Any special features, like Tiled Editor support, can be added to the
-  plugins.js file, so that game developers can pick and choose the
-  components they want for specific games without bloating the core engine.
+  plugins.js file, so that game developers can pick and choose  a
+  minimal custom set of components they want for specific games without bloating the core engine.
 
-Ga welcomes any contributions to this project!
+Minifying, crushing and compressing
+-----------------------------------
+
+The Ga repository doesn't include the minified and compressed version
+of the source code, because you should probably optimize that yourself
+to get the smallest possible file size. I recommend
+first minifying the code using with [Google Closure
+Compiler](http://closure-compiler.appspot.com/home). Next, take that
+minified code and run it through
+[JSCrush](http://www.iteral.com/jscrush/). Finally, zip the code with
+gzip. The combination of these three tools will give you the smallest possible file size.
+
+Contributions and Licencing
+---------------------------
+It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
+Please help! 
+Ga welcomes any and all contributions!
+
+Licensing? Ga is *unlicenesed*
+That means its freer than free.
+
+It's like a pebble.
+You can pick it up and throw into the sea.
+
 

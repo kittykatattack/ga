@@ -40,37 +40,65 @@ function setup() {
   messageOne = g.text("One", "16px puzzler", "white");
   messageOne.position.set(40, 52);
 
-  //Make `messageOne` a child of `blackSquare`
-  blackSquare.addChild(messageOne);
+  /*
+  Create a `group` called `sceneOne` and add the
+  `blackSquare` and `messageOne` to it.
+  Groups are empty containers for sprites. You can think of them
+  as a special kind of sprite that doesn't display its own image. a
+  group's job is 
+  just to display the sprites that are inside it. Groups have the
+  all same properties as ordinary sprites, so any changes that you
+  make the parent, such as its size, position or visiblity, will
+  affect the child sprites that it contains. The `width` and
+  `height` of the group is determined by the size and position of
+  the sprites inside it. Whenever you use `addChild` or `remChild` to 
+  add or remove a sprite from a group, the group's `width` and `height`
+  is recalcuated based on what it contains
+  */
+
+  sceneOne = g.group(blackSquare, messageOne);
+  console.log(sceneOne.visible)
+
+  //Alternatively, you could first create an empty group and 
+  //use `addChild` to add the sprites, like this:
+  /*
+  sceneOne = g.group();
+  sceneOne.addChild(blackSquare);
+  sceneOne.addChild(messageOne);
+  */
 
   //Make a blue square and some text.
-  //Add the text as a child of the sqaure and position it
   blueSquare = g.rectangle(128, 128, "cyan");
   messageTwo = g.text("Two", "16px puzzler", "red");
   messageTwo.position.set(40, 52);
-  blueSquare.addChild(messageTwo);
-  blueSquare.position.set(128, 128);
+
+  //Create a `sceneTwo` group and add `blueSquare` and
+  //`messageTwo`
+  sceneTwo = g.group(blueSquare, messageTwo);
+  sceneTwo.x = 128;
+  sceneTwo.y = 128;
 
   //You can change the depth layers of sprites
-  //or groups using the `layer` property
-  //blackSquare.layer = 1;
-  //blueSquare.layer = 2;
+  //or groups or sprites using the `layer` property
+  //sceneOne.layer = 1;
+  //sceneTwo.layer = 2;
 
   //Set up the tween functions
   forward = function() { 
     //Ease from one position to another using `slide`
     //`slide` arguments:
     //sprite, destinationX, destinationY, speed
-    g.slide(blackSquare, 128, 128, 0.05); 
-    g.slide(blueSquare, 0, 0, 0.05); 
+    g.slide(sceneOne, 128, 128, 0.05); 
+    g.slide(sceneTwo, 0, 0, 0.05); 
     //`fadeOut` arguments:
     //sprite, fadeSpeed
-    g.fadeOut(blackSquare, 0.02);
+    g.fadeOut(sceneOne, 0.02);
   };
   reverse = function() {
-    g.slide(blackSquare, 0, 0, 0.05); 
-    g.slide(blueSquare, 128, 128, 0.05); 
-    g.fadeIn(blackSquare, 0.02);
+    g.slide(sceneOne, 0, 0, 0.05); 
+    g.slide(sceneTwo, 128, 128, 0.05); 
+    //Use `fadeIn` to fade in a group or sprite
+    g.fadeIn(sceneOne, 0.02);
   };
   direction = forward;
 
@@ -88,12 +116,12 @@ function play() {
 
  //Reverse the direction after a 2 second pause if the scenes have reached
  //their destinations
- if (Math.floor(blackSquare.x) === 127){
+ if (Math.floor(sceneOne.x) === 127){
    g.wait(2000, function(){
      direction = reverse;
    });
  }
- if (Math.floor(blueSquare.x) === 127){
+ if (Math.floor(sceneTwo.x) === 127){
    g.wait(2000, function(){
      direction = forward;
    });

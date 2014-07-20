@@ -32,6 +32,19 @@ function setup() {
   cat.x = g.canvas.width / 2 - cat.halfWidth;
   cat.y = g.canvas.height / 2 - cat.halfHeight;
 
+  /*
+  The game engine has a built-in `key` object with keyboard bindings
+  to the arrow keys and space bar. Access them like this:
+  `key.leftArray`, `key.rightArrow`, `key.upArrow`, `key.downArrow`,
+  `key.space`. All these keys have `press` and
+  `release` methods that you can define. Here's how to create you own
+  custom key:
+
+      var customKey = g.keyboard(asciiCode);
+
+  Here's how to customize the `press` and `release` methods of the  
+  the pre-defined keys to control an onscreen game character: 
+  */
 
   //Assign key `press` methods
   g.key.leftArrow.press = function() {
@@ -86,20 +99,32 @@ function setup() {
 //The `play` function will run in a loop
 function play() {
 
+  /*
+  Use the `move` convience method to move the cat. This just updates
+  the cat's `x` and `y` position with its velocity (`vx` and `vy`)
+  each frame. If you have a lot of sprites inside an array, you can
+  move them all the same time by supply the array as an argument, like this:
+
+      g.move(arrayOfSprites);
+
+  Or, just move one sprite at a time, like this:
+  */
+
   g.move(cat);
 
-  //You can also move a sprite the good old-fashioned way
+  //Of course you can also move a sprite the good old-fashioned way if
+  //really want to!
   //cat.x += cat.vx;
   //cat.y += cat.vy;
 
   /*
-  Contain the cat inside the canvas
+  Contain the cat inside the canvas.
   'contain` constrains the sprite's movement to a rectangular space
   defined by the `localBounds` property of any object.
   (`localBounds` returns an object with `x`, `y`, `width` and `height`
   properties). 
   If the sprite hits the edges of
-  that space, `contain` returns useful a string that will tell you which
+  that space, `contain` returns a useful a string that will tell you which
   side the sprite hit: "left", "right". "top" or "bottom".
   */
 
