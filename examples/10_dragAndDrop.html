@@ -38,11 +38,11 @@ function setup() {
 
   tiger = g.sprite("images/tiger.png");
   tiger.draggable = true;
-  tiger.position.set(64, 64);
+  tiger.setPosition(64, 64);
 
   hedgehog = g.sprite("images/hedgehog.png");
   hedgehog.draggable = true;
-  hedgehog.position.set(128, 128);
+  hedgehog.setPosition(128, 128);
   
   //Buttons remain interactive even if there's no game loop running.
   //g.state = play;    

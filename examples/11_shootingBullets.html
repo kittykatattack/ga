@@ -19,9 +19,8 @@ This file requires these convenience functions from `plugins.js`:
 var g = GA(256, 256, setup);
 g.start();
 
-
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var box, turret, bullets, message;
 
@@ -102,7 +101,7 @@ function play() {
     //happened on, remove the bullet sprite and filter it out of 
     //the `bullets` array
     if(collision) {
-      message.content = "The bullet hit the " + collision + " side"
+      message.content = "The bullet hit the " + collision; 
       //The `remove` function will remove a sprite for its parent.
       g.remove(bullet); 
       //Remove the bullet from the `bullets` array

@@ -39,7 +39,8 @@ Here's Ga's full feature list:
   a `stage`, and `addChild`/`removeChild` methods), local and global coordinates, and depth layers.
 - `group` sprites together to make game scenes. 
 - A game loop with a user-definable `fps` and fully customizable and
-  drop-dead-simple game state manager.
+  drop-dead-simple game state manager. `pause` and `resume` the game
+  loop at any time.
 - Tileset (spritesheet) support using `frame` and `filmStrip` methods to make
   sprites using tileset frames.
 - A keyframe animation and state manager for sprites. Use `show` to
@@ -57,7 +58,7 @@ Here's Ga's full feature list:
   built-in, and you can easily define your own with the `keyboard`
   method.
 - A built-in universal `pointer` that works with both the mouse and
-  touch. Define as many pointers are you need for multi-touch.
+  touch. Define as many pointers as you need for multi-touch.
 - Import and play sounds using a built-in WebAudio API sound manager.
   Control sounds with `play`, `pause`, `stop`, `restart`, and
   `playFrom` methods. Change a sound's `volume` and `pan`.
@@ -65,23 +66,32 @@ Here's Ga's full feature list:
 - A handful of useful convenience functions: `ease`, `follow`,
   `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`, `random` and `contain`. Position
   sprites relative to other sprites using `put`.
-- A universal asset loader to pre-load images, fonts and sounds.
+- A universal asset loader to pre-load images, fonts and sounds. All
+  popular
+  file formats are supported. You can load new assets into the game at
+  any time.
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
 - A plugins.js file full of extra features. Just copy/paste the code you
-  want to use into your game. Or, if you're not worried about the file size,
-  just link the whole thing.
+  want to use into your game. Or, if you're not worried about the
+  extra size, just link the whole thing; it's pretty tiny anyway.
 - Yes, Ga is mobile friendly!
-- Yes, the core GA.js engine is less than 6k minified and gzipped!
-  It's all you need to start making any game.
+- Yes, the core GA.js engine is less than 6k minified and zipped!
+  It's all you need to start making any any 2D action, puzzle or
+  strategy game. 
+
+And the coolest part? If you were alone on a desert island without only
+a saltwater powered laptop, an unlimited supply of
+coconuts, and a copy of the GA.js you could recreate the entire history of 2D video games,
+from Spacewar to Flappy Bird.
 
 Coming very soon... 
 -------------------
 
 (These will be in plugins.js):
 
-- A complete 2D geometric and tile-based collision system.
+- Complete 2D geometric and tile-based collision functions.
 - Tiled Editor map support (for both flat 2D and isometric maps).
 - Many more examples including complete game prototypes.
 - Detailed documentation, user guide and tutorials.
@@ -115,7 +125,7 @@ first minifying the code using with [Google Closure
 Compiler](http://closure-compiler.appspot.com/home) or
 [UglifyJS2](https://github.com/mishoo/UglifyJS2). Then, zip it.
 
-For more agressive optimization, you could further try running the
+For more aggressive optimization, you could further try running the
 minified code through
 [JSCrush](http://www.iteral.com/jscrush/). 
 
@@ -125,7 +135,7 @@ It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
 Please help! 
 Ga welcomes any and all contributions!
 
-Licensing? Ga is *unlicenesed*
+Licensing? Ga is *unlicenesed*.
 That means its freer than free.
 
 It's like a pebble.

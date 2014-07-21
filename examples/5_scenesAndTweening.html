@@ -48,7 +48,9 @@ function setup() {
   //Make a black square and some text
   blackSquare = g.rectangle(128, 128, "black");
   messageOne = g.text("One", "16px puzzler", "white");
-  messageOne.position.set(40, 52);
+  //Use `setPosition` to set the `x` and `y` 
+  //value with one line of code
+  messageOne.setPosition(40, 52);
 
   /*
   Create a `group` called `sceneOne` and add the
@@ -80,7 +82,7 @@ function setup() {
   //Make a blue square and some text.
   blueSquare = g.rectangle(128, 128, "cyan");
   messageTwo = g.text("Two", "16px puzzler", "red");
-  messageTwo.position.set(40, 52);
+  messageTwo.setPostion(40, 52);
 
   //Create a `sceneTwo` group and add `blueSquare` and
   //`messageTwo`

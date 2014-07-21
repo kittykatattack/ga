@@ -2,13 +2,14 @@
 Welcome's to Ga's source code!
 If you're reading this to find out how to use Ga, you've come to the wrong place. 
 You should take a look inside the `examples` folder. 
-There's a lot of cool stuff inside that example folder, so check it out!
-But if you want to find out how Ga works, this is the place to be!
+There's a lot of cool stuff inside the `examples` folder, so check it out!
+But if you want to find out how Ga works, this is the place to be.
 
 Everything is in one big, hulking gainormous file.
 Why?
-Because One Thing is better than Many Things.
+Because `One Thing` is better than `Many Things`.
 Just use your text editor's search function to find what you're looking for.
+(I'm going be upating this source code with a full table of contents very soon so that you can see the structure and organization at a glance.)
 */
 
 function GA(width, height, setup, assetsToLoad, load) {
@@ -20,7 +21,7 @@ function GA(width, height, setup, assetsToLoad, load) {
   */
 
   //Make the canvas element and add it to the DOM
-  var dips = 1//window.devicePixelRatio;
+  var dips = 1;//window.devicePixelRatio;
   ga.canvas = document.createElement("canvas");
   ga.canvas.setAttribute("width", width * dips);
   ga.canvas.setAttribute("height", height * dips);
@@ -127,7 +128,11 @@ function GA(width, height, setup, assetsToLoad, load) {
         var button = ga.buttons[i];
         button.update(ga.pointer, ga.canvas);
         if (button.state === "over" || button.state === "down") {
-          ga.canvas.style.cursor = "pointer";
+          //If the button (or interactive sprite) isn't the actual
+          //stage itself, change the cursor to a pointer
+          if(!button.stage) {
+            ga.canvas.style.cursor = "pointer";
+          }
         }
       }
     }
@@ -328,23 +333,12 @@ function GA(width, height, setup, assetsToLoad, load) {
         o.removechild(sprites);
       }
     };
-    //A `position` object that lets you set the sprite's `x` and `y`
-    //values using `sprite.position.set(xValue, yValue)`.
-    //`sprite.position.get()` returns an object containing the 
-    //sprite's `x` and `y` values.
-    o.position = {
-      set: function(x, y){
-        o.x = x;
-        o.y = y;
-      },
-      get: function() {
-        var point = {};
-        point.x = o.x;
-        point.y = o.y;
-        return point;
-      }
+    //A `setPosition` convenience function to let you set the
+    //x any y position of a sprite with one line of code
+    o.setPosition = function(x, y) {
+      this.x = x;
+      this.y = y;
     };
-
     //The `put` object contains methods that help you positon a
     //another sprite in and around this sprite.
     //Get a short form reference to the sprite to make the code more
@@ -462,6 +456,16 @@ function GA(width, height, setup, assetsToLoad, load) {
           this.gy = this.parent.gy + value;
         },
         enumerable: true, configurable: true
+      },
+      //`position` getter
+      position: {
+        get: function() {
+          return {x: this.x, y: this.y};
+        },
+        set: function(point){
+          this.x = point.x;
+          this.y = point.y;
+        }
       },
       //`alpha` getter/setter
       alpha: {
@@ -1513,6 +1517,12 @@ function GA(width, height, setup, assetsToLoad, load) {
       centerY: {
         get: function() {
           return this.y;
+        },
+        enumerable: true, configurable: true
+      },
+      position: {
+        get: function() {
+          return {x: this.x, y: this.y};
         },
         enumerable: true, configurable: true
       }
