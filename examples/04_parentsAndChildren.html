@@ -26,17 +26,17 @@ var cat, star, square, message, star, ball, line,
     localMessage, globalMessage, collisionMessage;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   /*
   This example illustrates how you can use `addChild` and
-  `removeChild` to make spirtes the children of other sprites.
+  `removeChild` to make sprites the children of other sprites.
   All sprites have local and global x and y coordinates. The local
   coordinates, `x` and `y`, are relative to the top left corner of the
   sprite's parent. The global coordinates, `gx` and `gy` are relative
   to the top left corner of the `stage`. (The `stage` is the root
-  contaniner that contains all the sprites in the game.)
+  container that contains all the sprites in the game.)
   */
 
   //Make the background white and add a border to the canvas
@@ -94,7 +94,7 @@ function setup() {
   g.stage.put.bottom(globalMessage, 0, -20);
 
   //Add some text to display the side on which
-  //the cat is colliding with the edges of the sqaure
+  //the cat is colliding with the edges of the square
   collisionMessage = g.text("Use the arrow keys to move...", "16px sans-serif", "black");
 
   //Yes, circles and lines work too!

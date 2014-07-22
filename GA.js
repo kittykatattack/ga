@@ -877,8 +877,25 @@ function GA(width, height, setup, assetsToLoad, load) {
     //a line
     o.render = function(ctx) {
       ctx.beginPath();
-      ctx.moveTo(-o.halfWidth, -o.halfHeight);
-      ctx.lineTo(o.halfWidth, o.halfHeight);
+      //Draw the line correctly depending on its orientation
+      //around the 4 quadrants of the origin point
+      if (o.ax >= o.bx) {
+        if(o.ay >= o.by) {
+          ctx.moveTo(-o.halfWidth, -o.halfHeight);
+          ctx.lineTo(o.halfWidth, o.halfHeight);
+        } else {
+          ctx.moveTo(-o.halfWidth, o.halfHeight);
+          ctx.lineTo(o.halfWidth, -o.halfHeight);
+        }
+      } else {
+        if(o.ay >= o.by) {
+          ctx.moveTo(-o.halfWidth, o.halfHeight);
+          ctx.lineTo(o.halfWidth, -o.halfHeight);
+        } else {
+          ctx.moveTo(-o.halfWidth, -o.halfHeight);
+          ctx.lineTo(o.halfWidth, o.halfHeight);
+        }
+      }
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
     };

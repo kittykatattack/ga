@@ -24,8 +24,8 @@ Chapter 1: Utilities
 Chapter 2: Sprite creation tools
 ---------------------------------
 
-`shoot`: A function for making sprites shoot bulllets.
-`grid`: Easily plot a grid of sprites. Returns a container full of sprite `children` 
+`shoot`: A function for making sprites shoot bullets.
+`grid`: Easily plot a grid of sprites. Returns a container full of sprite `children` .
 
 Chapter 3: Collision
 ---------------------
@@ -37,12 +37,13 @@ Chapter 3: Collision
 
 ### Shape collisions
 
-`hitTestPoint`: Returns `true` or `false` if an x/y point is instersecting a rectangle or circle.
+`hitTestPoint`: Returns `true` or `false` if an x/y point is intersecting a rectangle or circle.
 `hitTestCircle`: Returns `true` if any two circular sprites overlap.
-`hitTestRectangle`: Returns `true` if any two rectangular sprites overlap
-`circleCollision`: Makes a moving circle bounce away from a stationaly circle
-
-### 2D geometric collisions
+`hitTestRectangle`: Returns `true` if any two rectangular sprites overlap.
+`circleCollision`: Makes a moving circle bounce away from a stationary circle.
+`movingCircleCollision`: Makes two moving circles bounce apart.
+`multipleCircleCollision`: Bounce apart any two circles that are in the same array.
+`bounceOffSurface`: A helper method that's use internally by these collision functions.
 
 ### 2D tile-based collisions
 
@@ -56,7 +57,7 @@ Chapter 1: Utilities
 
 //### move
 //Move a sprite or an array of sprites by adding its
-//veloctiy to its position
+//velocity to its position
 
 function move(sprites) {
   var s;
@@ -242,7 +243,7 @@ Return a random integer between a minimum and maximum value
 Parameters: 
 a. An integer.
 b. An integer.
-Here's how you can use it to get a random number betwee, 1 and 10:
+Here's how you can use it to get a random number between, 1 and 10:
 
     random(1, 10);
 
@@ -307,7 +308,7 @@ each sprite has been created. Here's the format for creating a grid:
           //A function that returns a sprite
           function() {return g.circle(16, "blue");},
 
-          //A an optional final function that runs some extra code
+          //An optional final function that runs some extra code
           function() {console.log("extra!");}
         );
 */
@@ -340,7 +341,7 @@ function grid(
           y = (Math.floor(i / columns) * cellWidth);
 
       //Use the `makeSprite` method supplied in the constructor
-      //to make the a sprite for the grid cell
+      //to make a sprite for the grid cell
       var sprite = makeSprite();
       container.addChild(sprite);
 
@@ -401,7 +402,7 @@ function outsideBounds(s, bounds, extra){
     collision = "bottom";
   }
 
-  //The the `extra` function runs if there was a collision
+  //The `extra` function runs if there was a collision
   //and `extra` has been defined
   if (collision && extra) extra(collision);
   
@@ -453,7 +454,7 @@ function contain(s, bounds, bounce, extra){
     collision = "bottom";
   }
 
-  //The the `extra` function runs if there was a collision
+  //The `extra` function runs if there was a collision
   //and `extra` has been defined
   if (collision && extra) extra(collision);
   
@@ -469,7 +470,7 @@ function contain(s, bounds, bounce, extra){
 /*
 #### hitTestPoint
 
-Use it to find out if a point is touching a circlular or rectangular sprite.
+Use it to find out if a point is touching a circular or rectangular sprite.
 Parameters: 
 a. An object with `x` and `y` properties.
 b. A sprite object with `x`, `y`, `centerX` and `centerY` properties.
@@ -491,7 +492,7 @@ function hitTestPoint(point, sprite) {
 
   //Rectangle
   if (shape === "rectangle") {
-    //Get the postion of the sprite's edges
+    //Get the position of the sprite's edges
     left = sprite.x;
     right = sprite.x + sprite.width;
     top = sprite.y;
@@ -595,14 +596,14 @@ export function hitTestRectangle(r1, r2) {
 /*
 #### circleCollision
 
-Use this fucntion to prevent a moving circular sprite from overlapping and optionally
+Use this function to prevent a moving circular sprite from overlapping and optionally
 bouncing off a non-moving circular sprite.
 Parameters: 
 a. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
 b. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
 c. Optional: `true` or `false` to indicate whether or not the first sprite
 d. Optional: `true` or `false` to indicate whether or not local or global sprite positions should be used. 
-This defauts to `true` so set it to `false` if you want to use the sprite's local coordinates.
+This defaults to `true` so set it to `false` if you want to use the sprite's local coordinates.
 should bounce off the second sprite.
 The sprites can contain an optional mass property that should be greater than 1.
 
@@ -648,7 +649,7 @@ export function circleCollision(c1, c2, bounce, global) {
     overlap = combinedRadii - magnitude;
 
     //Add some "quantum padding". This adds a tiny amount of space
-    //between the the circles to reduce their surface tension and make
+    //between the circles to reduce their surface tension and make
     //them more slippery. "0.3" is a good place to start but you might
     //need to modify this slightly depending on the exact behaviour
     //you want. Too little and the balls will feel sticky, too much
@@ -688,6 +689,156 @@ export function circleCollision(c1, c2, bounce, global) {
   }
 
   return hit;
+}
+
+/*
+#### movingCircleCollision
+
+Use it to make two moving circles bounce off each other.
+Parameters: 
+a. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
+b. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
+The sprites can contain an optional mass property that should be greater than 1.
+
+*/
+
+export function movingCircleCollision(c1, c2) {
+  var combinedRadii, overlap, xSide, ySide,
+      s = {},
+      p1A = {}, p1B = {}, p2A = {}, p2B = {},
+      hit = false;
+
+  c1.mass = c1.mass || 1;
+  c2.mass = c2.mass || 1;
+
+  //Calculate the vector between the circles’ center points
+  s.vx = c1.centerX - c2.centerX;
+  s.vy = c1.centerY - c2.centerY;
+
+  //Find the distance between the circles by calculating
+  //the vector's magnitude (how long the vector is) 
+  s.magnitude = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
+
+  //Add together the circles' combined half-widths
+  combinedRadii = c1.radius + c2.radius;
+
+  //Figure out if there's a collision
+  if (s.magnitude < combinedRadii) {
+
+    //Yes, a collision is happening
+    hit = true;
+
+    //Find the amount of overlap between the circles 
+    overlap = combinedRadii - s.magnitude;
+
+    //Add some "quantum padding" to the overlap
+    overlap += 0.3;
+
+    //Normalize the vector.
+    //These numbers tell us the direction of the collision
+    s.dx = s.vx / s.magnitude;
+    s.dy = s.vy / s.magnitude;
+
+    //Find the collision vector.
+    //Divide it in half to share between the circles, and make it absolute
+    s.vxHalf = Math.abs(s.dx * overlap / 2);
+    s.vyHalf = Math.abs(s.dy * overlap / 2);
+
+    //Find the side that the collision if occurring on
+    (c1.x > c2.x) ? xSide = 1 : xSide = -1;
+    (c1.y > c2.y) ? ySide = 1 : ySide = -1;
+
+    //Move c1 out of the collision by multiplying
+    //the overlap with the normalized vector and adding it to 
+    //the circle's positions
+    c1.x = c1.x + (s.vxHalf * xSide);
+    c1.y = c1.y + (s.vyHalf * ySide);
+
+    //Move c2 out of the collision
+    c2.x = c2.x + (s.vxHalf * -xSide);
+    c2.y = c2.y + (s.vyHalf * -ySide);
+
+    //1. Calculate the collision surface's properties
+
+    //Find the surface vector's left normal
+    s.lx = s.vy;
+    s.ly = -s.vx;
+
+    //2. Bounce c1 off the surface (s)
+
+    //Find the dot product between c1 and the surface
+    var dp1 = c1.vx * s.dx + c1.vy * s.dy;
+
+    //Project c1's velocity onto the collision surface
+    p1A.x = dp1 * s.dx;
+    p1A.y = dp1 * s.dy;
+
+    //Find the dot product of c1 and the surface's left normal (s.l.x and s.l.y)
+    var dp2 = c1.vx * (s.lx / s.magnitude) + c1.vy * (s.ly / s.magnitude);
+
+    //Project the c1's velocity onto the surface's left normal
+    p1B.x = dp2 * (s.lx / s.magnitude);
+    p1B.y = dp2 * (s.ly / s.magnitude);
+
+    //3. Bounce c2 off the surface (s)
+
+    //Find the dot product between c2 and the surface
+    var dp3 = c2.vx * s.dx + c2.vy * s.dy;
+
+    //Project c2's velocity onto the collision surface
+    p2A.x = dp3 * s.dx;
+    p2A.y = dp3 * s.dy;
+
+    //Find the dot product of c2 and the surface's left normal (s.l.x and s.l.y)
+    var dp4 = c2.vx * (s.lx / s.magnitude) + c2.vy * (s.ly / s.magnitude);
+
+    //Project c2's velocity onto the surface's left normal
+    p2B.x = dp4 * (s.lx / s.magnitude);
+    p2B.y = dp4 * (s.ly / s.magnitude);
+
+    //Calculate the bounce vectors
+    //Bounce c1
+    //using p1B and p2A
+    c1.bounce = {};
+    c1.bounce.x = p1B.x + p2A.x;
+    c1.bounce.y = p1B.y + p2A.y;
+
+    //Bounce c2
+    //using p1A and p2B
+    c2.bounce = {};
+    c2.bounce.x = p1A.x + p2B.x;
+    c2.bounce.y = p1A.y + p2B.y;
+
+    //Add the bounce vector to the circles' velocity
+    //and add mass if the circle has a mass property
+    c1.vx = c1.bounce.x / c1.mass;
+    c1.vy = c1.bounce.y / c1.mass;
+    c2.vx = c2.bounce.x / c2.mass;
+    c2.vy = c2.bounce.y / c2.mass;
+  }
+  return hit;
+}
+
+//#### multipleCircleCollision
+/*
+Checks all the circles in an array for a collision against
+all the other circles in an array, using `movingCircleCollision` (above)
+*/
+
+function multipleCircleCollision(arrayOfCircles) {
+  //marble collisions
+  for (var i = 0; i < arrayOfCircles.length; i++) {
+    //The first marble to use in the collision check 
+    var c1 = arrayOfCircles[i];
+    for (var j = i + 1; j < arrayOfCircles.length; j++) {
+      //The second marble to use in the collision check 
+      var c2 = arrayOfCircles[j];
+      //Check for a collision and bounce the marbles apart if
+      //they collide. Use an optional mass property on the sprite
+      //to affect the bounciness of each marble
+      movingCircleCollision(c1, c2);
+    }
+  }
 }
 
 /*

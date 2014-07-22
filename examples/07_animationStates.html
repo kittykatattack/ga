@@ -22,7 +22,7 @@ g.start();
 var elf, forest, leftArrow, upArrow, downArrow, rightArrow;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   //Make the forest background
@@ -31,7 +31,7 @@ function setup() {
   /*
   If you have a complex animation made up of sequential 
   tileset frames in a single image,  you can use 
-  `filmStrip` to autmatically create an array of x,y
+  `filmStrip` to automatically create an array of x,y
   coordinates for each animation frame.
   `filmStrip` arguments:
   imageName, frameWidth, frameHeight, spacing
@@ -41,7 +41,7 @@ function setup() {
 
   var walkingAnimation = g.filmStrip("images/walkcycle.png", 64, 64);
 
-  //Now intialize the sprite with the film strip to create a sprite
+  //Now initialize the sprite with the film strip to create a sprite
   elf = g.sprite(walkingAnimation);
 
   //The sprite is now loaded up with all 36 frames of the animation
@@ -53,7 +53,7 @@ function setup() {
   Define the elf's animation states. These are names that correspond
   to frames and frame sequences in the elf's animation frames. It's
   entirely up to you to decide what you want to call these states.
-  Define animation squences as a 2-value array:
+  Define animation sequences as a 2-value array:
 
       wallkleft: [startFrame, endFrame]
 

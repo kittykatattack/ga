@@ -1,6 +1,6 @@
 <!doctype html> 
 <meta charset = "utf-8"> 
-<title>Reactive circle collision</title>
+<title>Pegs</title>
 <body>
 <script src="../ga.js"></script>
 <script src="../plugins.js"></script>
@@ -26,7 +26,7 @@ g.start();
 var ball, pegs;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   //Make the background white and add a border to the canvas
@@ -71,18 +71,18 @@ function setup() {
   supply an optional final function that runs any extra code after
   each sprite has been created. Here's the format for creating a grid:
 
-          gridGroup = grid(
+      gridGroup = grid(
 
-            //Set the grid's properties
-            anInstanceOfGa, rows, columns, cellWidth, cellHeight, 
-            areSpirtesCentered?, xOffset, yOffset,
+        //Set the grid's properties
+        anInstanceOfGa, rows, columns, cellWidth, cellHeight, 
+        areSpirtesCentered?, xOffset, yOffset,
 
-            //A function that returns a sprite
-            function() {return g.circle(16, "blue");},
+        //A function that returns a sprite
+        function() {return g.circle(16, "blue");},
 
-            //A an optional final function that runs some extra code
-            function() {console.log("extra!");}
-          );
+        //A optional final function that runs some extra code
+        function() {console.log("extra!");}
+      );
   */
 
   pegs = grid(
@@ -141,7 +141,7 @@ function play() {
     a moving circle and a stationary circle. Set the third argument to
     `false` to prevent the circles from bouncing, and set the fourth
     argument to `false` if you want to use the circle's local x/y
-    coordinates. (The globl coordinates will be used by default)
+    coordinates. (The global coordinates will be used by default)
     `circleCollision` arguments:
     movingCircle, stationaryCircle, bounce?, globalCoordinates?
     */

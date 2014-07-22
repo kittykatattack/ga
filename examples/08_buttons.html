@@ -17,18 +17,18 @@ var g = GA(
 g.start();
 
 //Declare global sprites, objects, and variables
-//that you wnat to access in all the game functions and states
+//that you want to access in all the game functions and states
 
 var button, stateMessage, actionMessage;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   g.backgroundColor = "white";
   g.canvas.style.border = "1px black dashed";
 
-  //Create the buttons's three image states using the `frames` method
+  //Create the button's three image states using the `frames` method
   var buttonFrames = g.frames(
     "images/button.png",       //The tileset image
     [[0,0],[0,96],[0,192]],    //The `x` and `y` positions of frames

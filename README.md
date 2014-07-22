@@ -84,7 +84,7 @@ Here's Ga's full feature list:
 And the coolest part? If you were alone on a desert island without only
 a saltwater powered laptop, an unlimited supply of
 coconuts, and a copy of the GA.js you could recreate the entire history of 2D video games,
-from Spacewar to Flappy Bird.
+from Spacewar! to Flappy Bird.
 
 Coming very soon... 
 -------------------

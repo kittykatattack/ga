@@ -25,7 +25,7 @@ g.start();
 var box, turret, bullets, message;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   //Make the background white and add a border to the canvas
@@ -82,11 +82,11 @@ function setup() {
 //The `play` function will run in a loop
 function play() {
 
-  //Make the box and turrent angle towards the pointer
+  //Make the box and turret angle towards the pointer
   box.rotation = angle(box, g.pointer);
 
   //Id you just want to move all the bullets without removing them
-  //they hit the screen boundaries, you can just use the the help of the `move` method
+  //they hit the screen boundaries, you can just use the help of the `move` method
   //g.move(bullets);
  
   //Remove the bullets if they cross the screen boundaries

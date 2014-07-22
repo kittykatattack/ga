@@ -24,7 +24,7 @@ g.start();
 var cat, message;
 
 //A `setup` function that will run only once.
-//Use it for intilaization tasks
+//Use it for initialization tasks
 function setup() {
 
   //Make the background white and add a border to the canvas
@@ -48,8 +48,8 @@ function setup() {
 
       var customKey = g.keyboard(asciiCode);
 
-  Here's how to customize the `press` and `release` methods of the  
-  the pre-defined keys to control an onscreen game character: 
+  Here's how to customize the `press` and `release` methods of   
+  the pre-defined keys to control an on-screen game character: 
   */
 
   //Assign key `press` methods
@@ -95,7 +95,7 @@ function setup() {
   };
 
   //Add some text to display the side on which
-  //the cat is colliding with the edges of the cavnas
+  //the cat is colliding with the edges of the canvas
   message = g.text("Use the arrow keys to move...", "16px sans-serif", "black");
     
   //Change the state to `play`
@@ -106,7 +106,7 @@ function setup() {
 function play() {
 
   /*
-  Use the `move` convience method to move the cat. This just updates
+  Use the `move` convenience method to move the cat. This just updates
   the cat's `x` and `y` position with its velocity (`vx` and `vy`)
   each frame. If you have a lot of sprites inside an array, you can
   move them all the same time by supply the array as an argument, like this:
