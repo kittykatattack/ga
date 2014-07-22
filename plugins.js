@@ -47,6 +47,11 @@ Chapter 3: Collision
 
 ### 2D tile-based collisions
 
+Chapter 4: Sprite contollers
+----------------------------
+
+`keyControlFourWay`: Assign keyboard keys to make a sprite move at a fixed speed in 4 directions
+
 
 
 */
@@ -902,4 +907,66 @@ function bounceOffSurface(o, s) {
   //with optional mass to dampen the effect
   o.vx = bounce.x / mass;
   o.vy = bounce.y / mass;
+}
+
+/*
+Chapter 4: Sprite controllers
+-----------------------------
+*/
+
+//### keyControlFourWay
+
+function keyControlFourWay(gaInstance, s, speed, up, right, down, left) {
+  ga = gaInstance;
+
+  //Create a `direction` property on the sprite
+  s.direction = "";
+  
+  //Create some keyboard objects
+  leftArrow = ga.keyboard(left);
+  upArrow = ga.keyboard(up);
+  rightArrow = ga.keyboard(right);
+  downArrow = ga.keyboard(down);
+  
+  //Assign key `press` and release methods 
+  leftArrow.press = function() {
+    s.vx = -speed;
+    s.vy = 0;
+    s.direction = "left";
+  };
+  leftArrow.release = function() {
+    if (!rightArrow.isDown && s.vy === 0) {
+      s.vx = 0;
+    }
+  };
+  upArrow.press = function() {
+    s.vy = -speed;
+    s.vx = 0;
+    s.direction = "up";
+  };
+  upArrow.release = function() {
+    if (!downArrow.isDown && s.vx === 0) {
+      s.vy = 0;
+    }
+  };
+  rightArrow.press = function() {
+    s.vx = speed;
+    s.vy = 0;
+    s.direction = "right";
+  };
+  rightArrow.release = function() {
+    if (!leftArrow.isDown && s.vy === 0) {
+      s.vx = 0;
+    }
+  };
+  downArrow.press = function() {
+    s.vy = speed;
+    s.vx = 0;
+    s.direction = "down";
+  };
+  downArrow.release = function() {
+    if (!upArrow.isDown && s.vx === 0) {
+      s.vy = 0;
+    }
+  };
 }

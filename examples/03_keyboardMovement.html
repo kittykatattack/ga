@@ -10,6 +10,7 @@
 This file requires these convenience functions from `plugins.js`:
 `move`
 `contain`
+`keyControlFourWay`
 */
 
 //Create a new GA instance, and start it.
@@ -35,10 +36,29 @@ function setup() {
   cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
 
   //Center the cat
-  cat.x = g.canvas.width / 2 - cat.halfWidth;
-  cat.y = g.canvas.height / 2 - cat.halfHeight;
+  g.stage.put.center(cat);
+
+  //The above code is the equivalent to this:
+  //cat.x = g.canvas.width / 2 - cat.halfWidth;
+  //cat.y = g.canvas.height / 2 - cat.halfHeight;
 
   /*
+  Use the `keyControlFourWay` convenience method to make the cat
+  move up, right, down and left at a speed of 2 pixels per second when
+  the arrow keys are pressed. It also adds a `direction` property to
+  the sprite which is a string that tells you the direction the
+  sprite is moving in: "up", "right", "down" or "left"
+  `keyControlFourWay` arguments:
+  gaInstance, sprite, speed, upCode, rightCode, downCode, leftCode
+  (You can remember the order of the key codes because they're listed
+  clockwise from top.)
+  */
+
+  keyControlFourWay(g, cat, 2, 38, 39, 40, 37);
+
+  /*
+  That's quick and easy, but for most games you'll need a lot more
+  control over how your keys are assigned and what they do.
   The game engine has a built-in `key` object with keyboard bindings
   to the arrow keys and space bar. Access them like this:
   `key.leftArray`, `key.rightArrow`, `key.upArrow`, `key.downArrow`,
@@ -49,19 +69,21 @@ function setup() {
       var customKey = g.keyboard(asciiCode);
 
   Here's how to customize the `press` and `release` methods of   
-  the pre-defined keys to control an on-screen game character: 
+  Ga's pre-defined arrow keys to control an on-screen game character: 
   */
 
+  /*
   //Assign key `press` methods
   g.key.leftArrow.press = function() {
     //Change the cat's velocity when the key is pressed
     cat.vx = -2;
     cat.vy = 0;
+    cat.direction = "left";
   };
   g.key.leftArrow.release = function() {
     //If the left arrow has been released, and the right arrow isn't down,
     //and the cat isn't moving vertically: 
-    //Stop the elf and show its `left` state
+    //Stop the cat
     if (!g.key.rightArrow.isDown && cat.vy === 0) {
       cat.vx = 0;
     }
@@ -69,6 +91,7 @@ function setup() {
   g.key.upArrow.press = function() {
     cat.vy = -2;
     cat.vx = 0;
+    cat.direction = "up";
   };
   g.key.upArrow.release = function() {
     if (!g.key.downArrow.isDown && cat.vx === 0) {
@@ -78,6 +101,7 @@ function setup() {
   g.key.rightArrow.press = function() {
     cat.vx = 2;
     cat.vy = 0;
+    cat.direction = "right";
   };
   g.key.rightArrow.release = function() {
     if (!g.key.leftArrow.isDown && cat.vy === 0) {
@@ -87,15 +111,19 @@ function setup() {
   g.key.downArrow.press = function() {
     cat.vy = 2;
     cat.vx = 0;
+    cat.direction = "down";
   };
   g.key.downArrow.release = function() {
     if (!g.key.upArrow.isDown && cat.vx === 0) {
       cat.vy = 0;
     }
   };
+  */
 
-  //Add some text to display the side on which
-  //the cat is colliding with the edges of the canvas
+  //Have a look at the `animationStates` for details on
+  //assigning your own custom key bindings
+
+  //Add some text to display messages
   message = g.text("Use the arrow keys to move...", "16px sans-serif", "black");
     
   //Change the state to `play`
@@ -122,6 +150,13 @@ function play() {
   //really want to!
   //cat.x += cat.vx;
   //cat.y += cat.vy;
+
+  //If the cat is moving, display its direction
+  if (Math.abs(cat.vx) > 0 || Math.abs(cat.vy) > 0) {
+    message.content = "The cat is going: " + cat.direction;
+  } else {
+    message.content = "Use the arrow keys to move...";
+  }
 
   /*
   Contain the cat inside the canvas.

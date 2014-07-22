@@ -973,13 +973,13 @@ function GA(width, height, setup, assetsToLoad, load) {
   };
 
   //If you have a complex animation in a single image,  you can use 
-  //`filmStrip` to autmatically create an array of x,y
+  //`filmstrip` to autmatically create an array of x,y
   //coordinates for each animation frame.
-  //`filmStrip` arguments:
+  //`filmstrip` arguments:
   //imageName, frameWidth, frameHeight, spacing
   //(The last `spacing` argument should be included if there's any
   //default spacing (padding) around tileset images)
-  ga.filmStrip = function(imageName, frameWidth, frameHeight, spacing){
+  ga.filmstrip = function(imageName, frameWidth, frameHeight, spacing){
     var image = g.assets[imageName],
         positions = [],
         //Find out how many columns and rows there are in the image
