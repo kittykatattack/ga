@@ -41,7 +41,7 @@ Here's Ga's full feature list:
 - A game loop with a user-definable `fps` and fully customizable and
   drop-dead-simple game state manager. `pause` and `resume` the game
   loop at any time.
-- Tileset (spritesheet) support using `frame` and `filmStrip` methods to make
+- Tileset (spritesheet) support using `frame` and `filmstrip` methods to make
   sprites using tileset frames.
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
@@ -81,7 +81,7 @@ Here's Ga's full feature list:
   It's all you need to start making any any 2D action, puzzle or
   strategy game. 
 
-And the coolest part? If you were alone on a desert island without only
+And the coolest part? If you were alone on a desert island with only
 a saltwater powered laptop, an unlimited supply of
 coconuts, and a copy of the GA.js you could recreate the entire history of 2D video games,
 from Spacewar! to Flappy Bird.

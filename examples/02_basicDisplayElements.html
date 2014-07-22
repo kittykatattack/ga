@@ -15,7 +15,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
-var g = GA(
+var g = ga(
   256, 256, setup, 
   [
     "images/platforms.png",
@@ -150,11 +150,11 @@ function play() {
 
   //Make the star ease towards the pointer.
   //`ease` arguments: follower, leader, speed
-  ease(star, g.pointer, 0.1);
+  g.ease(star, g.pointer, 0.1);
 
   //Make the rocket rotate towards the star
   //`angle` returns the angle between two sprites, in radians.
-  rocket.rotation = angle(rocket, star);
+  rocket.rotation = g.angle(rocket, star);
 
   //Make the star invisible if the pointer is "over"
   //the ball or being pressed "down" on it
@@ -176,14 +176,14 @@ function play() {
   //`rotatePoint` arguments:
   //pointX, pointY, rotationRadius, angleOfRotation
   line.angleA += 0.02;
-  var rotatingA = rotatePoint(162, 52, 10, line.angleA);
+  var rotatingA = g.rotatePoint(162, 52, 10, line.angleA);
   line.ax = rotatingA.x;
   line.ay = rotatingA.y;
 
   //Make the line's `bx` and `by` point rotate counter
   //clockwise around point 222, 94
   line.angleB -= 0.03;
-  var rotatingB = rotatePoint(220, 94, 10, line.angleB);
+  var rotatingB = g.rotatePoint(220, 94, 10, line.angleB);
   line.bx = rotatingB.x;
   line.by = rotatingB.y;
 }

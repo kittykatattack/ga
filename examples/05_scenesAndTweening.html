@@ -17,7 +17,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
-var g = GA(
+var g = ga(
   256, 256, setup, 
   [
     "fonts/puzzler.otf"
@@ -69,7 +69,6 @@ function setup() {
   */
 
   sceneOne = g.group(blackSquare, messageOne);
-  console.log(sceneOne.visible)
 
   //Alternatively, you could first create an empty group and 
   //use `addChild` to add the sprites, like this:
@@ -82,7 +81,7 @@ function setup() {
   //Make a blue square and some text.
   blueSquare = g.rectangle(128, 128, "cyan");
   messageTwo = g.text("Two", "16px puzzler", "red");
-  messageTwo.setPostion(40, 52);
+  messageTwo.setPosition(40, 52);
 
   //Create a `sceneTwo` group and add `blueSquare` and
   //`messageTwo`
@@ -100,22 +99,22 @@ function setup() {
     //Ease from one position to another using `slide`
     //`slide` arguments:
     //sprite, destinationX, destinationY, speed
-    slide(sceneOne, 128, 128, 0.05); 
-    slide(sceneTwo, 0, 0, 0.05); 
+    g.slide(sceneOne, 128, 128, 0.05); 
+    g.slide(sceneTwo, 0, 0, 0.05); 
     //`fadeOut` arguments:
     //sprite, fadeSpeed
-    fadeOut(sceneOne, 0.02);
+    g.fadeOut(sceneOne, 0.02);
   };
   reverse = function() {
-    slide(sceneOne, 0, 0, 0.05); 
-    slide(sceneTwo, 128, 128, 0.05); 
+    g.slide(sceneOne, 0, 0, 0.05); 
+    g.slide(sceneTwo, 128, 128, 0.05); 
     //Use `fadeIn` to fade in a group or sprite
-    fadeIn(sceneOne, 0.02);
+    g.fadeIn(sceneOne, 0.02);
   };
   direction = forward;
 
   //Wait 2 seconds then change the state to `play`
-  wait(2000, function(){
+  g.wait(2000, function(){
     g.state = play;    
   });
 }
@@ -129,12 +128,12 @@ function play() {
  //Reverse the direction after a 2 second pause if the scenes have reached
  //their destinations
  if (Math.floor(sceneOne.x) === 127){
-   wait(2000, function(){
+   g.wait(2000, function(){
      direction = reverse;
    });
  }
  if (Math.floor(sceneTwo.x) === 127){
-   wait(2000, function(){
+   g.wait(2000, function(){
      direction = forward;
    });
  }

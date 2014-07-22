@@ -16,7 +16,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 
-var g = GA(256, 256, setup);
+var g = ga(256, 256, setup);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -54,7 +54,7 @@ function setup() {
   //from the turret
   g.stage.interactive = true;
   g.stage.press = function() {
-    shoot(
+    g.shoot(
       box,           //The shooter
       box.rotation,  //The angle at which to shoot
       32,            //The bullet's offset from the center
@@ -83,7 +83,7 @@ function setup() {
 function play() {
 
   //Make the box and turret angle towards the pointer
-  box.rotation = angle(box, g.pointer);
+  box.rotation = g.angle(box, g.pointer);
 
   //Id you just want to move all the bullets without removing them
   //they hit the screen boundaries, you can just use the help of the `move` method
@@ -94,9 +94,9 @@ function play() {
   //the bullet easily
   bullets = bullets.filter(function(bullet) {
     //Move the bullet
-    move(bullet);
+    g.move(bullet);
     //Check for a collision with the stage boundary
-    var collision = outsideBounds(bullet, g.stage.localBounds);
+    var collision = g.outsideBounds(bullet, g.stage.localBounds);
     //If there's a collision, display the side that the collision
     //happened on, remove the bullet sprite and filter it out of 
     //the `bullets` array

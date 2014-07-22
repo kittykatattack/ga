@@ -12,7 +12,13 @@ Just use your text editor's search function to find what you're looking for.
 (I'm going be upating this source code with a full table of contents very soon so that you can see the structure and organization at a glance.)
 */
 
-function GA(width, height, setup, assetsToLoad, load) {
+var GA = GA || {};
+
+function ga(width, height, setup, assetsToLoad, load){
+  return GA.create(width, height, setup, assetsToLoad, load);
+}
+
+GA.create = function(width, height, setup, assetsToLoad, load) {
   var ga = {};
 
   /*
@@ -84,7 +90,9 @@ function GA(width, height, setup, assetsToLoad, load) {
   //maximum frame rate permitted by `requestAnimationFrame`
   //Use the `fps` getter/setter to modify ga value;
   ga._fps = undefined;
-  
+
+  //Initialize the plugins, if they exist 
+  if (GA.plugins !== undefined) GA.plugins(ga);
 
   /*
   Core game engine methods
@@ -336,8 +344,8 @@ function GA(width, height, setup, assetsToLoad, load) {
     //A `setPosition` convenience function to let you set the
     //x any y position of a sprite with one line of code
     o.setPosition = function(x, y) {
-      this.x = x;
-      this.y = y;
+      o.x = x;
+      o.y = y;
     };
     //The `put` object contains methods that help you positon a
     //another sprite in and around this sprite.
@@ -1962,5 +1970,5 @@ function GA(width, height, setup, assetsToLoad, load) {
 
   //Return `ga`
   return ga;
-} 
+}; 
 

@@ -16,7 +16,7 @@ This file requires these convenience functions from `plugins.js`:
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
 
-var g = GA(256, 256, setup, ["images/platforms.png"]);
+var g = ga(256, 256, setup, ["images/platforms.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -57,6 +57,9 @@ function setup() {
   //Make the cat sprite from a tileset
   cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
   cat.shadow = true;
+
+  //Control the cat with the keyboard
+  g.keyControlFourWay(cat, 2, 38, 39, 40, 37);
 
   //Add the cat as a child of the square, and put it at the bottom of
   //the square
@@ -115,49 +118,6 @@ function setup() {
   //be similarly affected
   //square.alpha = 0.2;
 
-  //Keyboard control
-  //Assign key `press` methods
-  g.key.leftArrow.press = function() {
-    //Change the cat's velocity when the key is pressed
-    cat.vx = -2;
-    cat.vy = 0;
-  };
-  g.key.leftArrow.release = function() {
-    //If the left arrow has been released, and the right arrow isn't down,
-    //and the cat isn't moving vertically: 
-    //Stop the elf and show its `left` state
-    if (!g.key.rightArrow.isDown && cat.vy === 0) {
-      cat.vx = 0;
-    }
-  };
-  g.key.upArrow.press = function() {
-    cat.vy = -2;
-    cat.vx = 0;
-  };
-  g.key.upArrow.release = function() {
-    if (!g.key.downArrow.isDown && cat.vx === 0) {
-      cat.vy = 0;
-    }
-  };
-  g.key.rightArrow.press = function() {
-    cat.vx = 2;
-    cat.vy = 0;
-  };
-  g.key.rightArrow.release = function() {
-    if (!g.key.leftArrow.isDown && cat.vy === 0) {
-      cat.vx = 0;
-    }
-  };
-  g.key.downArrow.press = function() {
-    cat.vy = 2;
-    cat.vx = 0;
-  };
-  g.key.downArrow.release = function() {
-    if (!g.key.upArrow.isDown && cat.vx === 0) {
-      cat.vy = 0;
-    }
-  };
-
   //Change the state to `play`
   g.state = play;  
 }
@@ -166,7 +126,7 @@ function setup() {
 function play() {
  
   //Move the cat
-  move(cat);
+  g.move(cat);
 
   //You can also move a sprite the good old-fashioned way
   //cat.x += cat.vx;
@@ -190,7 +150,7 @@ function play() {
     + "cat.gy: " + cat.gy;
 
   //Contain the cat inside the square's boundary
-  var catHitsEdges = contain(cat, square.localBounds);
+  var catHitsEdges = g.contain(cat, square.localBounds);
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {
@@ -203,7 +163,7 @@ function play() {
 
   //Update the star's angle and make it rotate around the cat
   star.angle += 0.05;
-  rotateAround(star, cat, 32, star.angle);
+  g.rotateAround(star, cat, 32, star.angle);
 }
 
 

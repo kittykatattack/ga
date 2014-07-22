@@ -13,7 +13,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 
-var g = GA(256, 256, setup);
+var g = ga(256, 256, setup);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -64,7 +64,7 @@ function play() {
   //if there's a collision and `false` if there isn't
   //`hitTestRectangle` arguments:
   //spriteOne, spriteTwo
-  var collision = hitTestRectangle(blue, red);
+  var collision = g.hitTestRectangle(blue, red);
   
   //Change the message if there's a collision between the rectangles
   if(collision) {

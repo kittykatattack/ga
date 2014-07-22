@@ -16,7 +16,7 @@ This file requires these convenience functions from `plugins.js`:
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
 
-var g = GA(256, 256, setup, ["images/platforms.png"]);
+var g = ga(256, 256, setup, ["images/platforms.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -54,7 +54,7 @@ function setup() {
   clockwise from top.)
   */
 
-  keyControlFourWay(g, cat, 2, 38, 39, 40, 37);
+  g.keyControlFourWay(g, cat, 2, 38, 39, 40, 37);
 
   /*
   That's quick and easy, but for most games you'll need a lot more
@@ -144,7 +144,7 @@ function play() {
   Or, just move one sprite at a time, like this:
   */
 
-  move(cat);
+  g.move(cat);
 
   //Of course you can also move a sprite the good old-fashioned way if
   //really want to!
@@ -169,7 +169,7 @@ function play() {
   side the sprite hit: "left", "right". "top" or "bottom".
   */
 
-  var catHitsEdges = contain(cat, g.stage.localBounds);
+  var catHitsEdges = g.contain(cat, g.stage.localBounds);
 
   //Display the edge of canvas that the cat hit
   if (catHitsEdges) {

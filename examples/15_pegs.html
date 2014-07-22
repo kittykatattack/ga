@@ -17,7 +17,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 
-var g = GA(256, 256, setup);
+var g = ga(256, 256, setup);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -34,17 +34,17 @@ function setup() {
   g.canvas.style.border = "1px black dashed";
 
   //Figure out a random diameter for the falling ball
-  var randomDiameter = random(8, 32);
+  var randomDiameter = g.random(8, 32);
  
   //Create the ball using the random diameter
   ball = g.circle(randomDiameter, "red");
 
   //Position the ball randomly somewhere across the top of the canvas
-  ball.x = random(0, g.canvas.width - ball.diameter);
+  ball.x = g.random(0, g.canvas.width - ball.diameter);
   ball.y = 0;
 
   //Set the ball's velocity
-  ball.vx = random(-3, 6);
+  ball.vx = g.random(-3, 6);
   ball.vy = 0;
 
   //Set the ball's gravity, friction and mass
@@ -74,7 +74,7 @@ function setup() {
       gridGroup = grid(
 
         //Set the grid's properties
-        anInstanceOfGa, rows, columns, cellWidth, cellHeight, 
+        rows, columns, cellWidth, cellHeight, 
         areSpirtesCentered?, xOffset, yOffset,
 
         //A function that returns a sprite
@@ -85,14 +85,14 @@ function setup() {
       );
   */
 
-  pegs = grid(
+  pegs = g.grid(
     //Set the grid's properties
-    g, 5, 4, 48, 48, 
+    5, 4, 48, 48, 
     true, 0, 0,
     //A function that describes how to make each peg in the grid
     function() {
-      var peg = g.circle(random(8, 32), "blue");
-      peg.fillStyle = colors[random(0, 4)];
+      var peg = g.circle(g.random(8, 32), "blue");
+      peg.fillStyle = colors[g.random(0, 4)];
       return peg;
     },
     //Run any extra code after each peg is made, if you want to
@@ -117,12 +117,12 @@ function play() {
 
   //Move the ball by applying the new calculated velocity
   //to the ball's x and y position
-  move(ball);
+  g.move(ball);
 
   //Check for a collision with the ball and the stage's boundary, and
   //make the ball bounce by setting setting the last argument 
   //in the `contain` method to `true`
-  var stageCollision = contain(ball, g.stage.localBounds, true);
+  var stageCollision = g.contain(ball, g.stage.localBounds, true);
 
   //If the ball hit the bottom of the stage, add some so
   //that the ball gradually rolls to a stop
@@ -145,7 +145,7 @@ function play() {
     `circleCollision` arguments:
     movingCircle, stationaryCircle, bounce?, globalCoordinates?
     */
-    circleCollision(ball, peg);
+    g.circleCollision(ball, peg);
   });
 }
  

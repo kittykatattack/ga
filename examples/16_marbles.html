@@ -20,7 +20,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 
-var g = GA(256, 256, setup, ["images/marbles.png"]);
+var g = ga(256, 256, setup, ["images/marbles.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -49,7 +49,7 @@ function setup() {
       gridGroup = grid(
 
         //Set the grid's properties
-        anInstanceOfGa, rows, columns, cellWidth, cellHeight, 
+        rows, columns, cellWidth, cellHeight, 
         areSpirtesCentered?, xOffset, yOffset,
 
         //A function that returns a sprite
@@ -60,19 +60,19 @@ function setup() {
       );
 
   */
-  marbles = grid(
+  marbles = g.grid(
     //Set the grid's properties
-    g, 5, 5, 48, 48, 
+    5, 5, 48, 48, 
     true, 0, 0,
     //A function that describes how to make each peg in the grid
     function() {
       var frames = g.filmstrip("images/marbles.png", 96, 96)
       var marble = g.sprite(frames);
-      marble.show(random(0, 5));
+      marble.show(g.random(0, 5));
       marble.circular = true;
-      marble.diameter = random(8, 32);
-      marble.vx = random(-10, 10);
-      marble.vy = random(-10, 10);
+      marble.diameter = g.random(8, 32);
+      marble.vx = g.random(-10, 10);
+      marble.vy = g.random(-10, 10);
       marble.frictionX = 0.99;
       marble.frictionY = 0.99;
       marble.mass = 0.75 + (marble.diameter / 32);
@@ -113,9 +113,9 @@ function play() {
     sling.visible = false;
     if (capturedMarble !== null) {
       //Find out how long the sling is
-      sling.length = distance(capturedMarble, g.pointer);
+      sling.length = g.distance(capturedMarble, g.pointer);
       //Get the angle between the center of the marble and the pointer
-      sling.angle = angle(g.pointer, capturedMarble);
+      sling.angle = g.angle(g.pointer, capturedMarble);
       //Shoot the marble away from the pointer with a velocity
       //proportional to the sling's length
       capturedMarble.vx = Math.cos(sling.angle) * sling.length / 5;
@@ -128,7 +128,7 @@ function play() {
   marbles.children.forEach(function(marble) {
     //Check for a collision with the pointer and marble
     if (g.pointer.isDown && capturedMarble === null) {
-      if (hitTestPoint(g.pointer.position, marble)) {
+      if (g.hitTestPoint(g.pointer.position, marble)) {
         //If there's a collision, capture the marble
         capturedMarble = marble;
         capturedMarble.vx = 0;
@@ -142,16 +142,16 @@ function play() {
 
     //Move the marble by applying the new calculated velocity
     //to the marble's x and y position
-    move(marble);
+    g.move(marble);
 
     //Contain the marble inside the stage and make it bounce
     //off the edges
-    contain(marble, g.stage.localBounds, true);
+    g.contain(marble, g.stage.localBounds, true);
   });
 
   //Make each circle in the `marbles.children` array
   //bounce off another circle in the same array
-  multipleCircleCollision(marbles.children);
+  g.multipleCircleCollision(marbles.children);
 
   /*
   //You can alternatively check for for multiple circle collisions
@@ -166,7 +166,7 @@ function play() {
       //Check for a collision and bounce the marbles apart if
       //they collide. Use an optional mass property on the sprite
       //to affect the bounciness of each marble
-      movingCircleCollision(c1, c2);
+      g.movingCircleCollision(c1, c2);
     }
   }
   */
