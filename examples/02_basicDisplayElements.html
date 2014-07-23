@@ -21,7 +21,8 @@ var g = ga(
     "images/platforms.png",
     "images/rocket.png",
     "fonts/puzzler.otf",
-    "fonts/PetMe64.ttf"
+    "fonts/PetMe64.ttf",
+    "images/animals.json"
   ]
 );
 g.start();
@@ -29,13 +30,14 @@ g.start();
 //Declare global sprites, objects, and variables
 //that you want to access in all the game functions and states
 
-var box, ball, line, message, 
+var box, ball, line, message, cat, 
     pathA, pathB, rocket, star,
     pointerDisplay;
 
 //A `setup` function that will run only once.
 //Use it for initialization tasks
 function setup() {
+
 
   //Set an optional fps for the game.
   //The frame rate will default to 60 fps is you don't set it
@@ -46,6 +48,7 @@ function setup() {
 
   //Optionally change the background color
   //g.backgroundColor = "DarkGray";
+
 
   //`rectangle` arguments: 
   //width, height, fillColor, strokeColor, lineWidth, x, y
@@ -63,8 +66,6 @@ function setup() {
   message.x = 80;
   message.y = 10;
 
-  //`sprite` arguments:
-  //source, sourceX, sourceY, sourceWidth, sourceHeight
   //Create a sprite from a single image by supplying the 
   //image name as the first argument
   rocket = g.sprite("images/rocket.png");
@@ -88,7 +89,40 @@ function setup() {
   rocket.width = 50;
   rocket.height = 50;
 
-  //You can make a sprite from a tileset image by
+  /*
+  You can make a sprite using a frame JSON tileset file in 
+  Texture Packer format. Just load the JSON file that contains the
+  frame and supply the frame name in the sprite's argument. (The
+  tileset image file will be loaded automatically when the JSON file
+  loads)
+  */
+
+  tiger = g.sprite("tiger.png");
+
+  //Use `setPosition` to set the sprite's `x` and `y` values 
+  //with one line of code
+  tiger.setPosition(10, 190);
+
+  //Use `scaleX` and `scaleY` to scale a sprite proportionately.
+  tiger.scaleX = 0.3;
+  tiger.scaleY = 0.3;
+
+  /*
+  You can access the tiger's tileset image like this:
+  
+      var tileset = g.image("images/animals.png");
+  
+  You can access the JSON data file like this:
+  
+      var json = g.json("images/animals.json");
+
+  You can access the specific JSON data for a tileset
+  frame like this:
+  
+      var frameData = g.json("tiger.png"));
+  */
+
+  //You can also make a sprite from a tileset image by
   //supplying a `frame` object as an argument to the sprite. 
   //`frame` arguments:
   //sourceImage, sourceX, sourceY, sourceWidth, sourceHeight
@@ -138,6 +172,8 @@ function setup() {
   //to help us do this. both are initialized to 0
   line.angleA = 0;
   line.angleB = 0;
+
+
 
   //Change the game state to `play`
   g.state = play;  

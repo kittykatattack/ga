@@ -967,7 +967,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
   
   //The `frames` function returns and object that defines
-  //in the position and size of a sub-image in a tilseet
+  //the position and size of a sub-image in a tilseet
   ga.frames = function(source, arrayOfPositions, width, height) {
     var o = {};
     o.image = source;
@@ -992,10 +992,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         rows = image.height / frameHeight,
         //Find the total number of frames
         numberOfFrames = columns * rows;    
-
-    if(spacing) {
-    
-    }
 
     for(var i = 0; i < numberOfFrames; i++) {
       //Find the correct row and column for each frame
@@ -1027,22 +1023,51 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.loop = true;
     o._currentFrame = 0;
     if (source === undefined) throw new Error("Sprites require a source");
-    //If the source is just an ordinary image object, use it to create the
+    //If the source is just an ordinary string, use it to create the
     //sprite
     if (!source.image) {
-      o.source = ga.assets[source];
-      o.sourceX =  0;
-      o.sourceY =  0;
-      o.width = o.source.width;
-      o.height = o.source.height;
-      o.sourceWidth = o.source.width;
-      o.sourceHeight = o.source.height;
+      //If the source isn't an array, then it must be a single image
+      if(!(source instanceof Array)) {
+        //Is the string refering to tileset frame from a Texture Packer JSON
+        //file, or is refering to an image object? Let's find out
+        if (ga.assets[source] instanceof Image) {
+          //It's an ordinary Image object
+          o.source = ga.assets[source];
+          o.sourceX =  0;
+          o.sourceY =  0;
+          o.width = o.source.width;
+          o.height = o.source.height;
+          o.sourceWidth = o.source.width;
+          o.sourceHeight = o.source.height;
+        }
+        //It's not an Image object, so it must be a tileset frame
+        else {
+          o.tilesetFrame = ga.assets[source];
+          o.source = o.tilesetFrame.source;
+          o.sourceX = o.tilesetFrame.frame.x;
+          o.sourceY = o.tilesetFrame.frame.y;
+          o.width = o.tilesetFrame.frame.w;
+          o.height = o.tilesetFrame.frame.h;
+          o.sourceWidth = o.tilesetFrame.frame.w;
+          o.sourceHeight = o.tilesetFrame.frame.h;
+        }
+      //The source is an array of frames on a texture atlas tileset
+      } else {
+        o.frames = source;
+        o.source = ga.assets[source[0]].source;
+        o.sourceX = ga.assets[source[0]].frame.x;
+        o.sourceY = ga.assets[source[0]].frame.y;
+        o.width = ga.assets[source[0]].frame.w;
+        o.height = ga.assets[source[0]].frame.h;
+        o.sourceWidth = ga.assets[source[0]].frame.w;
+        o.sourceHeight = ga.assets[source[0]].frame.h;
+      }
     }
     //If the source contains an `image` sub-property, this must
     //be a frame object that's defining the rectangular area of an inner sub-image
     //Use that sub-image to make the sprite. If it doesn't contain a
     //`data` property, then it must be a single frame
-    if(source.image && !source.data) {
+    else if(source.image && !source.data) {
       //Throw an error if the source is not an image file
       if (!(ga.assets[source.image] instanceof Image)) {
         throw new Error(source.image + "is not an image file");
@@ -1057,7 +1082,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
     //If the source contains an `image` sub-property
     //and a `data` property, then it contains multiple frames
-    if(source.image && source.data) {
+    else if(source.image && source.data) {
       o.source = ga.assets[source.image];
       o.frames = source.data;
       //Set the sprite to the first frame
@@ -1067,11 +1092,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.height = source.height;
       o.sourceWidth = source.width;
       o.sourceHeight = source.height;
+        console.log("test")
+        console.log(o.frames)
     }
+    //Add a `gotoAndStop` method to go to a specific frame
     o.gotoAndStop = function(frameNumber) {
       if (o.frames.length > 0) {
-        o.sourceX = o.frames[frameNumber][0];
-        o.sourceY = o.frames[frameNumber][1];
+        //If each frame is an array, then the frames were made from an
+        //ordinary Image object using the the `frames` method.
+        if (o.frames[0] instanceof Array) {
+          o.sourceX = o.frames[frameNumber][0];
+          o.sourceY = o.frames[frameNumber][1];
+        }
+        //If each frame isn't an array, then the frame must be a texture atlas id name.
+        //In that case, get the source position from the frame object.
+        else {
+          o.sourceX = g.assets[o.frames[frameNumber]].frame.x;
+          o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
+        }
         //Set the `_currentFrame` value
         o._currentFrame = frameNumber;
       } else {
@@ -1213,6 +1251,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //A convenience method that lets you access images by their file names
   ga.image = function(imageFileName){
     return ga.assets[imageFileName];
+  };
+  
+  //A convenience method that lets you access JSON files by their file names
+  ga.json = function(jsonFileName){
+    return ga.assets[jsonFileName];
   };
 
   //A state manager and keyframe animation player for
@@ -1428,6 +1471,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     imageExtensions: ["png", "jpg", "gif"],
     fontExtensions: ["ttf", "otf", "ttc", "woff"],
     audioExtensions: ["mp3", "ogg", "wav", "webm"],
+    jsonExtensions: ["json"],
     
     //The callback function that should run when all assets have loaded.
     //Assign this when you load the fonts, like this: `assets.whenLoaded = makeSprites;`
@@ -1501,12 +1545,75 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //we can access it like this: `assets["sounds/sound.mp3"]`
           self[soundSprite.name] = soundSprite;
         }
+
+                //Load json files that have file extensions that match 
+        //the jsonExtensions array 
+        else if (self.jsonExtensions.indexOf(extension) !== -1) {
+          //Create a new xhr object and an object to store the file
+          var xhr = new XMLHttpRequest();
+          var file = {};
+          //Use xhr to load the JSON file
+          xhr.open("GET", source, true);
+          xhr.addEventListener("readystatechange", function() {
+            //Check to make sure the file has loaded properly
+            if (xhr.status === 200 && xhr.readyState === 4) {
+              //Convert the JSON data file into an ordinary object
+              file = JSON.parse(xhr.responseText);
+              //Get the file name
+              file.name = source;
+              //Assign the file as a property of the assets object so
+              //we can access it like this: `assets["file.json"]`
+              self[file.name] = file;
+              //Texture Packer support.
+              //If the file has a `frames` property then its in Texture
+              //Packer format
+              if (file.frames) {
+                //Create the tileset frames
+                self.createTilesetFrames(file, source);
+              } else {
+                //Alert the load handler that the file has loaded
+                self.loadHandler();
+              }
+            }
+          });
+          //Send the request to load the file
+          xhr.send();
+        }
         
         //Display a message if a file type isn't recognized
         else {
           console.log("File type not recognized: " + source);
         }
       });
+    },
+
+    createTilesetFrames: function(json, source) {
+      var self = this;
+      //Get the image's file path
+      var baseUrl = source.replace(/[^\/]*$/, '');
+      var image = new Image();
+      image.addEventListener("load", loadImage, false);
+      image.src = baseUrl + json.meta.image;
+      function loadImage() {
+        //Assign the image as a property of the assets object so
+        //we can access it like this: `assets["images/imageName.png"]`
+        self[baseUrl+json.meta.image] = image;
+        //Loop through all the frames
+        Object.keys(json.frames).forEach(function(tilesetImage){
+          //console.log(json.frames[image].frame);
+          //The `frame` object contains all the size and position
+          //data.
+          //Add the frame to the asset object so that we
+          //can access it like this: `assets["frameName.png"]`
+          self[tilesetImage] = json.frames[tilesetImage];
+          //Get a reference to the source so that it will be easy for
+          //us to access it later
+          self[tilesetImage].source = image;
+          //console.log(self[tilesetImage].source)
+        });
+        //Alert the load handler that the file has loaded
+        self.loadHandler();
+      }
     },
     
     //The loadHandler will be called each time an asset finishes loading

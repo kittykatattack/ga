@@ -1,6 +1,6 @@
 <!doctype html> 
 <meta charset = "utf-8"> 
-<title>Keyframe animation</title>
+<title>Texture atlas animation</title>
 <body>
 <script src="../ga.js"></script>
 <script src="../plugins.js"></script>
@@ -16,7 +16,7 @@ This file requires these convenience functions from `plugins.js`:
 var g = ga(
   256, 256, setup, 
   [
-    "images/buttonFairy.png"
+    "images/fairy.json"
   ]
 );
 g.start();
@@ -32,32 +32,32 @@ function setup() {
 
   g.backgroundColor = "white";
   g.canvas.style.border = "1px black dashed";
-
+ 
   /*
-  Ga has two main way that you can make sprites with animation frames.
-  The first, lower level way, is to use the `frames` method. `frames`
-  lets you list an array of x/y positions on an image that refer to
-  each sub-image that you wan to use. Here's how to use it:
-  */   
+  An easier way to create animated sprites is to use a texture atlas,
+  made with a software tool like Texture Packer. Save the PNG and JSON 
+  files that Texture Packer
+  produces in the same "images" folder. Then load the JSON file when you
+  initialize Ga, as you can see at the beginning of this file. Next, create an array that
+  lists the frame id names of all the images from the texture atlas
+  that you want your sprite to contain. 
+  */
 
-  //Create the fairy's animation frames using the `frames` method
-  var fairyFrames = g.frames(
-    "images/buttonFairy.png", //The tileset image
-    [[0,0],[48,0],[96,0]],    //The `x` and `y` positions of frames
-    48, 32                    //The `width` and `height` of each frame
-  );
+  var fairyFrames = ["0.png", "1.png", "2.png"];
 
-  //Make a sprite using the frames
+  //Finally, initialize the sprite using the array of frames.
+
   fairy = g.sprite(fairyFrames);
 
-  //The easier (and maybe better) way to make a sprite with multiple frames is to use
-  //a texture atlas. See the next example file for details on how to
-  //this.
+  //That's a lot easier than the previous example!
+  //You can now control the animation just like you did in the
+  //previous example
 
   //Use the `play` method to play the fairy's frames.
   //The animation will loop unless you set the sprite's `loop`
   //property to `false`. Change the frame-rate with the
   //`fps` property (it's default value is `12`)
+
   fairy.fps = 24;
   fairy.play();
 

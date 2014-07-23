@@ -43,6 +43,7 @@ Here's Ga's full feature list:
   loop at any time.
 - Tileset (spritesheet) support using `frame` and `filmstrip` methods to make
   sprites using tileset frames.
+- Built-in texture atlas support for the popular Texture Packer format.
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
@@ -66,9 +67,8 @@ Here's Ga's full feature list:
 - A handful of useful convenience functions: `ease`, `follow`,
   `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`, `random` and `contain`. Position
   sprites relative to other sprites using `put`.
-- A universal asset loader to pre-load images, fonts and sounds. All
-  popular
-  file formats are supported. You can load new assets into the game at
+- A universal asset loader to pre-load images, fonts, sounds and JSON
+  data files. All popular file formats are supported. You can load new assets into the game at
   any time.
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.

@@ -2,14 +2,18 @@
 Ga plugins
 ==========
 Weclome to the `plugins.js` file!
-This file contains lots of extra tools that are really useful for making games, but which are more specialized that than the universal tools in `GA.js` file. 
+This file contains lots of extra tools that are really useful for making games, 
+but which are more specialized that than the universal tools in `GA.js` file. 
 
-How can use these plugins? The easiest way is just to link this entire file with a `<script>` tag. Then you have immediate access to all this code and you can decide later what you really need. 
+How can use these plugins? The easiest way is just to link this entire file 
+with a `<script>` tag. Then you have immediate access to all this code 
+and you can decide later what you really need. 
 
 Your own custom plugins
 -----------------------
 
-If you wan to keep you game file size small, create your own custom plugins file. Here's how: 
+If you wan to keep you game file size small, create 
+your own custom plugins file. Here's how: 
 
 1. Make a new JS file called `custom.js` (or an other name you want to give it.)
 2. Add this:
@@ -20,7 +24,8 @@ If you wan to keep you game file size small, create your own custom plugins file
 
 3. Link `custom.js` to your game's main HTML document with a `<script>` tag.
 
-4. Then just copy/paste any plugin functions from this file (`plugins.js`) into your own `custom.js` file. Like this:
+4. Then just copy/paste any plugin functions from this 
+file (`plugins.js`) into your own `custom.js` file. Like this:
 
     GA.custom = function(ga) {
       //Create a random number within a specific range
@@ -29,12 +34,19 @@ If you wan to keep you game file size small, create your own custom plugins file
       };
     };
 
-The `GA.custom` function is called by Ga as soon as the engine has finished initializing, but before the game runs. This means you can use it to run any other custom setup task that you want to perform before any of the game code runs. You could also use the `GA.custom` function to overwrite any of Ga's default properties with your own. Go wild!
+The `GA.custom` function is called by Ga as soon as the engine has 
+finished initializing, but before the game runs. This means you 
+can use it to run any other custom setup task that you want to 
+perform before any of the game code runs. You could also use the 
+`GA.custom` function to overwrite any of Ga's default properties 
+with your own. Go wild!
 
 The plugins in this file
 ------------------------
 
-The code in this `plugins.js` file is organized into chapters. Use your text editor's search features to find what you're looking for. Here's the table of contents to get you started:
+The code in this `plugins.js` file is organized into chapters. 
+Use your text editor's search features to find what you're looking for. 
+Here's the table of contents to get you started:
 
 ### Chapter 1: Utilities
 
