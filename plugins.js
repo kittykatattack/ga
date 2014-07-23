@@ -2,10 +2,41 @@
 Ga plugins
 ==========
 Weclome to the `plugins.js` file!
-This file contains lots of extra tools that are really useful for making games, but which are more specialized that than the universal tools in `GA.js` file. You can either link this entire file with a `<script>` tag or, to keep you game file size small, just copy and past the code that you need into your game. The code in this file is organized into chapters. Use your text editor's search features to find what you're looking for.
+This file contains lots of extra tools that are really useful for making games, but which are more specialized that than the universal tools in `GA.js` file. 
 
-Chapter 1: Utilities
----------------------
+How can use these plugins? The easiest way is just to link this entire file with a `<script>` tag. Then you have immediate access to all this code and you can decide later what you really need. 
+
+Your own custom plugins
+-----------------------
+
+If you wan to keep you game file size small, create your own custom plugins file. Here's how: 
+
+1. Make a new JS file called `custom.js` (or an other name you want to give it.)
+2. Add this:
+
+    GA.custom = function(ga) {
+      //Your own collection of plugins will go here
+    };
+
+3. Link `custom.js` to your game's main HTML document with a `<script>` tag.
+
+4. Then just copy/paste any plugin functions from this file (`plugins.js`) into your own `custom.js` file. Like this:
+
+    GA.custom = function(ga) {
+      //Create a random number within a specific range
+      ga.random = function(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      };
+    };
+
+The `GA.custom` function is called by Ga as soon as the engine has finished initializing, but before the game runs. This means you can use it to run any other custom setup task that you want to perform before any of the game code runs. You could also use the `GA.custom` function to overwrite any of Ga's default properties with your own. Go wild!
+
+The plugins in this file
+------------------------
+
+The code in this `plugins.js` file is organized into chapters. Use your text editor's search features to find what you're looking for. Here's the table of contents to get you started:
+
+### Chapter 1: Utilities
 
 `move`: Make a sprite or group move (or an array of them) by updating its velocity.
 `distance`: The distance in pixels between the center point of two sprites.
@@ -21,34 +52,34 @@ Chapter 1: Utilities
 `random`: Generate a random number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 
-Chapter 2: Sprite creation tools
----------------------------------
+### Chapter 2: Sprite creation tools
 
 `shoot`: A function for making sprites shoot bullets.
 `grid`: Easily plot a grid of sprites. Returns a container full of sprite `children` .
 
-Chapter 3: Collision
----------------------
+### Chapter 3: Collision
 
-### Boundary collisions
+#### Boundary collisions
 
 `outsideBounds`: Tells you if a sprite has exceeded the boundary of another sprite or container.
 `contain`: Contains a sprite inside another sprite. Optional bounce if the sprite hits the edges.
 
-### Shape collisions
+#### Shape collisions
 
 `hitTestPoint`: Returns `true` or `false` if an x/y point is intersecting a rectangle or circle.
 `hitTestCircle`: Returns `true` if any two circular sprites overlap.
 `hitTestRectangle`: Returns `true` if any two rectangular sprites overlap.
+`rectangleCollision`: Prevents two colliding rectangles from overlapping and tells you the collision side
 `circleCollision`: Makes a moving circle bounce away from a stationary circle.
 `movingCircleCollision`: Makes two moving circles bounce apart.
 `multipleCircleCollision`: Bounce apart any two circles that are in the same array.
 `bounceOffSurface`: A helper method that's use internally by these collision functions.
 
-### 2D tile-based collisions
+#### 2D tile-based collisions
 
-Chapter 4: Sprite contollers
-----------------------------
+... coming soon!
+
+### Chapter 4: Sprite controllers
 
 `keyControlFourWay`: Assign keyboard keys to make a sprite move at a fixed speed in 4 directions
 
@@ -595,6 +626,119 @@ GA.plugins = function(ga) {
     //`hit` will be either `true` or `false`
     return hit;
   };
+
+  /*
+  #### rectangleCollision
+
+  Use it to prevent two rectangular sprites from overlapping. 
+  Optionally, make the first retangle bounceoff the second rectangle.
+  Parameters: 
+  a. A sprite object with `x`, `y` `center.x`, `center.y`, `halfWidth` and `halfHeight` properties.
+  b. A sprite object with `x`, `y` `center.x`, `center.y`, `halfWidth` and `halfHeight` properties.
+  c. Optional: true or false to indicate whether or not the first sprite
+  should bounce off the second sprite.
+  */
+
+  ga.rectangleCollision = function(r1, r2, bounce, global) {
+    var collision, combinedHalfWidths, combinedHalfHeights,
+        overlapX, overlapY, vx, vy;
+      
+    //Set `bounce` to a default value of `true`
+    if(bounce === undefined) bounce = true;
+
+    //Set `global` to a default value of `true`
+    if(global === undefined) global = true;
+
+    //Calculate the distance vector
+    if(global) {
+      vx = (r1.gx + r1.halfWidth) - (r2.gx + r2.halfWidth);
+      vy = (r1.gy + r1.halfHeight) - (r2.gy + r2.halfHeight);
+    } else {
+      vx = r1.centerX - r2.centerX;
+      vy = r1.centerY - r2.centerY;
+    }
+    
+    //Figure out the combined half-widths and half-heights
+    combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+    combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+    //Check whether vx is less than the combined half widths 
+    if (Math.abs(vx) < combinedHalfWidths) {
+      //A collision might be occurring! 
+      //Check whether vy is less than the combined half heights 
+      if (Math.abs(vy) < combinedHalfHeights) {
+        //A collision has occurred! This is good! 
+        //Find out the size of the overlap on both the X and Y axes
+        overlapX = combinedHalfWidths - Math.abs(vx);
+        overlapY = combinedHalfHeights - Math.abs(vy);
+
+        //The collision has occurred on the axis with the
+        //*smallest* amount of overlap. Let's figure out which
+        //axis that is
+
+        if (overlapX >= overlapY) {
+          //The collision is happening on the X axis 
+          //But on which side? vy can tell us
+          if (vy > 0) {
+            collision = "top";
+            //Move the rectangle out of the collision
+            r1.y = r1.y + overlapY;
+          } else {
+            collision = "bottom";
+            //Move the rectangle out of the collision
+            r1.y = r1.y - overlapY;
+          }
+          //Bounce
+          if (bounce) {
+            r1.vy *= -1;
+
+            /*Alternative
+            //Find the bounce surface's vx and vy properties
+            var s = {};
+            s.vx = r2.x - r2.x + r2.width; 
+            s.vy = 0;
+    
+            //Bounce r1 off the surface
+            //bounceOffSurface(r1, s);
+            */
+          }
+        } else {
+          //The collision is happening on the Y axis 
+          //But on which side? vx can tell us
+          if (vx > 0) {
+            collision = "left";
+            //Move the rectangle out of the collision
+            r1.x = r1.x + overlapX;
+          } else {
+            collision = "right";
+            //Move the rectangle out of the collision
+            r1.x = r1.x - overlapX;
+          }
+          //Bounce
+          if (bounce) {
+            r1.vx *= -1;
+
+            /*Alternative
+            //Find the bounce surface's vx and vy properties
+            var s = {};
+            s.vx = 0; 
+            s.vy = r2.y - r2.y + r2.height;
+      
+            //Bounce r1 off the surface
+            bounceOffSurface(r1, s);
+            */
+          }
+        }
+      } else {
+        //No collision
+      }
+    } else {
+      //No collision
+    }
+    //Return the collision string. it will be either "top", "right",
+    //"bottom", or "left" depening on which side of r1 is touching r2. 
+    return collision;
+  }
 
   /*
   #### circleCollision

@@ -1,5 +1,5 @@
 /*
-Welcome's to Ga's source code!
+Welcome to Ga's source code!
 If you're reading this to find out how to use Ga, you've come to the wrong place. 
 You should take a look inside the `examples` folder. 
 There's a lot of cool stuff inside the `examples` folder, so check it out!
@@ -9,7 +9,7 @@ Everything is in one big, hulking gainormous file.
 Why?
 Because `One Thing` is better than `Many Things`.
 Just use your text editor's search function to find what you're looking for.
-(I'm going be upating this source code with a full table of contents very soon so that you can see the structure and organization at a glance.)
+(I'm going be updating this source code with a full table of contents very soon so that you can see the structure and organization at a glance.)
 */
 
 var GA = GA || {};
@@ -22,7 +22,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   var ga = {};
 
   /*
-  Intilaize the game engine
+  Initialize the game engine
   -------------------------
   */
 
@@ -88,11 +88,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //The upper-limit frames per second that the game should run at
   //If `_fps` is undefined, the game will attempt to run at the 
   //maximum frame rate permitted by `requestAnimationFrame`
-  //Use the `fps` getter/setter to modify ga value;
+  //Use the `fps` getter/setter to modify this value;
   ga._fps = undefined;
-
-  //Initialize the plugins, if they exist 
-  if (GA.plugins !== undefined) GA.plugins(ga);
 
   /*
   Core game engine methods
@@ -269,8 +266,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //`addChild` and `removeChild` to create composite objects
     //makeContainer(sprite);
 
-    //Add the sprite's container properites so that you can have
-    //a nested parent/child scene graph heirarchy
+    //Add the sprite's container properties so that you can have
+    //a nested parent/child scene graph hierarchy
     //Create a `children` array that contains all the 
     //in this container
     o.children = [];
@@ -347,7 +344,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.x = x;
       o.y = y;
     };
-    //The `put` object contains methods that help you positon a
+    //The `put` object contains methods that help you position a
     //another sprite in and around this sprite.
     //Get a short form reference to the sprite to make the code more
     //compact and easier to read
@@ -671,10 +668,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     });
   }
 
-  //A `group` is a special kind of display objec that doesn't have any
-  //visible content. Intstead, you can use it as a parent container to 
+  //A `group` is a special kind of display object that doesn't have any
+  //visible content. Instead, you can use it as a parent container to 
   //group other sprites. If you don't assign it a `width` and
-  //`height`, the group's width and height will be calclated based on the size
+  //`height`, the group's width and height will be calculated based on the size
   //of the largest sprite that group contains 
   ga.group = function(spritesToGroup) {
     var o = {};
@@ -683,7 +680,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     makeDisplayObject(o);
     //Add the group to the `stage`
     ga.stage.addChild(o);
-    //Custom `addChild` and `removeChild` methods that recalcuate the
+    //Custom `addChild` and `removeChild` methods that recalculate the
     //group's width and height based on the size and position of the 
     //child sprites it contains
     o.addChild = function(sprite) {
@@ -695,7 +692,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //add it to this object's `children` array
       sprite.parent = o;
       o.children.push(sprite);
-      //Recalcuate the group's width
+      //Recalculate the group's width
       var width = 0;
       o.children.forEach(function(child) {
         if(child.x + child.width > width) {
@@ -719,7 +716,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         throw new Error(sprite + "is not a child of " + o);
       }
     };
-    //Group any sprites that were passed to the group's argumnents
+    //Group any sprites that were passed to the group's arguments
     //(Important!: This needs to be done after adding the group to the stage)
     if (spritesToGroup) {
       var sprites = Array.prototype.slice.call(arguments);
@@ -981,7 +978,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
 
   //If you have a complex animation in a single image,  you can use 
-  //`filmstrip` to autmatically create an array of x,y
+  //`filmstrip` to automatically create an array of x,y
   //coordinates for each animation frame.
   //`filmstrip` arguments:
   //imageName, frameWidth, frameHeight, spacing
@@ -1008,7 +1005,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       y = Math.floor(i / columns) * frameHeight;
 
       //Compensate for any optional spacing (padding) around the tiles if
-      //there is any. This bit of code accumlates the spacing offsets from the 
+      //there is any. This bit of code accumulates the spacing offsets from the 
       //left side of the tileset and adds them to the current tile's position 
       if (spacing && spacing > 0) {
         x += spacing + (spacing * i % columns); 
@@ -1131,7 +1128,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.press = o.press || undefined;
     o.release = o.release || undefined;
     //The `state` property tells you button's
-    //curent state. Set its initial state to "up"
+    //current state. Set its initial state to "up"
     o.state = "up";
     //The `action` property tells you whether its being pressed or
     //released
@@ -1168,7 +1165,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //Down state
         if (pointer.isDown) {
           o.state = "down";
-          //Show the thrid frame if this sprite is a button and it
+          //Show the third frame if this sprite is a button and it
           //has only three frames, or show the second frame if it
           //only has two frames
           if(o.subtype === "button") {
@@ -1222,7 +1219,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //sprites with more than one frame
 
   ga.addStatePlayer = function(sprite) {
-    //Intialize the variables
+    //Initialize the variables
     var frameCounter = 0,
         numberOfFrames = 0,
         startFrame = 0,
@@ -1326,7 +1323,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   render
   -------
 
-  A render function that displays all the sprites on the the canvas.
+  A render function that displays all the sprites on the canvas.
   Use it inside a game loop to render the sprites like this:
 
       render(canvasContext);
@@ -1409,7 +1406,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             displaySprite(child);
           }
         }
-        //The context's orginal position will only be restored after
+        //The context's original position will only be restored after
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents 
         ctx.restore();
@@ -1671,7 +1668,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       var hit = false;
       //Is the sprite rectangular?
       if (!sprite.circular) {
-        //Get the postion of the sprite's edges using global
+        //Get the position of the sprite's edges using global
         //coordinates
         var left = sprite.gx,
             right = sprite.gx + sprite.width,
@@ -1895,7 +1892,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         set: function(value) {
           //Panner objects accept x, y and z coordinates for 3D 
           //sound. However, because we're only doing 2D left/right
-          //panning we're only interested in the the x coordinate, 
+          //panning we're only interested in the x coordinate, 
           //the first one. However, for a natural effect, the z
           //value also has to be set proportionately.
           var x = value,
@@ -1964,9 +1961,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
   }
 
-
-  //Make the `group` and `keyboard` functions public
+  //Make the `keyboard` function public
   ga.keyboard = keyboard;
+
+  //Initialize the plugins, if they exist 
+  if (GA.plugins !== undefined) GA.plugins(ga);
+  
+  //Install any user-defined plugins or custom initialization code
+  if (GA.custom !== undefined) GA.custom(ga);
 
   //Return `ga`
   return ga;
