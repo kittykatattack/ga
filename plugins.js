@@ -3,7 +3,7 @@ Ga plugins
 ==========
 Weclome to the `plugins.js` file!
 This file contains lots of extra tools that are really useful for making games, 
-but which are more specialized that than the universal tools in `GA.js` file. 
+but which are more specialized that than the universal tools in `ga.js` file. 
 
 How can use these plugins? The easiest way is just to link this entire file 
 with a `<script>` tag. Then you have immediate access to all this code 

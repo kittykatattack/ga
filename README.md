@@ -77,13 +77,13 @@ Here's Ga's full feature list:
   want to use into your game. Or, if you're not worried about the
   extra size, just link the whole thing; it's pretty tiny anyway.
 - Yes, Ga is mobile friendly!
-- Yes, the core GA.js engine is less than 6k minified and zipped!
+- Yes, the core `ga.js` engine is less than 6k minified and zipped!
   It's all you need to start making any any 2D action, puzzle or
   strategy game. 
 
 And the coolest part? If you were alone on a desert island with only
 a saltwater powered laptop, an unlimited supply of
-coconuts, and a copy of the GA.js you could recreate the entire history of 2D video games,
+coconuts, and a copy of `ga.js` you could recreate the entire history of 2D video games,
 from Spacewar! to Flappy Bird.
 
 Coming very soon... 
@@ -99,7 +99,7 @@ Coming very soon...
 Ga's philosophy and technical constraints
 -----------------------------------------
 
-- The GA.js core game engine file can't ever be bigger that 6.5k
+- The `ga.js` core game engine file can't ever be bigger that 6.5k
   minified and zipped. This makes it suitable for making games for micro game
   competitions, like [js13k](http://js13kgames.com). But, more
   importantly, this constraint also discourages feature-creep and keeps

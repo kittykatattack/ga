@@ -1274,8 +1274,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function show(frameNumber) {
       //Reset any possible previous animations
       reset();
-      //Find the new state on the sprite 
-      sprite.gotoAndStop(frameNumber);
+      //Find the new state on the sprite
+      //If `frameNumber` is a number, use that number to go to the
+      //correct frame
+      if (typeof frameNumber !== "string") {
+        sprite.gotoAndStop(frameNumber);
+      } 
+      //If `frameNumber` is string that describes a sprite's frame id,
+      //then go to the index number that matches that id name
+      else {
+        sprite.gotoAndStop(sprite.frames.indexOf(frameNumber));
+      }
     }
 
     //The `play` function plays all the sprites frames
