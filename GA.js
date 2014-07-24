@@ -9,7 +9,8 @@ Everything is in one big, hulking gainormous file.
 Why?
 Because `One Thing` is better than `Many Things`.
 Just use your text editor's search function to find what you're looking for.
-(I'm going be updating this source code with a full table of contents very soon so that you can see the structure and organization at a glance.)
+(I'm going be updating this source code with a full table of contents very 
+soon so that you can see the structure and organization at a glance.)
 */
 
 var GA = GA || {};
