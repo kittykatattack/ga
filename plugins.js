@@ -656,7 +656,7 @@ GA.plugins = function(ga) {
         overlapX, overlapY, vx, vy;
       
     //Set `bounce` to a default value of `true`
-    if(bounce === undefined) bounce = true;
+    if(bounce === undefined) bounce = false;
 
     //Set `global` to a default value of `true`
     if(global === undefined) global = true;
