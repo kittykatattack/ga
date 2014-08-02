@@ -1229,7 +1229,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
   
   //###sprite
-  //`sprite` creates and returns a sprite using an JavaScript Image object, a tileset
+  //`sprite` creates and returns a sprite using a JavaScript Image object, a tileset
   //`frame`, a `filmstrip`, or a frame from a texture atlas (in
   //standard Texture Packer format).
   //arguments: sourceString.
@@ -1276,16 +1276,31 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.sourceWidth = o.tilesetFrame.frame.w;
           o.sourceHeight = o.tilesetFrame.frame.h;
         }
-      //The source is an array of frames on a texture atlas tileset.
+      //The source is an array. But what kind of array? Is it an array
+      //Image objects or an array of texture atlas frame ids?
       } else {
-        o.frames = source;
-        o.source = ga.assets[source[0]].source;
-        o.sourceX = ga.assets[source[0]].frame.x;
-        o.sourceY = ga.assets[source[0]].frame.y;
-        o.width = ga.assets[source[0]].frame.w;
-        o.height = ga.assets[source[0]].frame.h;
-        o.sourceWidth = ga.assets[source[0]].frame.w;
-        o.sourceHeight = ga.assets[source[0]].frame.h;
+        if (ga.assets[source[0]].source) {
+          //The source is an array of frames on a texture atlas tileset.
+          o.frames = source;
+          o.source = ga.assets[source[0]].source;
+          o.sourceX = ga.assets[source[0]].frame.x;
+          o.sourceY = ga.assets[source[0]].frame.y;
+          o.width = ga.assets[source[0]].frame.w;
+          o.height = ga.assets[source[0]].frame.h;
+          o.sourceWidth = ga.assets[source[0]].frame.w;
+          o.sourceHeight = ga.assets[source[0]].frame.h;
+        }
+        //It must be an array of image objects
+        else {
+          o.frames = source;
+          o.source = ga.assets[source[0]];
+          o.sourceX = 0;
+          o.sourceY = 0;
+          o.width = o.source.width;
+          o.height = o.source.width;
+          o.sourceWidth = o.source.width;
+          o.sourceHeight = o.source.width;
+        }
       }
     }
     //If the source contains an `image` sub-property, this must
@@ -1317,8 +1332,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.height = source.height;
       o.sourceWidth = source.width;
       o.sourceHeight = source.height;
-        console.log("test")
-        console.log(o.frames)
     }
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {
@@ -1329,11 +1342,23 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.sourceX = o.frames[frameNumber][0];
           o.sourceY = o.frames[frameNumber][1];
         }
-        //If each frame isn't an array, then the frame must be a texture atlas id name.
+        //If each frame isn't an array, and it has a sub-object called `frame`, 
+        //then the frame must be a texture atlas id name.
         //In that case, get the source position from the `frame` object.
-        else {
+        else if (g.assets[o.frames[frameNumber]].frame) {
           o.sourceX = g.assets[o.frames[frameNumber]].frame.x;
           o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
+        }
+        //If neither of the above are true, then each frame must be
+        //an individual Image object
+        else {
+          o.source = g.assets[o.frames[frameNumber]];
+          o.sourceX = 0;
+          o.sourceY = 0;
+          o.width = o.source.width;
+          o.height = o.source.height;
+          o.sourceWidth = o.source.width;
+          o.sourceHeight = o.source.height;
         }
         //Set the `_currentFrame` value.
         o._currentFrame = frameNumber;

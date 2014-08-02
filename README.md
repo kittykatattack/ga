@@ -76,6 +76,9 @@ Here's Ga's full feature list:
 - A plugins.js file full of extra features. Just copy/paste the code you
   want to use into your game. Or, if you're not worried about the
   extra size, just link the whole thing; it's pretty tiny anyway.
+- A friendly yet powerful "Haiku" style API that's centered on shallow,
+  composable components and requires very little mental overhead to
+  use. Get more done writing less code.
 - Yes, Ga is mobile friendly!
 - Yes, the core `ga.js` engine is less than 6k minified and zipped!
   It's all you need to start making any any 2D action, puzzle or
