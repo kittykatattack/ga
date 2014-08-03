@@ -12,7 +12,6 @@ This file requires these convenience functions from `plugins.js`:
 `fadeOut`
 `fadeIn`
 `wait`
-`easeProperty`
 */
 
 //Create a new GA instance, and start it.
@@ -34,9 +33,8 @@ var sceneOne,
     sceneTwo,
     blueSquare,
     messageTwo,
-    forward, 
-    reverse,
-    direction;
+    oneTween,
+    twoTween;
 
 //A `setup` function that will run only once.
 //Use it for initialization tasks
@@ -94,58 +92,68 @@ function setup() {
   //sceneOne.layer = 1;
   //sceneTwo.layer = 2;
 
-  //Set up the tween functions
-  forward = function() { 
-    //Ease from one position to another using `slide`
+  /*
+  Ga has four special tween functions to help you manage scene
+  or sprite transitions:
+
+      slide
+      yoyo
+      fadeIn
+      fadeOut
+
+  They're special because they don't need to run inside a looping game
+  state (like `play`) to work. That makes them easy to launch with callback functions.
+  `slide` eases a sprite from its start position to a destination x
+  and y point at a certain speed. It returns a tween object. You can
+  attach an `onComplete` method to the tween object to do something
+  when the tween has finished. It also has a Boolean `playing`
+  property that tells you whether or not the tween is playing. Use
+  `tween.pause()` and `tween.play()` to pause and play the tweens at
+  any time. You can completely remove a tween with
+  `ga.removeTween(tweenObject).
+  `yoyo` is the same as `slide`, but the tween will bounce back and
+  forth between its start and end points, forever. You can give it an
+  option `delay` argument that defines how long, in milliseconds, the
+  tween should hold its position until it bounces back again.
+  `fadeIn` and `fadeOut` work the same way, and change the sprite's
+  `alpha` property.
+  All of these special tweens are managed in Ga's `tweens` array.
+  */
+
+  //Here's an example that uses most of these methods and features
+
+  //Use the `wait` methods to wait 2 seconds before tweening
+  //the scenes
+  g.wait(2000, function(){
     //`slide` arguments:
     //sprite, destinationX, destinationY, speed
-    g.slide(sceneOne, 128, 128, 0.05); 
-    g.slide(sceneTwo, 0, 0, 0.05); 
+    oneTween = g.slide(sceneOne, 128, 128, 0.05); 
+    //`yoyo` arguments:
+    //sprite, destinationX, destinationY, speed, delayInMilliseconds
+    twoTween = g.yoyo(sceneTwo, 0, 0, 0.05, 2000); 
+    //Make `sceneOne` fade out
     //`fadeOut` arguments:
-    //sprite, fadeSpeed
+    //sprite, speed
     g.fadeOut(sceneOne, 0.02);
-  };
-  reverse = function() {
-    g.slide(sceneOne, 0, 0, 0.05); 
-    g.slide(sceneTwo, 128, 128, 0.05); 
-    //Use `fadeIn` to fade in a group or sprite
-    g.fadeIn(sceneOne, 0.02);
-  };
-  direction = forward;
 
-  //Wait 2 seconds then change the state to `play`
-  g.wait(2000, function(){
-    g.state = play;    
+    //Use `oneTween`'s `onComplete` method to do something when the
+    //tween is finished. In this example we'll make it slide back to
+    //its starting position and fade it back in
+    oneTween.onComplete = function(){
+      g.slide(sceneOne, oneTween.startX, oneTween.startY, 0.05);
+      //`fadeIn` arguemnts:
+      //sprite, speed
+      g.fadeIn(sceneOne, 0.02);
+    };
+    /*
+    g.wait(4000, function(){
+        //Remove a tween completely with the `removeTween` method
+        g.removeTween(twoTween);
+    });
+    */
   });
 }
 
-//The `play` function will run in a loop
-function play() {
- 
- //Make the scenes move in the current direction
- direction(); 
-
- //Reverse the direction after a 2 second pause if the scenes have reached
- //their destinations
- if (Math.floor(sceneOne.x) === 127){
-   g.wait(2000, function(){
-     direction = reverse;
-   });
- }
- if (Math.floor(sceneTwo.x) === 127){
-   g.wait(2000, function(){
-     direction = forward;
-   });
- }
-
- //Use `easeProperty` to tween any single properties. `easeProperty`
- //returns a value that you can apply incrementally to the property
- //that you want to change,
- //`easePropery` arguments:
- //property, destinationValue, speed
- //blackSquare.x += easeProperty(blackSquare.x, 100, 0.05);
-
-}
 
 </script>
 </body>

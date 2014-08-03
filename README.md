@@ -63,24 +63,21 @@ Here's Ga's full feature list:
 - Import and play sounds using a built-in WebAudio API sound manager.
   Control sounds with `play`, `pause`, `stop`, `restart`, and
   `playFrom` methods. Change a sound's `volume` and `pan`.
-- Useful built-in tweening functions like `slide`, `fadeIn` and `fadeOut`.
-- A handful of useful convenience functions: `ease`, `follow`,
-  `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`, `random` and `contain`. Position
-  sprites relative to other sprites using `put`.
+- Conveniently position sprites relative to other sprites using `put`.
 - A universal asset loader to pre-load images, fonts, sounds and JSON
   data files. All popular file formats are supported. You can load new assets into the game at
   any time.
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
-- A plugins.js file full of extra features. Just copy/paste the code you
-  want to use into your game. Or, if you're not worried about the
-  extra size, just link the whole thing; it's pretty tiny anyway.
+- A `plugins.js` file full of extra tools. 
 - A friendly yet powerful "Haiku" style API that's centered on shallow,
   composable components and requires very little mental overhead to
-  use. Get more done writing less code.
+  use effectively. Get more done writing less code.
+- Ga is totally hackable. Overwrite any of its default methods or objects
+  with your own at runtime.
 - Yes, Ga is mobile friendly!
-- Yes, the core `ga.js` engine is less than 6k minified and zipped!
+- Yes, the core `ga.js` engine is less than 6.5k minified and zipped!
   It's all you need to start making any any 2D action, puzzle or
   strategy game. 
 
@@ -89,12 +86,42 @@ a saltwater powered laptop, an unlimited supply of
 coconuts, and a copy of `ga.js` you could recreate the entire history of 2D video games,
 from Spacewar! to Flappy Bird.
 
+### The plugins
+
+But there's more! Ga comes with a `plugins.js` file that includes a
+huge number of useful tools for making games. You can use as many or
+as few of these tools as you want to. Here are some of the goodies
+you'll find in `plugins.js`:
+
+- Tween functions for sprite and scene transitions: `slide`,
+  `yoyo`, `fadeIn` and `fadeOut`.
+- A handful of useful convenience functions: `ease`, `follow`,
+  `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`,
+  `random`, `contain` and `outsideBounds`.
+- A fast, universal `hit` method that handles collision testing and
+  reactions for all types of sprites. Use one collision method for
+  everything: rectangles, circles, points, and arrays of sprites.
+  Easy!
+- A companion suite of lightweight, low-level 2D geometric collision methods.
+- A loading progress bar for game assets.
+- Make sprites shoot things with `shoot`. 
+- Easily plot sprites in a grid formation with `grid`.
+
+Just copy/paste the code you want to use from `plugins.js` into your game. 
+Or, if you're not worried about the extra size, 
+just link the whole thing; it's pretty tiny anyway!
+
+If you want to get fancy, you can alternatively create your own `custom.js` file that 
+contains a small custom sub-set of the plugins
+you want to use for your game. (See the `plugins.js` file for instructions
+on how to do this).
+
 Coming very soon... 
 -------------------
 
 (These will be in plugins.js):
 
-- Complete 2D geometric and tile-based collision functions.
+- Complete tile-based collision functions.
 - Tiled Editor map support (for both flat 2D and isometric maps).
 - Many more examples including complete game prototypes.
 - Detailed documentation, user guide and tutorials.
@@ -126,7 +153,9 @@ The Ga repository doesn't include the minified and compressed version
 of the source code, because you should probably optimize that yourself. I recommend
 first minifying the code using with [Google Closure
 Compiler](http://closure-compiler.appspot.com/home) or
-[UglifyJS2](https://github.com/mishoo/UglifyJS2). Then, zip it.
+[UglifyJS2](https://github.com/mishoo/UglifyJS2). 
+
+Then, zip it.
 
 For more aggressive optimization, you could further try running the
 minified code through
@@ -138,7 +167,7 @@ It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
 Please help! 
 Ga welcomes any and all contributions!
 
-Licensing? Ga is *unlicenesed*.
+Licensing? Ga is vehemently *unlicenesed*.
 That means its freer than free.
 
 It's like a pebble.

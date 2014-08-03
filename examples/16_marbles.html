@@ -125,10 +125,11 @@ function play() {
     }
   }
 
+
   marbles.children.forEach(function(marble) {
     //Check for a collision with the pointer and marble
     if (g.pointer.isDown && capturedMarble === null) {
-      if (g.hitTestPoint(g.pointer.position, marble)) {
+      if (g.hit(g.pointer, marble)) {
         //If there's a collision, capture the marble
         capturedMarble = marble;
         capturedMarble.vx = 0;

@@ -64,12 +64,21 @@ Here's the table of contents to get you started:
 `random`: Generate a random number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 
-### Chapter 2: Sprite creation tools
+### Chapter 2: Tween methods for sprite and scene transitions
+
+`slide`: Ease a sprite into a new position.
+`yoyo`: Ease a sprite back and forth between two points, with optional delay.
+`fadeIn`: Fade a sprite in.
+`fadeOut`: Fade a sprite out.`
+`removeTween`: Compeletely remove a tween from Ga's global `tweens` array.
+
+### Chapter 3: Sprite creation tools
 
 `shoot`: A function for making sprites shoot bullets.
-`grid`: Easily plot a grid of sprites. Returns a container full of sprite `children` .
+`grid`: Easily plot a grid of sprites. Returns a container full of sprite `children`.
+`progressBar`: A loading progress bar you can use to display while game assets are loading.`
 
-### Chapter 3: Collision
+### Chapter 4: Collision
 
 #### Boundary collisions
 
@@ -91,7 +100,7 @@ Here's the table of contents to get you started:
 
 ... coming soon!
 
-### Chapter 4: Sprite controllers
+### Chapter 5: Sprite controllers
 
 `keyControlFourWay`: Assign keyboard keys to make a sprite move at a fixed speed in 4 directions
 
@@ -164,52 +173,6 @@ GA.plugins = function(ga) {
     if (distance >= 1) {
       follower.x += vx * speed;
       follower.y += vy * speed;
-    }
-  };
-
-  //### easeProperty
-  //Use `easeProperty` to ease any property on a sprite
-  //It returns a value that you can apply to the sprite's property
-
-  ga.easeProperty = function(start, end, speed) {
-    //Scale any values less than one (important for tweening alpha)
-    var scaleFactor = 1;
-    if (start <= 1) scaleFactor = 100; 
-    //Calculate the distance
-    var distance = end - start;
-    //Move the follower if it's more than 1 pixel 
-    //away from the leader
-    if ((Math.abs(distance) * scaleFactor) >= 1) {
-      return distance * speed;
-    } else {
-      return 0;
-    }
-  };
-
-  //### slide
-  //Use `slide` to ease a sprite to a new position
-  ga.slide = function(s, endX, endY, speed) {
-    s.x += ga.easeProperty(s.x, endX, speed);
-    s.y += ga.easeProperty(s.y, endY, speed);
-  };
-
-  //### fadeOut
-
-  ga.fadeOut = function(s, speed) {
-    if (s.alpha > 0.02) {
-      s.alpha -= speed;
-    } else {
-      s.alpha = 0;
-    }
-  };
-
-  //### fadeIn
-
-  ga.fadeIn = function(s, speed) {
-    if (s.alpha < 1) {
-      s.alpha += speed;
-    } else {
-      s.alpha = 1;
     }
   };
 
@@ -306,9 +269,200 @@ GA.plugins = function(ga) {
     setTimeout(callBack, duration);
   };
     
+  /*
+  Chapter 2: Tween methods for sprite and scene transitions
+  ---------------------------------------------------------
+
+  Ga has four special tween functions to help you manage scene
+  or sprite transitions:
+
+      slide
+      yoyo
+      fadeIn
+      fadeOut
+
+  They're special because they don't need to run inside a looping game
+  state (like `play`) to work. That makes them easy to launch with callback functions.
+  `slide` eases a sprite from its start position to a destination x
+  and y point at a certain speed. It returns a tween object. You can
+  attach an `onComplete` method to the tween object to do something
+  when the tween has finished. It also has a Boolean `playing`
+  property that tells you whether or not the tween is playing. Use
+  `tween.pause()` and `tween.play()` to pause and play the tweens at
+  any time. You can completely remove a tween with
+  `ga.removeTween(tweenObject).
+  `yoyo` is the same as `slide`, but the tween will bounce back and
+  forth between its start and end points, forever. You can give it an
+  optional `delay` argument that defines how long, in milliseconds, the
+  tween should hold its position until it bounces back again.
+  `fadeIn` and `fadeOut` work the same way, and change the sprite's
+  `alpha` property.
+  All of these special tweens are managed in Ga's `tweens` array. Ga's game loop
+  calls each tween object's `update` function each frame.
+  */
+
+  //### slide
+  //Use `slide` to ease a sprite to a new position.
+  //`slide` arguments:
+  //sprite, destinationX, destinationY, speed
+  ga.slide = function(sprite, endX, endY, speed) {
+    var tween = {};
+    tween.startX = sprite.x;
+    tween.startY = sprite.y;
+    tween.playing = true;
+    tween.update = function() {
+      if (tween.playing) {
+        var vx = endX - sprite.x,
+            vy = endY - sprite.y,
+            distance = Math.sqrt(vx * vx + vy * vy);
+
+        if (distance >= 0.5) {
+          sprite.x += vx * speed;
+          sprite.y += vy * speed;
+        } else {
+          sprite.x = endX;
+          sprite.y = endY;
+          tween.playing = false;
+          if (tween.onComplete) tween.onComplete();
+          //Remove the tween from Ga's `tweens` array.
+          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
+        }
+      }
+    };
+    tween.pause = function() {
+      tween.playing = false;
+    };
+    tween.play = function() {
+      tween.playing = true;
+    };
+    //Add the tween to Ga's `tweens` array. The `tweens` array is
+    //updated on each frame.
+    ga.tweens.push(tween);
+    //Return the tween object
+    return tween;
+  };
+
+  //### yoyo
+  //`yoyo` arguments:
+  //sprite, destinationX, destinationY, speed, delayInMilliseconds
+  ga.yoyo = function(sprite, endX, endY, speed, delay) {
+    if (delay === undefined) delay = 0;
+    var yoyo = {};
+    function repeat(sprite, endX, endY, speed, delay) {
+      yoyo.tween = ga.slide(sprite, endX, endY, speed);
+      yoyo.tween.onComplete = function() {
+        ga.wait(delay, function() {
+          repeat(sprite, yoyo.tween.startX, yoyo.tween.startY, speed, delay);
+        });
+      };
+    };
+    repeat(sprite, endX, endY, speed, delay);
+    //Define the `playing` property
+    Object.defineProperty(yoyo, "playing", {
+      get: function() {
+        //Return the `tween` object's `playing` value
+        return yoyo.tween.playing;
+      }, 
+      enumerable: false, configurable: false
+    });
+    //Pause and play the yoyo's tween
+    yoyo.pause = function() {
+      yoyo.tween.playing = false;
+    };
+    yoyo.play = function() {
+      yoyo.tween.playing = true;
+    };
+    return yoyo;
+  };
+
+  //### fadeOut
+  //`fadeOut` arguments:
+  //sprite, speed
+  ga.fadeOut = function(sprite, speed) {
+    var tween = {};
+    tween.playing = true;
+    tween.update = function() {
+      if (tween.playing) {
+        //Important! Use the sprite's `_alpha` property for this
+        //instead of its relative `alpha` property. That's because we
+        //want to tween the alpha property without taking into account
+        //the sprite's parent's alpha as well.
+        if (sprite._alpha > 0) {
+          sprite._alpha -= speed;
+          if (sprite._alpha < 0) sprite._alpha = 0;
+        } else {
+          tween.playing = false;
+          if (tween.onComplete) tween.onComplete();
+          //Remove the tween from Ga's `tweens` array.
+          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
+        }
+      }
+    };
+    tween.pause = function() {
+      tween.playing = false;
+    };
+    tween.play = function() {
+      tween.playing = true;
+    };
+    //Add the tween to Ga's `tweens` array. The `tweens` array is
+    //updated on each frame.
+    ga.tweens.push(tween);
+    //Return the tween object
+    return tween;
+  };
+
+  //### fadeIn
+  //`fadeIn` arguemnts:
+  //sprite, speed
+  ga.fadeIn = function(sprite, speed) {
+    var tween = {};
+    tween.playing = true;
+    tween.update = function() {
+      if (tween.playing) {
+        //Important! Use the sprite's `_alpha` property for this
+        //instead of its relative `alpha` property. That's because we
+        //want to tween the alpha property without taking into account
+        //the sprite's parent's alpha as well.
+        if (sprite._alpha < 1) {
+          sprite._alpha += speed;
+          if (sprite._alpha > 1) sprite._alpha = 1;
+        } else {
+          tween.playing = false;
+          if (tween.onComplete) tween.onComplete();
+          //Remove the tween from Ga's `tweens` array.
+          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
+        }
+      }
+    };
+    tween.pause = function() {
+      tween.playing = false;
+    };
+    tween.play = function() {
+      tween.playing = true;
+    };
+    //Add the tween to Ga's `tweens` array. The `tweens` array is
+    //updated on each frame.
+    ga.tweens.push(tween);
+    //Return the tween object
+    return tween;
+  };
+
+  //### removeTween
+  ga.removeTween = function(tweenObject) {
+    //Remove the tween if tweenObject doesn't have a nested
+    //tween object
+    if(!tweenObject.tween) {
+      tweenObject.pause();
+      ga.tweens.splice(ga.tweens.indexOf(tweenObject), 1);
+    //Otherwise, remove the nested tween object
+    } else {
+      tweenObject.tween.pause();
+      ga.tweens.splice(ga.tweens.indexOf(tweenObject.tween), 1);
+    }
+  }
 
   /*
-  Chapter 2: Sprite creation tools
+  Chapter 3: Sprite creation tools
   --------------------------------
   */
 
@@ -411,7 +565,108 @@ GA.plugins = function(ga) {
   };
 
   /*
-  Chapter 3: Collision
+  ### progressBar
+  Use the `progressBar` to display the percentage of assetes being loaded.
+  To use it, first make sure you define a `load` state when you intialize Ga.
+  Here's an example of a Ga instance that's intialized with 5 assets. The last 
+  argument, `load`, tells Ga that it should apply the `load` state as soon as
+  Ga starts.
+
+      var g = ga(
+        512, 512, setup, 
+        [
+          "images/blixyiiUI.png",
+          "images/blixyiiTileset.png",
+          "fonts/puzzler.otf",
+          "sounds/music.wav",
+          "sounds/bounce.wav"
+        ],
+        load
+      );
+      g.start();
+  
+  Next, create a `load` function. It will run in a loop while the assets are loading
+  and before the `setup` state is run. Here's how to create and update the progress
+  bar in the load state
+
+      function load() {
+        g.progressBar.create(g.canvas, g.assets);
+        g.progressBar.update();
+      }
+
+  When the assets have finished loading the `setup` state will automatically be run.
+  Remove the progress bar in the `setup` function state like this:
+
+      function setup() {
+        g.progressBar.remove();
+        //...
+      }
+
+  This is just a basic example of a progress bar to help you get started. You can use the
+  same format to create your own custom preloading animation.
+
+  */
+  ga.progressBar = {
+    maxWidth: 0, 
+    height: 0,
+    backgroundColor: "gray",
+    foregroundColor: "cyan",
+    backBar: null,
+    frontBar: null,
+    percentage: null,
+    assets: null,
+    initialized: false,
+    create: function(canvas, assets) {
+      if (!this.initialized) {
+        //Store a reference to the `assets` object
+        this.assets = assets;
+        //Set the maximum width to half the width of the canvas
+        this.maxWidth = ga.canvas.width / 2;
+
+        //Build the progress bar using two Rectangle sprites and
+        //one Message Sprite
+        //1. Create the bar's gray background
+        this.backBar = ga.rectangle(this.maxWidth, 32, this.backgroundColor);
+        this.backBar.x = (ga.canvas.width / 2) - (this.maxWidth / 2);
+        this.backBar.y = (ga.canvas.height / 2) - 16;
+
+        //2. Create the blue foreground. This is the element of the 
+        //progress bar that will increase in width as assets load
+        this.frontBar = ga.rectangle(this.maxWidth, 32, this.foregroundColor);
+        this.frontBar.x = (ga.canvas.width / 2) - (this.maxWidth / 2);
+        this.frontBar.y = (ga.canvas.height / 2) - 16;
+        
+        //3. A text sprite that will display the percentage
+        //of assets that have loaded
+        this.percentage = ga.text("0%", "28px sans-serif", "black");
+        this.percentage.x = (ga.canvas.width / 2) - (this.maxWidth / 2) + 12;
+        this.percentage.y = (ga.canvas.height / 2) - 16;
+
+        //Flag the progressBar as having been initialized
+        this.initialized = true;
+      }
+    },
+    update: function() {
+      //Change the width of the blue `frontBar` to match the 
+      //ratio of assets that have loaded. Adding `+ 1` to
+      //`assets.loaded` means that the loading bar will appear at 100%
+      //when the last asset is being loaded, which is reassuring for the
+      //player.
+      var ratio = (this.assets.loaded + 1) / this.assets.toLoad;
+      this.frontBar.scaleX = ratio; 
+      //Display the percentage
+      this.percentage.content = Math.floor((ratio) * 100) + "%";
+    },
+    remove: function() {
+      //Remove the progress bar
+      g.remove(this.frontBar);
+      g.remove(this.backBar);
+      g.remove(this.percentage);
+    }
+  };
+
+  /*
+  Chapter 4: Collision
   --------------------
   */
 
@@ -463,6 +718,9 @@ GA.plugins = function(ga) {
         y = bounds.y,
         width = bounds.width,
         height = bounds.height;
+
+    //Set `bounce` to `false` by default
+    bounce = bounce || false;
 
     //The `collision` object is used to store which 
     //side of the containing rectangle the sprite hits
@@ -1062,6 +1320,120 @@ GA.plugins = function(ga) {
     o.vx = bounce.x / mass;
     o.vy = bounce.y / mass;
   }
+
+  /*
+  //#### hit
+  An universal collision method that works for rectangular and circular sprites.
+  it figures out what kinds of sprites are involved in the collision and 
+  automatically chooses the correct collision method.
+  */
+
+  ga.hit = function(a, b, react, bounce, global, extra) {
+    var collision;
+
+    //Set the defaults
+    react = react || false;
+    bounce = bounce || false;
+    global = global || true;
+
+    //Check to make sure one of the arguments isn't an array
+    if (b instanceof Array || a instanceof Array) {
+      //If it is, check for a collision between a sprite and an array
+      spriteVsArray();
+    } else {
+      //If one of the arguments isn't an array, find out what type of
+      //collision check to run
+      collision = findCollisionType(a, b); 
+      if (collision && extra) extra(collision);
+    }
+    //Return the result of the collision.
+    //It will be `undefined` if there's no collision and `true` if 
+    //there is a collision. `rectangleCollision` sets `collsision` to
+    //"top", "bottom", "left" or "right" depeneding on which side the
+    //collision is occuring on
+    return collision;
+
+    function findCollisionType (a, b) {
+      //Are `a` and `b` both shapes?
+      if (a.width && b.width) {
+        //Yes, but what kind of shapes?
+        if(a.diameter && b.diameter) {
+          //They're cicles
+          return circleVsCircle(a, b);
+        } else {
+          //They're rectangles
+          return rectangleVsRectangle(a, b);
+        }
+      }
+      //They're not both shapes, so what are they?
+      //Does `a` not have a width and `b` has a width?
+      else if (!a.width && b.width) {
+        //Yes, so this is a point vs. sprite collision test
+        return ga.hitTestPoint(a, b);
+      }
+      else {
+        //The user is trying to test some incompatible objects
+        throw new Error("I'm sorry, " + a + " and " + b + " cannot be use together in a collision test.");
+      }
+    }
+    
+    function spriteVsArray() {
+      //If `a` happens to be the array, flip it around so that it becomes `b`
+      if (a instanceof Array) {
+        var temp = a;
+        b = a;
+        a = temp;
+      }
+      //Loop through the array in reverse
+      for (var i = b.length - 1; i >= 0; i--) {
+        var sprite = b[i];
+        collision = findCollisionType(a, sprite); 
+        if (collision && extra) extra(collision, sprite);
+      }
+    }
+
+    function circleVsCircle(a, b) {
+      //If the circles shouldn't react to the collision,
+      //just test to see if they're touching
+      if(!react) {
+        return ga.hitTestCircle(a, b);
+      } 
+      //Yes, the circles should react to the collision
+      else {
+        //Are they both moving?
+        if (a.vx + a.vy !== 0 && b.vx + b.vy !== 0) {
+          //Yes, they are both moving
+          //(moving circle collisions always bounce apart so there's
+          //no need for the third, `bounce`, argument)
+          return ga.movingCircleCollision(a, b);
+        }
+        else {
+          //No, they're not both moving
+          return ga.circleCollision(a, b, bounce, global);
+        }
+      }
+    }
+
+    function rectangleVsRectangle(a, b) {
+      //If the rectangles shouldn't react to the collision, just
+      //test to see if they're touching
+      if(!react) {
+        return ga.hitTestRectangle(a, b);
+      } 
+      //Yes
+      else {
+        //Should they bounce apart?
+        //Yes
+        if(bounce) {
+          return ga.rectangleCollision(a, b, true, global);
+        } 
+        //No
+        else {
+          return ga.rectangleCollision(a, b, false, global); 
+        }
+      }
+    }
+  };
 
   /*
   Chapter 4: Sprite controllers

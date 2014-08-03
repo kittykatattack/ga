@@ -1,0 +1,320 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Blixxyee!</title>
+<body>
+<script src="../ga.js"></script>
+<script src="../plugins.js"></script>
+<script>
+
+/*
+This file requires these convenience functions from `plugins.js`
+`grid`
+`contain`
+`rectangleCollision`
+`slide`
+*/
+
+//Create a new GA instance, and start it.
+//Pre-load images and sounds in the array.
+var g = ga(
+  512, 512, setup, 
+  [
+    "images/blixyiiUI.png",
+    "images/blixyiiTileset.png",
+    "fonts/puzzler.otf",
+    "sounds/music.wav",
+    "sounds/bounce.wav"
+  ],
+  load
+);
+g.start();
+
+//Game variables
+var paddle, ball, topBorder, blocks,
+    music, bounceSound, message, titleMessage,
+    gridWidth = 8,
+    gridHeight = 5,
+    cellWidth = 64,
+    cellHeight = 64,
+    score = 0,
+    //Get a reference to the tileset images 
+    tileset = "images/blixyiiTileset.png",
+    ui = "images/blixyiiUI.png",
+    //title sprites
+    title, playButton,
+    //Groups
+    titleScene, gameScene;
+ 
+function load() {
+  //Display the loading progress bar wile the game
+  //assets load
+  g.progressBar.create(g.canvas, g.assets);
+  g.progressBar.update();
+}
+
+function setup() {
+
+  //Remove the progress bar
+  g.progressBar.remove();
+
+  //Set the canvas background color to white and add a dashed border
+  g.backgroundColor = "white";
+  g.canvas.style.border = "1px black dashed";
+
+  //Create the sprites
+  //1. The `titleScene` sprites
+  title = g.sprite(g.frame(ui, 0, 0, 512, 512));
+
+  //The play button
+  var buttonFrames = g.frames(ui, [[1,513],[1,609],[193,513]], 192, 96);
+  playButton = g.button(buttonFrames);
+  playButton.press = function() {
+    //start the music, set the `state` to `play`
+    //make `titleScene` slide out to the right and
+    //the `gameScene` slide in from the left
+    music.play();
+    g.state = play;
+    g.slide(titleScene, 513, 0, 0.2);
+    g.slide(gameScene, 0, 0, 0.2);
+  };
+  //Set the `playButton`'s x property to 513 so that
+  //it's offscreen when the sprite is created
+  playButton.x = 513;
+  playButton.y = 350; 
+
+  //Set the `titleMessage` x position to -200 so that it's offscreen
+  titleMessage = g.text("start game", "20px puzzler", "white", -200, 300); 
+
+  //Make the `playButton` and `titleMessage` slide in from the  
+  //edges of the screen using the `slide` function
+  g.slide(playButton, 250, 350, 0.2);
+  g.slide(titleMessage, 250, 300, 0.2);
+
+  //Create the `titleScene` group
+  titleScene = g.group(title, playButton, titleMessage);
+  
+  //2. The `gameScene` sprites
+  
+  //The paddle
+  paddle = g.sprite(g.frame(tileset, 0, 0, 96, 18));
+  g.stage.put.bottom(paddle, 0, -18);
+  
+  //The ball
+  ball = g.sprite(g.frame(tileset, 96, 0, 18, 18));
+  g.stage.put.bottom(ball, 0, -128);
+
+  //Set the ball's initial velocity
+  ball.vx = 12;
+  ball.vy = 8;
+
+  //Add a black border along the top of the screen
+  //It's a grid of one row and 8 columns.
+  topBorder = g.grid(
+    //columns, rows, width, height 
+    8, 1, 64, 32,
+    //centere? xCellPadding, yCellPadding, centered?    
+    false, 0, 0, 
+    //Create a black rectangle for each cell
+    function() {return g.rectangle(64, 32, "black");}
+  );
+
+  //Plot the grid of blocks
+  blocks = g.grid(
+    gridWidth, gridHeight, 64, 64,
+    false, 0, 0,
+    function() {
+      //Choose a random block from the tileset for each grid cell
+      var randomX = g.random(0, 4) * cellWidth;
+      return g.sprite(g.frame(tileset, randomX, 64, 64, 64));
+    }
+  );
+
+  //Position the blocks 32 pixels below the top of the canvas
+  blocks.y = 32;
+
+  //A text sprite for the score
+  message = g.text("test", "20px puzzler", "white");
+  message.x = 8;
+  message.y = 8;
+
+  //Add the game sprites to the `gameScene` group
+  gameScene = g.group(paddle, ball, topBorder, blocks, message);
+
+  //Position the `gameScene` offscreen at -513 so that its
+  //not visible when the game starts
+  gameScene.x = -513;
+  
+  //Sound and music
+  bounceSound = g.sound("sounds/bounce.wav");
+  music = g.sound("sounds/music.wav");
+  music.loop = true;
+}
+
+function play() {
+  //Move the paddle to the mouse's position
+  paddle.x = g.pointer.x - paddle.halfWidth;
+
+  //Keep the paddle within the screen boundaries
+  g.contain(paddle, g.stage.localBounds);
+  
+  //Move the ball
+  g.move(ball);
+
+  //Bounce the ball off the screen edges. Use the `contain` method
+  //with a custom `bounds` object (the second argument) that defines
+  //the area that the ball should bounce around in.
+  //Play the bounceSound when the ball hits one of these edges, 
+  //and reduce the score by one if it hits the ground.
+  var ballHitsWall = g.contain(
+    ball, 
+    {x: 0, y: 32, width: g.stage.width, height: g.stage.height}, 
+    true, 
+    //what should happen when the ball hits the edges of the boundary?
+    function(collision) {
+      bounceSound.play();
+      if (collision === "bottom") {
+        score -= 1;
+      }
+    }
+  );
+
+  /*
+  Check for a collision between the ball and the paddle, and 
+  bounce the ball off the paddle. Play the `bounceSound` when 
+  the collision occurs. 
+  You can use the univeral `hit` collision fucntion to do this.
+  `hit` arguments:
+  spriteA, spriteB, reactToCollision?, bounce?, useGlobalCoordinates?
+  actionWhenCollisionOccurs
+  */
+
+  var ballHitsPaddle = g.hit(
+    ball, paddle, true, true, true,
+    function(collision) {
+      bounceSound.play();
+    }
+  );
+  
+  //You can alternatively check for a collision using the lower-level 
+  //`rectangleCollision` function
+  /*
+  var ballHitsPaddle = g.rectangleCollision(ball, paddle, true);
+  if (ballHitsPaddle) {
+    bounceSound.play();
+  }
+  */
+
+  /*
+  Check for a collision between the ball and the all 
+  the blocks in the grid
+  You can use the univeral `hit` collision function to do this. If one
+  of the first two argumens is an array, the `hit` function will loop
+  through all the sprites in that array and check it for a collision
+  with the other sprite.
+  `hit` arguments:
+  spriteA, spriteB, reactToCollision?, bounce?, useGlobalCoordinates?
+  actionWhenCollisionOccurs
+  */
+
+  var ballHitsBlock = g.hit(
+    ball, blocks.children, true, true, true,
+    function(collision, block) {
+      score += 1;
+      bounceSound.play();
+      g.remove(block);
+    }
+  );
+  
+  //You can alternatively check for a collision 
+  //between the ball and the blocks using the lower-level 
+  //`rectangleCollision` function inside a `filter` loop
+  /*
+  blocks.children.filter(function(block){
+    var ballHitsBlock = g.rectangleCollision(ball, block, true);
+    if (ballHitsBlock) {
+      score += 1;
+      bounceSound.play();
+      g.remove(block);
+      return false;
+    } else {
+      return true;
+    }
+  });
+  */
+
+  //Use whichever collision style you prefer
+
+  //Display the current score
+  message.content = "Score: " + score;
+
+  //Check for the end of the game.
+  if (blocks.empty) {
+    //Pause the game, wait for 1 second, and then
+    //call the `end` function
+    g.pause();
+    g.wait(1000, function() {
+      end();
+    });
+  }
+}
+
+function end() {
+  //Display the `titleScene` and hide the `gameScene`
+  g.slide(titleScene, 0, 0, 0.2);
+  g.slide(gameScene, -513, 0, 0.2);
+
+  //Display the final score
+  titleMessage.text = "Score: " + score; 
+
+  //Lower the music volume
+  music.volume = 0.3;
+
+  //Assign a new button `press` action to
+  //`restart` the game
+  playButton.press = function() {
+    restart();
+  };
+}
+
+function restart() {
+
+  //Remove any remaining blocks if there are any
+  g.remove(blocks);
+
+  //Plot a new grid of blocks
+  blocks = g.grid(
+    gridWidth, gridHeight, 64, 64,
+    false, 0, 0,
+    function() {
+      var randomX = g.random(0, 4) * cellWidth;
+      return g.sprite(g.frame(tileset, randomX, 64, 64, 64));
+    }
+  );
+  //Add the blocks to the `gameScene` and position it
+  gameScene.addChild(blocks);
+  blocks.y = 32;
+  blocks.x = 0;
+
+  //Reset the ball and paddle positions
+  g.stage.put.bottom(paddle, 0, -18);
+  g.stage.put.bottom(ball, 0, -128);
+
+  //Reset the ball's velocity
+  ball.vx = 12;
+  ball.vy = 8;
+
+  //Reset the score
+  score = 0;
+
+  //Set the music volume to full
+  music.volume = 1;
+  
+  //Hide the titleScene and reveal the gameScene
+  g.slide(titleScene, 513, 0, 0.2);
+  g.slide(gameScene, 0, 0, 0.2);
+  
+  //Set the game state to `play` and `resume` the game
+  g.state = play;
+  g.resume();
+}
+</script>

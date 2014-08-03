@@ -62,9 +62,12 @@ function play() {
   //Check for a collision between the blue and red squares.
   //The collision variable will be `true`
   //if there's a collision and `false` if there isn't
+  var collision = g.hit(blue, red);
+
+  //Alternatively, you can use the lower-leve hitTestRectangle method.
   //`hitTestRectangle` arguments:
   //spriteOne, spriteTwo
-  var collision = g.hitTestRectangle(blue, red);
+  //var collision = g.hitTestRectangle(blue, red);
   
   //Change the message if there's a collision between the rectangles
   if(collision) {

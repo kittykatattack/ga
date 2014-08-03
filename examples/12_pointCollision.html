@@ -54,14 +54,27 @@ function play() {
   //Set the default message content 
   message.content = "No collision...";
 
-  //Check for a collision between the pointer and the 
-  //ball and box. The collision variables will be `true`
-  //if there's a collision and `false` if there isn't.
+  /*
+  Check for a collision between the pointer and the 
+  ball and box. The collision variables will be `true`
+  if there's a collision and `false` if there isn't.
+  Use the univeral `hit` method to do the collision check.
+  `hit` arguments (only the first two are required):
+  spriteA, spriteB, reactToCollision?, bounce?, useGlobalCoordinates?
+  actionWhenCollisionOccurs
+  */
+
+  var boxCollision = g.hit(g.pointer, box);
+  var ballCollision = g.hit(g.pointer, ball);
+
+  //You can alternatively use the lower-level `hitTestPoint` method
   //`hitTestPoint` arguments:
   //pointObject, sprite
+  /*
   var boxCollision = g.hitTestPoint(g.pointer.position, box),
       ballCollision = g.hitTestPoint(g.pointer.position, ball);
-  
+  */
+
   //Change the message if there's a collision with the box
   if(boxCollision) {
     message.content = "Box!"; 

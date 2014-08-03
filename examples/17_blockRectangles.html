@@ -58,18 +58,25 @@ function setup() {
 function play() {
 
   /*
-  Use `rectangleCollision` to prevent two rectangles from
+  Use the universal `hit` method to prevent two rectangles from
   overlapping. It returns a `collision` variable that tells you the side on which
   the first rectangle touched the second rectangle. (The `collision`
   variable will be `undefined` if there's no collision.). The second
   sprite in the argument will block the movement of the first sprite.
   The second sprite in the argument can push the first sprite.
+  //`hit` arguments:
+  //spriteOne, spriteTwo, reactToCollision?, bounceApart?
+  */
+  var collision = g.hit(blue, red, true, false);
+
+  /*
+  You can alternatively use the lower-level `rectangleCollision`
+  method
   `rectangleCollision` arguments:
   sprite1, sprite2, bounce?, useGlobalCoordinates?
   (the third and fourth arguments default to `true`);
   */
-
-  var collision = g.rectangleCollision(blue, red);
+  //var collision = g.rectangleCollision(blue, red);
   
   //Change the message if there's a collision between the rectangles
   if(collision) {
