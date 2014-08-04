@@ -832,12 +832,22 @@ GA.plugins = function(ga) {
   b. A sprite object with `centerX`, `centerY` and `radius`.
   */
 
-  ga.hitTestCircle = function(c1, c2) {
+  ga.hitTestCircle = function(c1, c2, global) {
     var vx, vy, magnitude, totalRadii, hit;
 
+    //Set `global` to a default value of `true`
+    if(global === undefined) global = true;
+
     //Calculate the vector between the circles’ center points
-    vx = c1.centerX - c2.centerX;
-    vy = c1.centerY - c2.centerY;
+    if(global) {
+      //Use global coordinates
+      vx = (c2.gx + c2.radius) - (c1.gx + c1.radius);
+      vy = (c2.gy + c2.radius) - (c1.gy + c1.radius);
+    } else {
+      //Use local coordinates
+      vx = c2.centerX - c1.centerX;
+      vy = c2.centerY - c1.centerY;
+    }
 
     //Find the distance between the circles by calculating
     //the vector's magnitude (how long the vector is)  
@@ -864,15 +874,23 @@ GA.plugins = function(ga) {
 
   */
 
-  ga.hitTestRectangle = function(r1, r2) {
+  ga.hitTestRectangle = function(r1, r2, global) {
     var hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+    //Set `global` to a default value of `true`
+    if(global === undefined) global = true;
 
     //A variable to determine whether there's a collision
     hit = false;
 
     //Calculate the distance vector
-    vx = r1.centerX - r2.centerX;
-    vy = r1.centerY - r2.centerY;
+    if(global) {
+      vx = (r1.gx + r1.halfWidth) - (r2.gx + r2.halfWidth);
+      vy = (r1.gy + r1.halfHeight) - (r2.gy + r2.halfHeight);
+    } else {
+      vx = r1.centerX - r2.centerX;
+      vy = r1.centerY - r2.centerY;
+    }
 
     //Figure out the combined half-widths and half-heights
     combinedHalfWidths = r1.halfWidth + r2.halfWidth;
@@ -1119,7 +1137,7 @@ GA.plugins = function(ga) {
 
   */
 
-  ga.movingCircleCollision = function(c1, c2) {
+  ga.movingCircleCollision = function(c1, c2, global) {
     var combinedRadii, overlap, xSide, ySide,
         s = {},
         p1A = {}, p1B = {}, p2A = {}, p2B = {},
@@ -1127,10 +1145,20 @@ GA.plugins = function(ga) {
 
     c1.mass = c1.mass || 1;
     c2.mass = c2.mass || 1;
+    
+    //Set `global` to a default value of `true`
+    if(global === undefined) global = true;
 
     //Calculate the vector between the circles’ center points
-    s.vx = c1.centerX - c2.centerX;
-    s.vy = c1.centerY - c2.centerY;
+    if(global) {
+      //Use global coordinates
+      s.vx = (c2.gx + c2.radius) - (c1.gx + c1.radius);
+      s.vy = (c2.gy + c2.radius) - (c1.gy + c1.radius);
+    } else {
+      //Use local coordinates
+      s.vx = c2.centerX - c1.centerX;
+      s.vy = c2.centerY - c1.centerY;
+    }
 
     //Find the distance between the circles by calculating
     //the vector's magnitude (how long the vector is) 
@@ -1242,7 +1270,9 @@ GA.plugins = function(ga) {
   all the other circles in an array, using `movingCircleCollision` (above)
   */
 
-  ga.multipleCircleCollision = function(arrayOfCircles) {
+  ga.multipleCircleCollision = function(arrayOfCircles, global) {
+    //Set `global` to a default value of `true`
+    if(global === undefined) global = true;
     //marble collisions
     for (var i = 0; i < arrayOfCircles.length; i++) {
       //The first marble to use in the collision check 
@@ -1253,7 +1283,7 @@ GA.plugins = function(ga) {
         //Check for a collision and bounce the marbles apart if
         //they collide. Use an optional mass property on the sprite
         //to affect the bounciness of each marble
-        ga.movingCircleCollision(c1, c2);
+        ga.movingCircleCollision(c1, c2, global);
       }
     }
   };
@@ -1396,7 +1426,7 @@ GA.plugins = function(ga) {
       //If the circles shouldn't react to the collision,
       //just test to see if they're touching
       if(!react) {
-        return ga.hitTestCircle(a, b);
+        return ga.hitTestCircle(a, b, global);
       } 
       //Yes, the circles should react to the collision
       else {
@@ -1405,7 +1435,7 @@ GA.plugins = function(ga) {
           //Yes, they are both moving
           //(moving circle collisions always bounce apart so there's
           //no need for the third, `bounce`, argument)
-          return ga.movingCircleCollision(a, b);
+          return ga.movingCircleCollision(a, b, global);
         }
         else {
           //No, they're not both moving
@@ -1418,7 +1448,7 @@ GA.plugins = function(ga) {
       //If the rectangles shouldn't react to the collision, just
       //test to see if they're touching
       if(!react) {
-        return ga.hitTestRectangle(a, b);
+        return ga.hitTestRectangle(a, b, global);
       } 
       //Yes
       else {
@@ -1440,9 +1470,9 @@ GA.plugins = function(ga) {
   -----------------------------
   */
 
-  //### keyControlFourWay
+  //### fourKeyController
 
-  ga.keyControlFourWay = function(s, speed, up, right, down, left) {
+  ga.fourKeyController = function(s, speed, up, right, down, left) {
     //Create a `direction` property on the sprite
     s.direction = "";
     

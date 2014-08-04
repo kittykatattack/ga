@@ -49,12 +49,12 @@ function setup() {
   the sprite which is a string that tells you the direction the
   sprite is moving in: "up", "right", "down" or "left"
   `keyControlFourWay` arguments:
-  gaInstance, sprite, speed, upCode, rightCode, downCode, leftCode
+  sprite, speed, upCode, rightCode, downCode, leftCode
   (You can remember the order of the key codes because they're listed
   clockwise from top.)
   */
 
-  g.keyControlFourWay(g, cat, 2, 38, 39, 40, 37);
+  g.fourKeyController(cat, 2, 38, 39, 40, 37);
 
   /*
   That's quick and easy, but for most games you'll need a lot more
