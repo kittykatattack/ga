@@ -71,11 +71,10 @@ Here's Ga's full feature list:
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
 - A `plugins.js` file full of extra tools. 
-- A friendly yet powerful "Haiku" style API that's centered on shallow,
-  composable components and requires very little mental overhead to
-  use effectively. Get more done writing less code.
+- A compact and powerful "Haiku" style API that's centered on shallow,
+  composable components. Get more done writing less code.
 - Ga is totally hackable. Overwrite any of its default methods or objects
-  with your own at runtime.
+  with your own at compile or run time.
 - Yes, Ga is mobile friendly!
 - Yes, the core `ga.js` engine is less than 6.5k minified and zipped!
   It's all you need to start making any any 2D action, puzzle or
@@ -106,23 +105,30 @@ you'll find in `plugins.js`:
 - A loading progress bar for game assets.
 - Make sprites shoot things with `shoot`. 
 - Easily plot sprites in a grid formation with `grid`.
+- Tiled Editor support using `makeTiledWorld`. Design your game in
+  Tiled Editor and access all the sprites, layers and objects directly
+  in your game code. It's an extremely fun, quick and easy way to make
+  games.
+- A versatile, `hitTestTile` method that handles all the collision
+  checking you'll need for tile-based games. You can use it in combination
+  with the any of the 2D geometric collision methods for optimized
+  broadphase/narrowphase collision checking if you want to.
+- Create a `worldCamera` that follows sprites around a scrolling game
+  world.
 
-Just copy/paste the code you want to use from `plugins.js` into your game. 
+To use the plugins, just copy/paste the code you want to use from `plugins.js` into your game. 
 Or, if you're not worried about the extra size, 
-just link the whole thing; it's pretty tiny anyway!
+just link the whole thing; it's really tiny anyway!
 
 If you want to get fancy, you can alternatively create your own `custom.js` file that 
 contains a small custom sub-set of the plugins
-you want to use for your game. (See the `plugins.js` file for instructions
-on how to do this).
+you want to use for your game. Your `custom.js` file can load at
+compile time, so it's ready to use before your game code runs. 
+(See the `plugins.js` file for instructions on how to do this).
 
-Coming very soon... 
--------------------
+### Coming very soon... 
 
-(These will be in plugins.js):
-
-- Complete tile-based collision functions.
-- Tiled Editor map support (for both flat 2D and isometric maps).
+- Tiled Editor isometric maps support.
 - Many more examples including complete game prototypes.
 - Detailed documentation, user guide and tutorials.
 

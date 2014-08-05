@@ -445,7 +445,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.children = [];
     //The `addChild` method lets you add sprites to this container.
     o.addChild = function(sprite) {
-      //Remove the sprite from its current parent, if it has one.
+      //Remove the sprite from its current parent, if it has one, and
+      //the parent isn't already this object
       if (sprite.parent) {
         sprite.parent.removeChild(sprite);
       }
@@ -453,6 +454,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //add it to this object's `children` array.
       sprite.parent = o;
       o.children.push(sprite);
+      //Calculate the sprite's new width and height
+      o.calculateSize();
     };
     //The `removeChild` method lets you remove a sprite from its
     //parent container. 
@@ -461,6 +464,25 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.children.splice(o.children.indexOf(sprite), 1);
       } else {
         throw new Error(sprite + "is not a child of " + o);
+      }
+      //Calculate the sprite's new width and height
+      o.calculateSize();
+    };
+    //Dynamically calculate the width and height of the sprite based
+    //on the size and position of the children it contains
+    o.calculateSize = function() {
+      //Calculate the width based on the size of the largest child
+      //that this sprite contains
+      if (o.children.length > 0 && o.stage === false) {
+        for(var i = 0; i < o.children.length - 1; i++) {
+          var child = o.children[i];
+          if (child.x + child.width > o._width) {
+            o._width = child.x + child.width;
+          }
+          if (child.y + child.height > o._height) {
+            o._height = child.y + child.height;
+          }
+        }
       }
     };
     //Swap the depth layer positions of two child sprites
@@ -480,25 +502,26 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
     //`add` and `remove` convenience methods let you add and remove
     //many sprites at the same time.
-    o.add = function(sprites) {
-      if(sprites instanceof Array) {
+    o.add = function(spritesToAdd) {
+      var sprites = Array.prototype.slice.call(arguments);
+      if(sprites.length > 1) {
         sprites.forEach(function(sprite) {
           o.addChild(sprite);
         });
       } else {
-        o.addChild(sprites);
+        o.addChild(sprites[0]);
       }
     };
-    o.remove = function(sprites) {
-      if(sprites instanceof Array) {
-        sprites.foreach(function(sprite) {
-          o.removechild(sprite);
+    o.remove = function(spritesToRemove) {
+      var sprites = Array.prototype.slice.call(arguments);
+      if(sprites.length > 1) {
+        sprites.forEach(function(sprite) {
+          o.removeChild(sprite);
         });
       } else {
-        o.removechild(sprites);
+        o.removeChild(sprites[0]);
       }
     };
-
     //A `setPosition` convenience function to let you set the
     //x any y position of a sprite with one line of code.
     o.setPosition = function(x, y) {
@@ -592,7 +615,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
               child.gy += offset;
             });
           }
-          //Set the new x value.
+          //Set the new y value.
           this._gy = value;
         },
         enumerable: true, configurable: true
@@ -666,6 +689,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //the base width by the sprite's x and y scale factors.
       width: {
         get: function() {
+          //Return the width, multiplied by the scale factor
           return this._width * this.scaleX;
         },
         set: function(value){
@@ -675,6 +699,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       },
       height: {
         get: function() {
+          //Return the height, multiplied by the scale factor
           return this._height * this.scaleY;
         },
         set: function(value){
@@ -829,14 +854,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //### remove
   //`remove` is a global convenience method that will 
-  //remove any sprite from its parent.
-  ga.remove = function(sprites) {
-    if(sprites instanceof Array) {
-      sprites.foreach(function(sprite) {
+  //remove any sprite, or an argument list of sprites, from its parent.
+  ga.remove = function(spritesToRemove) {
+    var sprites = Array.prototype.slice.call(arguments);
+    if(sprites.length > 1) {
+      sprites.forEach(function(sprite) {
         sprite.parent.removeChild(sprite);
       });
     } else {
-      sprites.parent.removeChild(sprites);
+      sprites[0].parent.removeChild(sprites[0]);
     }
   };
 
@@ -893,9 +919,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //### group
   //A `group` is a special kind of display object that doesn't have any
   //visible content. Instead, you can use it as a parent container to 
-  //group other sprites. If you don't assign it a `width` and
-  //`height`, the group's width and height will be calculated based on the size
-  //of the largest sprite that group contains. Supply any number of
+  //group other sprites. Supply any number of
   //sprites to group as arguments, or don't supply any arguments if
   //you want to create an empty group. (You can always add sprites to
   //the group later using `addChild`). 
@@ -906,42 +930,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     makeDisplayObject(o);
     //Add the group to the `stage`
     ga.stage.addChild(o);
-    //Custom `addChild` and `removeChild` methods that recalculate the
-    //group's width and height based on the size and position of the 
-    //child sprites it contains
-    o.addChild = function(sprite) {
-      //Remove the sprite from its current parent, if it has one
-      if (sprite.parent) {
-        sprite.parent.removeChild(sprite);
-      }
-      //Make this object the sprite's parent and 
-      //add it to this object's `children` array
-      sprite.parent = o;
-      o.children.push(sprite);
-      //Recalculate the group's width
-      var width = 0;
-      o.children.forEach(function(child) {
-        if(child.x + child.width > width) {
-          width = child.x + child.width;
-        }
-      });
-      o.width = width;
-    };
-    o.removeChild = function(sprite) {
-      if(sprite.parent === o) {
-        o.children.splice(o.children.indexOf(sprite), 1);
-        //recalculate the group's height
-        var height = 0;
-        o.children.forEach(function(child) {
-          if(child.y + child.height > height) {
-            height = child.y + child.height;
-          }
-        });
-      o.height = height;
-      } else {
-        throw new Error(sprite + "is not a child of " + o);
-      }
-    };
     //Group any sprites that were passed to the group's arguments
     //(Important!: This bit of code needs to happen after adding the group to the stage)
     if (spritesToGroup) {
@@ -1342,7 +1330,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     else if(source.image && !source.data) {
       //Throw an error if the source is not an image file.
       if (!(ga.assets[source.image] instanceof Image)) {
-        throw new Error(source.image + "is not an image file");
+        throw new Error(source.image + " is not an image file");
       }
       o.source = ga.assets[source.image];
       o.sourceX = source.x;
@@ -1684,12 +1672,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function displaySprite(sprite) {
       //Only draw sprites if they're visible and inside the
       //area of the canvas.
+      /*
       if (
         sprite.visible
+        && sprite.gx < canvas.width 
         && sprite.gx + sprite.width > -1
-        && sprite.gx < canvas.width
-        && sprite.gy + sprite.height > -1
         && sprite.gy < canvas.height
+        && sprite.gy + sprite.height > -1
+      ) {
+      */
+      if (
+        sprite.visible
+        && sprite.gx < canvas.width 
+        && sprite.gx + sprite.width > -1
+        && sprite.gy < canvas.height
+        && sprite.gy + sprite.height > -1
       ) {
         //Save the current context state.
         ctx.save();
@@ -1705,20 +1702,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
         }
-        //Position the canvas to the sprite's center point (its
-        //position plus half its width.) This will let us easily
-        //rotate the sprite around its center 
-        /* 
-        ctx.translate(
-          Math.floor(sprite.x + sprite.halfWidth),
-          Math.floor(sprite.y + sprite.halfHeight)
-        );
-        */
+        //If the sprite's parent is the stage, position the sprite
+        //relative to the top left corner of the canvas
         if (sprite.parent.stage === true) {
           ctx.translate(
             sprite.gx + sprite.halfWidth,
             sprite.gy + sprite.halfHeight
           );
+        //If the sprite's parent isn't the stage, position the sprite
+        //relative to the sprite's parent's center point
         } else {
           ctx.translate(
             sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth,
@@ -1748,6 +1740,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents. 
         ctx.restore();
+      } else {
+       //console.log(sprite.height)
       }
     }
   }
