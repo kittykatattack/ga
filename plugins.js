@@ -1,3 +1,11 @@
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level SIMPLE_OPTIMIZATIONS
+// @language ECMASCRIPT5
+// @fileoverview
+// @suppress {checkTypes | globalThis | checkVars}
+// ==/ClosureCompiler==
+
 /*
 Ga plugins
 ==========

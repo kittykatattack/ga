@@ -1,3 +1,11 @@
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level SIMPLE_OPTIMIZATIONS
+// @language ECMASCRIPT5
+// @fileoverview
+// @suppress {checkTypes | globalThis | checkVars}
+// ==/ClosureCompiler==
+
 /*
 Welcome to Ga's source code!
 ============================
@@ -92,6 +100,11 @@ to learn how the engine works.
 //### GA
 //`GA` is the global instance of the program.
 var GA = GA || {};
+
+//Set `plugins` and `custom` to an intial value of `undefined` to make
+//Google Closure Compiler happy
+GA.plugins = undefined;
+GA.custom = undefined;
 
 //### ga
 //The `ga` convenience function is just a nice quick way to create an
@@ -424,8 +437,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //calculations. All these properties will be changed or accessed through a matching getter/setter
     o._alpha = 1;
     o._draggable = undefined;
-    o._scaleX;
-    o._scaleY;
     //The sprite's global coordinates.
     o._gx = 0;
     o._gy = 0;
@@ -494,8 +505,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         child1.childIndex = index2;
         child2.childIndex = index1;
         //Swap the array positions
-        this.children[index1] = child2;
-        this.children[index2] = child1;
+        o.children[index1] = child2;
+        o.children[index2] = child1;
       } else {
         throw new Error(child + " Both objects must be a child of the caller " + o);
       }
@@ -584,12 +595,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //global coordinates.
       gx: {
         get: function() {
-          return this._gx;
+          return o._gx;
         },
         set: function(value) {
-          var currentX = this.gx;
-          if (this.children && this.children.length > 0) {
-            this.children.forEach(function(child) {
+          var currentX = o.gx;
+          if (o.children && o.children.length > 0) {
+            o.children.forEach(function(child) {
               //The offset is equal to the difference between the 
               //container's `currentX` position and its new `value`.
               var offset = value - currentX;
@@ -597,18 +608,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             });
           }
           //Set the new x value.
-          this._gx = value;
+          o._gx = value;
         },
         enumerable: true, configurable: true
       },
       gy: {
         get: function() {
-          return this._gy;
+          return o._gy;
         },
         set: function(value) {
-          var currentY = this.gy;
-          if (this.children && this.children.length > 0) {
-            this.children.forEach(function(child) {
+          var currentY = o.gy;
+          if (o.children && o.children.length > 0) {
+            o.children.forEach(function(child) {
               //The offset is equal to the difference between the 
               //container's `currentY` position and its new `value`.
               var offset = value - currentY;
@@ -616,7 +627,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             });
           }
           //Set the new y value.
-          this._gy = value;
+          o._gy = value;
         },
         enumerable: true, configurable: true
       },
@@ -624,27 +635,27 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //relative to this sprite's parent.
       x: {
         get: function() {
-          if (this.parent.gx > 0) {
-            return this.gx - this.parent.gx;
+          if (o.parent.gx > 0) {
+            return o.gx - o.parent.gx;
           } else {
-            return Math.abs(this.parent.gx) + this.gx;
+            return Math.abs(o.parent.gx) + o.gx;
           }
         },
         set: function(value){
-          this.gx = this.parent.gx + value;
+          o.gx = o.parent.gx + value;
         },
         enumerable: true, configurable: true
       },
       y: {
         get: function() {
-          if (this.parent.gy > 0) {
-            return this.gy - this.parent.gy;
+          if (o.parent.gy > 0) {
+            return o.gy - o.parent.gy;
           } else {
-            return Math.abs(this.parent.gy) + this.gy;
+            return Math.abs(o.parent.gy) + o.gy;
           }
         },
         set: function(value) {
-          this.gy = this.parent.gy + value;
+          o.gy = o.parent.gy + value;
         },
         enumerable: true, configurable: true
       },
@@ -652,11 +663,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //set the sprite's position as an object with x and y values.
       position: {
         get: function() {
-          return {x: this.x, y: this.y};
+          return {x: o.x, y: o.y};
         },
         set: function(point){
-          this.x = point.x;
-          this.y = point.y;
+          o.x = point.x;
+          o.y = point.y;
         }
       },
       //An `alpha` getter/setter. The sprite's `alpha` (transparency) should match its
@@ -664,24 +675,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       alpha: {
         get: function() {
           //Find out the sprite's alpha relative to its parent's alpha
-          var relativeAlpha = this.parent._alpha * this._alpha;
+          var relativeAlpha = o.parent._alpha * o._alpha;
           return relativeAlpha;
         },
         set: function(value) {
-          this._alpha = value;
+          o._alpha = value;
         },
         enumerable: true, configurable: true
       },
       //The sprite's `halfWidth` and `halfHeight`.
       halfWidth: {
         get: function() {
-          return this.width / 2;
+          return o.width / 2;
         },
         enumerable: true, configurable: true
       },
       halfHeight: {
         get: function() {
-          return this.height / 2;
+          return o.height / 2;
         },
         enumerable: true, configurable: true
       },
@@ -690,33 +701,33 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       width: {
         get: function() {
           //Return the width, multiplied by the scale factor
-          return this._width * this.scaleX;
+          return o._width * o.scaleX;
         },
         set: function(value){
-          this._width = value;
+          o._width = value;
         },
         enumerable: true, configurable: true
       },
       height: {
         get: function() {
           //Return the height, multiplied by the scale factor
-          return this._height * this.scaleY;
+          return o._height * o.scaleY;
         },
         set: function(value){
-          this._height = value;
+          o._height = value;
         },
         enumerable: true, configurable: true
       },
       //The sprite's center point.
       centerX: {
         get: function() {
-          return this.x + this.halfWidth;
+          return o.x + o.halfWidth;
         },
         enumerable: true, configurable: true
       },
       centerY: {
         get: function() {
-          return this.y + this.halfHeight;
+          return o.y + o.halfHeight;
         },
         enumerable: true, configurable: true
       },
@@ -726,11 +737,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //higher number.
       layer: {
         get: function() {
-          return this._layer;
+          return o._layer;
         },
         set: function(value) {
-          this._layer = value;
-          this.parent.children.sort(byLayer);          
+          o._layer = value;
+          o.parent.children.sort(byLayer);          
         },
         enumerable: true, configurable: true
       },
@@ -740,21 +751,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //function where its given `radius` and `diameter` properties.
       circular: {
         get: function() {
-          return this._circular;
+          return o._circular;
         },
         set: function(value) {
           //Give the sprite `diameter` and `radius` properties
           //if `circular` is `true`.
-          if (value === true && this._circular === false) {
-            makeCircular(this);
-            this._circular = true;
+          if (value === true && o._circular === false) {
+            makeCircular(o);
+            o._circular = true;
           }
           //Remove the sprite's `diameter` and `radius` properties
           //if `circular` is `false`.
-          if (value === false && this._circular === true) {
-            delete this.diameter;
-            delete this.radius;
-            this._circular = false;
+          if (value === false && o._circular === true) {
+            delete o.diameter;
+            delete o.radius;
+            o._circular = false;
           }
         },
         enumerable: true, configurable: true
@@ -765,18 +776,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //frame to check whether they're being dragged.
       draggable: {
         get: function() {
-          return this._draggable;
+          return o._draggable;
         },
         set: function(value) {
           //If it's `true` push the sprite into the `draggableSprites`
           //array.
           if (value === true) {
-            ga.draggableSprites.push(this);
-            this._draggable = true;
+            ga.draggableSprites.push(o);
+            o._draggable = true;
           }
           //If it's `false`, remove it from the `draggableSprites` array.
           if (value === false) {
-            ga.draggableSprites.splice(ga.draggableSprites.indexOf(this), 1);
+            ga.draggableSprites.splice(ga.draggableSprites.indexOf(o), 1);
           }
         },
         enumerable: true, configurable: true
@@ -788,21 +799,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //which is updated each frame in the `ga.update` method.
       interactive: {
         get: function() {
-          return this._interactive;
+          return o._interactive;
         },
         set: function(value) {
           if (value === true) {
             //Add interactive properties to the sprite
             //so that it can act like a button.
-            makeInteractive(this);
-            this._interactive = true;
+            makeInteractive(o);
+            o._interactive = true;
           }
           if (value === false) {
             //Remove the sprite's reference from the game engine's
             //`buttons` array so that it it's no longer affected
             //by mouse and touch interactivity.
-            ga.buttons.splice(ga.buttons.indexOf(this), 1);
-            this._interactive = false;
+            ga.buttons.splice(ga.buttons.indexOf(o), 1);
+            o._interactive = false;
           }
         },
         enumerable: true, configurable: true
@@ -817,8 +828,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           var rectangle = {
             x: 0, 
             y: 0, 
-            width: this.width, 
-            height: this.height
+            width: o.width, 
+            height: o.height
           }; 
           return rectangle;
         },
@@ -827,10 +838,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       globalBounds: {
         get: function() {
           rectangle = {
-            x: this.gx, 
-            y: this.gy, 
-            width: this.gx + this.width, 
-            height: this.gy + this.height
+            x: o.gx, 
+            y: o.gy, 
+            width: o.gx + o.width, 
+            height: o.gy + o.height
           }; 
           return rectangle;
         },
@@ -841,7 +852,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //array is empty.
       empty: {
         get: function() {
-          if (this.children.length === 0) {
+          if (o.children.length === 0) {
             return true;
           } else {
             return false;
@@ -874,21 +885,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     Object.defineProperties(o, {
       diameter: {
         get: function() {
-          return this.width;
+          return o.width;
         },
         set: function(value) {
-          this.width = value;
-          this.height = value;
+          o.width = value;
+          o.height = value;
         },
         enumerable: true, configurable: true
       },
       radius: {
         get: function() {
-          return this.width / 2;
+          return o.width / 2;
         },
         set: function (value) {
-          this.width = value * 2;
-          this.height = value * 2;
+          o.width = value * 2;
+          o.height = value * 2;
         }, 
         enumerable: true, configurable: true
       }
@@ -925,7 +936,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //the group later using `addChild`). 
   ga.group = function(spritesToGroup) {
     var o = {};
-    o.type = "group";
     //Make the group a display object.
     makeDisplayObject(o);
     //Add the group to the `stage`
@@ -1004,7 +1014,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //a circle.
     o.render = function(ctx) {
       ctx.beginPath();
-      ctx.arc(0, 0, o.radius, 0, 6.28, false);
+      ctx.arc(0, 0, o.radius, 0, 2*Math.PI, false);
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
     };
@@ -1017,7 +1027,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //arguments: lineColor, lineWidth, startX, startY, endX, endY.
   ga.line = function(strokeStyle, lineWidth, ax, ay, bx, by) {
     var o = {};
-    o.type = "line";
+    //Add basic properties to the sprite.
+    makeDisplayObject(o);
     //Set the defaults.
     if (!ax && ax !== 0) ax = 0;
     if (!ay && ay !== 0) ay = 0;
@@ -1032,8 +1043,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The `lineJoin` style.
     //Options are "round", "mitre" and "bevel".
     o.lineJoin = "round";
-    //Add basic properties to the sprite.
-    makeDisplayObject(o);
     //Add the sprite to the stage.
     ga.stage.addChild(o);
     //Measure the width and height of the line, and its
@@ -1062,7 +1071,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         set: function(value) {
           //Find the current x value (the x point closest to the
           //left.)
-          var currentX = this.gx;
+          var currentX = o.gx;
           //Figure out the difference between the current
           //x value and the new x value.
           var offset = value - currentX;
@@ -1084,7 +1093,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         set: function(value) {
           //Find the current y value (the y point closest to the top)
-          var currentY = this.gy;
+          var currentY = o.gy;
           //Figure out the difference between the current
           //y value and the new y value
           var offset = value - currentY;
@@ -1136,14 +1145,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //arguments: stringContent, font, fontColor, xPosition, yPosition.
   ga.text = function(content, font, fillStyle, x, y) {
     var o = {};
-    o.type = "text";
+    //Add the basic sprite properties.
+    makeDisplayObject(o);
     //Set the defaults.
     o.content = content || "Hello!";
     o.font = font || "12px sans-serif";
     o.fillStyle = fillStyle || "red";
     o.textBaseline = "top";
-    //Add the basic sprite properties.
-    makeDisplayObject(o);
     //Measure the width and height of the text
     Object.defineProperties(o, {
       width: {
@@ -1775,11 +1783,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     
     load: function(sources) {
       console.log("Loading assets...");
-      //Find the number of files that need to be loaded.
-      this.toLoad = sources.length;
       //Get a reference to this asset object so we can 
       //refer to it in the `forEach` loop ahead.
       var self = this;
+      //Find the number of files that need to be loaded.
+      self.toLoad = sources.length;
       sources.forEach(function(source){
         //Find the file extension of the asset.
         var extension = source.split('.').pop();
@@ -1812,12 +1820,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //document. It's kind of a hack, but until HTML5 has a
           //proper font loading API, it will do for now.
           var newStyle = document.createElement('style');
-          newStyle.appendChild(document.createTextNode("\
-            @font-face {\
-              font-family: '" + fontFamily + "';\
-              src: url('" + source + "');\
-            }\
-          "));
+          var fontFace =  "@font-face {font-family: '" + fontFamily + "'; src: url('" + source + "');}";
+          newStyle.appendChild(document.createTextNode(fontFace));
           document.head.appendChild(newStyle);
           //Tell the loadHandler we're loading a font.
           self.loadHandler();
@@ -1917,17 +1921,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //#### loadHandler
     //The `loadHandler` will be called each time an asset finishes loading.
     loadHandler: function () {
-      this.loaded += 1;
-      console.log(this.loaded);
+      var self = this;
+      self.loaded += 1;
+      console.log(self.loaded);
       //Check whether everything has loaded.
-      if (this.toLoad === this.loaded) {
+      if (self.toLoad === self.loaded) {
         //If it has, run the callback function that was assigned to the `whenLoaded` property
         console.log("Assets finished loading");
         //Reset `loaded` and `toLoaded` so we can load more assets
         //later if we want to.
-        this.toLoad = 0;
-        this.loaded = 0;
-        this.whenLoaded();
+        self.toLoad = 0;
+        self.loaded = 0;
+        self.whenLoaded();
       }
     }
   };
@@ -1946,13 +1951,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     Object.defineProperties(o, {
       centerX: {
         get: function() {
-          return this.x;
+          return o.x;
         },
         enumerable: true, configurable: true
       },
       centerY: {
         get: function() {
-          return this.y;
+          return o.y;
         },
         enumerable: true, configurable: true
       },
@@ -1960,7 +1965,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //contain the pointer's position.
       position: {
         get: function() {
-          return {x: this.x, y: this.y};
+          return {x: o.x, y: o.y};
         },
         enumerable: true, configurable: true
       }

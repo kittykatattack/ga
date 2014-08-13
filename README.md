@@ -158,14 +158,22 @@ Minifying, crushing and compressing
 The Ga repository doesn't include the minified and compressed version
 of the source code, because you should probably optimize that yourself. I recommend
 first minifying the code using with [Google Closure
-Compiler](http://closure-compiler.appspot.com/home) or
+Compiler](http://closure-compiler.appspot.com/home) (Simple mode only) or
 [UglifyJS2](https://github.com/mishoo/UglifyJS2). 
 
 Then, zip it.
 
 For more aggressive optimization, you could further try running the
 minified code through
-[JSCrush](http://www.iteral.com/jscrush/). 
+[JSCrush](http://www.iteral.com/jscrush/). Although it sometimes makes
+things worse rather than better - you'll have to test it with your
+code.
+
+Note: If you're using Google Closure Compiler from the command line, set the `--language_in`
+flag to `ECMASCRIPT5`, like this:
+
+`java -jar ~/compiler.jar --language_in=ECMASCRIPT5 --js ga.js --js_output_file ga.min.js`
+
 
 Contributions and Licencing
 ---------------------------
