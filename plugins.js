@@ -108,6 +108,8 @@ Here's the table of contents to get you started:
 #### 2D tile-based collision utilities
 
 `getIndex`: Converts a sprite's x/y pixel coordinates into an array index number.
+`getTile`: Converts a sprite's index number into x/y pixel coordinates.
+`surroundingCells`: returns an array of 9 index numbers of cells surrounding a center cell.
 `getPoints`: returns an object with the x/y positions of all the sprite's corner points.
 `hitTestTile`: A versatile collision detection function for tile based games.
 
@@ -477,7 +479,8 @@ GA.plugins = function(ga) {
   //### fadeOut
   //`fadeOut` arguments:
   //sprite, speed
-  ga.fadeOut = function(sprite, speed) {
+  ga.fadeOut = function(sprite, speed, finalValue) {
+    finalValue = finalValue || 0;
     var tween = {};
     tween.playing = true;
     tween.update = function() {
@@ -486,9 +489,9 @@ GA.plugins = function(ga) {
         //instead of its relative `alpha` property. That's because we
         //want to tween the alpha property without taking into account
         //the sprite's parent's alpha as well.
-        if (sprite._alpha > 0) {
+        if (sprite._alpha > finalValue) {
           sprite._alpha -= speed;
-          if (sprite._alpha < 0) sprite._alpha = 0;
+          if (sprite._alpha < finalValue) sprite._alpha = finalValue;
         } else {
           tween.playing = false;
           if (tween.onComplete) tween.onComplete();
@@ -513,7 +516,8 @@ GA.plugins = function(ga) {
   //### fadeIn
   //`fadeIn` arguemnts:
   //sprite, speed
-  ga.fadeIn = function(sprite, speed) {
+  ga.fadeIn = function(sprite, speed, finalValue) {
+    finalValue = finalValue || 1;
     var tween = {};
     tween.playing = true;
     tween.update = function() {
@@ -522,9 +526,9 @@ GA.plugins = function(ga) {
         //instead of its relative `alpha` property. That's because we
         //want to tween the alpha property without taking into account
         //the sprite's parent's alpha as well.
-        if (sprite._alpha < 1) {
+        if (sprite._alpha < finalValue) {
           sprite._alpha += speed;
-          if (sprite._alpha > 1) sprite._alpha = 1;
+          if (sprite._alpha > finalValue) sprite._alpha = finalValue;
         } else {
           tween.playing = false;
           if (tween.onComplete) tween.onComplete();
@@ -1580,6 +1584,61 @@ GA.plugins = function(ga) {
     return index.x + (index.y * mapWidthInTiles);
   };
 
+  /*
+  #### getTile
+  The `getTile` helper method
+  converts a tile's index number into x/y screen
+  coordinates, and capture's the tile's grid index (`gid`) number.
+  It returns an object with `x`, `y`, `centerX`, `centerY`, `width`, `height`, `halfWidth`
+  `halffHeight` and `gid` properties. (The `gid` number is the value that the tile has in the 
+  mapArray) This lets you use the returned object
+  with the 2d geometric collision functions like `hitTestRectangle`
+  or `rectangleCollision`
+
+  The `world` object requires these properties:
+  `x`, `y`, `tilewidth`, `tileheight` and `widthInTiles`
+  */
+  ga.getTile = function(index, mapArray, world) {
+    var tile = {}
+    tile.gid = mapArray[index];
+    tile.width = world.tilewidth;
+    tile.height = world.tileheight;
+    tile.halfWidth = world.tilewidth / 2;
+    tile.halfHeight = world.tileheight / 2;
+    tile.x = ((index % world.widthInTiles) * world.tilewidth) + world.x;
+    tile.y = ((Math.floor(index / world.widthInTiles)) * world.tileheight) + world.y;
+    tile.gx = tile.x;
+    tile.gy = tile.y;
+    tile.centerX = tile.x + world.tilewidth / 2;
+    tile.centery = tile.y + world.tileheight / 2;
+
+    //Return the tile object
+    return tile;
+  };
+
+  /*
+  #### surroundingCells
+  The `surroundingCells` helper method returns an array containing 9
+  index numbers of map array cells around any given index number.
+  Use it for an efficient broadphase/narrowphase collision test.
+  The 2 arguments are the index number that represents the center cell, 
+  and the width of the map array.
+  */
+
+  ga.surroundingCells = function(index, widthInTiles) {
+    return [
+      index - widthInTiles - 1,
+      index - widthInTiles,
+      index - widthInTiles + 1,
+      index - 1,
+      index,
+      index + 1,
+      index + widthInTiles - 1,
+      index + widthInTiles,
+      index + widthInTiles + 1,
+    ];
+  };
+
   //#### getPoints
   /*
   The `getPoints` method takes a sprite and returns
@@ -1628,7 +1687,7 @@ GA.plugins = function(ga) {
   `tileheight`, `tilewidth`, `widthInTiles`.
   */
 
-  ga.hitTestTile = function(sprite, mapArray, collisionGid, world, pointsToCheck) {
+  ga.hitTestTile = function(sprite, mapArray, gidToCheck, world, pointsToCheck) {
     //Assign "some" as the default value for `pointsToCheck`
     pointsToCheck = pointsToCheck || "some";
 
@@ -1672,11 +1731,11 @@ GA.plugins = function(ga) {
 
       //Find out what the gid value is in the map position
       //that the point is currently over
-      var currentGid = mapArray[collision.index];
+      collision.gid = mapArray[collision.index];
 
       //If it matches the value of the gid that we're interested, in
       //then there's been a collision
-      if (currentGid === collisionGid) { 
+      if (collision.gid === gidToCheck) { 
         return true;
       } else {
         return false;
