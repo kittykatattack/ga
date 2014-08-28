@@ -10,15 +10,15 @@
 Welcome to Ga's source code!
 ============================
 
-If you're reading this to find out how to use Ga, you've come to the wrong place. 
-You should take a look inside the `examples` folder. 
+If you're reading this to find out how to use Ga, you've come to the wrong place.
+You should take a look inside the `examples` folder.
 There's a lot of cool stuff inside the `examples` folder, so check it out!
 But if you want to find out how Ga works, this is the place to be.
 
-This source code is organized into chapters. 
+This source code is organized into chapters.
 Yes, chapters.
-Just think of it like *Lord of the Rings* or maybe *Harry Potter* and you'll be fine. 
-Actually, come to think of it, maybe it's more like *50 Shades of Grey*. 
+Just think of it like *Lord of the Rings* or maybe *Harry Potter* and you'll be fine.
+Actually, come to think of it, maybe it's more like *50 Shades of Grey*.
 
 Everything is in one big, hulking gainormous file.
 Why?
@@ -67,7 +67,7 @@ Table of contents
 `makeInteractive`: Assigns `press` and `release` actions to sprites and adds pointer interactivity.
 `ga.images`: Access Image objects by their file names.
 `ga.json`: Access JSON files by their file names.
-`ga.addStatePlayer`: Adds `play`, `stop`, `show`, and `playSequence` methods to sprites. 
+`ga.addStatePlayer`: Adds `play`, `stop`, `show`, and `playSequence` methods to sprites.
 
 *Chapter 3: Rendering*
 
@@ -93,7 +93,7 @@ Prologue: Fixing the WebAudio API
 --------------------------
 
 The WebAudio API is so new that it's API is not consistently implemented properly across
-all modern browsers. Thankfully, Chris Wilson's Audio Context Monkey Patch script 
+all modern browsers. Thankfully, Chris Wilson's Audio Context Monkey Patch script
 normalizes the API for maximum compatibility.
 
 https://github.com/cwilso/AudioContext-MonkeyPatch/blob/gh-pages/AudioContextMonkeyPatch.js
@@ -110,10 +110,10 @@ Thank you, Chris!
     if (!param)	// if NYI, just return
       return;
     if (!param.setTargetAtTime)
-      param.setTargetAtTime = param.setTargetValueAtTime; 
+      param.setTargetAtTime = param.setTargetValueAtTime;
   }
 
-  if (window.hasOwnProperty('webkitAudioContext') && 
+  if (window.hasOwnProperty('webkitAudioContext') &&
       !window.hasOwnProperty('AudioContext')) {
     window.AudioContext = webkitAudioContext;
 
@@ -125,21 +125,21 @@ Thank you, Chris!
       AudioContext.prototype.createScriptProcessor = AudioContext.prototype.createJavaScriptNode;
 
     AudioContext.prototype.internal_createGain = AudioContext.prototype.createGain;
-    AudioContext.prototype.createGain = function() { 
+    AudioContext.prototype.createGain = function() {
       var node = this.internal_createGain();
       fixSetTarget(node.gain);
       return node;
     };
 
     AudioContext.prototype.internal_createDelay = AudioContext.prototype.createDelay;
-    AudioContext.prototype.createDelay = function(maxDelayTime) { 
+    AudioContext.prototype.createDelay = function(maxDelayTime) {
       var node = maxDelayTime ? this.internal_createDelay(maxDelayTime) : this.internal_createDelay();
       fixSetTarget(node.delayTime);
       return node;
     };
 
     AudioContext.prototype.internal_createBufferSource = AudioContext.prototype.createBufferSource;
-    AudioContext.prototype.createBufferSource = function() { 
+    AudioContext.prototype.createBufferSource = function() {
       var node = this.internal_createBufferSource();
       if (!node.start) {
         node.start = function ( when, offset, duration ) {
@@ -156,7 +156,7 @@ Thank you, Chris!
     };
 
     AudioContext.prototype.internal_createDynamicsCompressor = AudioContext.prototype.createDynamicsCompressor;
-    AudioContext.prototype.createDynamicsCompressor = function() { 
+    AudioContext.prototype.createDynamicsCompressor = function() {
       var node = this.internal_createDynamicsCompressor();
       fixSetTarget(node.threshold);
       fixSetTarget(node.knee);
@@ -168,7 +168,7 @@ Thank you, Chris!
     };
 
     AudioContext.prototype.internal_createBiquadFilter = AudioContext.prototype.createBiquadFilter;
-    AudioContext.prototype.createBiquadFilter = function() { 
+    AudioContext.prototype.createBiquadFilter = function() {
       var node = this.internal_createBiquadFilter();
       fixSetTarget(node.frequency);
       fixSetTarget(node.detune);
@@ -179,10 +179,10 @@ Thank you, Chris!
 
     if (AudioContext.prototype.hasOwnProperty( 'createOscillator' )) {
       AudioContext.prototype.internal_createOscillator = AudioContext.prototype.createOscillator;
-      AudioContext.prototype.createOscillator = function() { 
+      AudioContext.prototype.createOscillator = function() {
         var node = this.internal_createOscillator();
         if (!node.start)
-          node.start = node.noteOn; 
+          node.start = node.noteOn;
         if (!node.stop)
           node.stop = node.noteOff;
         fixSetTarget(node.frequency);
@@ -198,10 +198,10 @@ Thank you, Chris!
 Chapter 1: The game engine
 --------------------------
 
-This fist chapter is all about the Ga's game engine code. This is the code that 
-launches Ga, sets the defaults, creates a canvas element, starts loading asssets, 
+This fist chapter is all about the Ga's game engine code. This is the code that
+launches Ga, sets the defaults, creates a canvas element, starts loading asssets,
 setups up the current game state,
-and generally gets things up and running. This is probably the best place to start 
+and generally gets things up and running. This is probably the best place to start
 to learn how the engine works.
 
 */
@@ -226,8 +226,8 @@ function ga(width, height, setup, assetsToLoad, load){
 //### GA.create
 //The entire Ga program exists inside the `Ga.create` method. It
 //creates and returns a new instance of Ga, along with all the core
-//game engine functions. However, Ga won't actually start until you 
-//call the `start` method from the applicaiton code, as you can see in 
+//game engine functions. However, Ga won't actually start until you
+//call the `start` method from the applicaiton code, as you can see in
 //all the examples (in the `examples` folder).
 
 GA.create = function(width, height, setup, assetsToLoad, load) {
@@ -248,15 +248,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga.canvas.setAttribute("height", height * dips);
   ga.canvas.style.backgroundColor = "black";
   document.body.appendChild(ga.canvas);
-  
+
   //Create the context as a property of the canvas.
   ga.canvas.ctx = ga.canvas.getContext("2d");
 
   //Make the `stage`. The `stage` is the root container group
   //for all the sprites and other groups.
   ga.stage = makeStage();
- 
-  //Initialize the pointer. 
+
+  //Initialize the pointer.
   ga.pointer = makePointer();
 
   //Make the keyboard keys (arrow keys and space bar.)
@@ -267,7 +267,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //An array to hold all the button sprites.
   ga.buttons = [];
-  
+
   //Set `dragAndDrop` to `false` by default
   //(Change it to `true` and set the `draggable` property on sprites
   //to `true` to enable drag and drop.
@@ -275,9 +275,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //An array to store the draggable sprites.
   ga.draggableSprites = [];
-  
+
   //An array to store the tweening functions.
   ga.tweens = [];
+  
+  //An array to store the particles.
+  ga.particles = [];
 
   //Set the game `state`.
   ga.state = undefined;
@@ -294,27 +297,65 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     );
   }
 
-  //Get the user-defined array that lists the assets 
+  //Get the user-defined array that lists the assets
   //that have to load.
   ga.assetFilePaths = assetsToLoad || undefined;
 
   //A Boolean to let us pause the game.
   ga.paused = false;
 
-  //The upper-limit frames per second that the game should run at
-  //If `_fps` is undefined, the game will attempt to run at the 
-  //maximum frame rate permitted by `requestAnimationFrame`
+  //The upper-limit frames per second that the game should run at.
+  //Ga defaults to 60 fps.
   //Use the `fps` getter/setter to modify this value.
-  ga._fps = undefined;
+  ga._fps = 60;
+  ga._startTime = Date.now();
+  ga._frameDuration = 1000 / ga._fps;
+  ga._lag = 0;
 
   /*
   ### Core game engine methods
   This next sections contains all the important methods that the game engine needs to do its work.
   */
-
+  
   //### gameLoop
-  //The engine's game loop. 
-
+  //The engine's game loop. Ga uses a fixed timestep for logic update
+  //and rendering. This is mainly for simplicity. I'll probably
+  //migrate to a "fixed timestep / variable rendering" with
+  //interpolation in the 
+  //next major update. For a working example, see:
+  //jsbin.com/tolime/1/edit
+  //If the `fps` isn't set, the maximum framerate is used.
+  //Use Ga's `fps` getter/setter (in the code ahead) to change the framerate
+  function gameLoop() {
+    requestAnimationFrame(gameLoop, ga.canvas);
+    if (ga._fps === undefined) {
+      //Run the code for each frame.
+      update();
+    }
+    //If `fps` has been set, clamp the frame rate to that upper limit.
+    else {
+      //Calcuate the time that has elapsed since the last frame
+      var current = Date.now(),
+          elapsed = current - ga._startTime;
+      
+      if (elapsed > 1000) elapsed = ga._frameDuration;
+      ga._startTime = current;
+      //Add the elapsed time to the lag counter
+      ga._lag += elapsed;
+      //Update the frame if the lag counter is greater than or
+      //equal to the frame duration
+      while (ga._lag >= ga._frameDuration){  
+        //Update the logic
+        update();
+        //Reduce the lag counter by the frame duration
+        ga._lag -= ga._frameDuration;
+      }
+    }
+  }
+  
+  
+  //The old game loop. Yay, archeology!
+  /*
   function gameLoop() {
     //If `fps` hasn't been set, the loop will try to run at the maximum
     //frame rate that `requestAnimationFrame` can run on the host
@@ -325,7 +366,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       requestAnimationFrame(gameLoop, ga.canvas);
       //Run the code for each frame.
       update();
-    } 
+    }
     //If `fps` has been set, clamp the frame rate to that upper limit.
     else {
       setTimeout(function() {
@@ -334,32 +375,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }, 1000 / ga._fps);
     }
   }
-
-  //The old game loop. Yay, archeology!
-  /*
-  function gameLoop() {
-    requestAnimationFrame(gameLoop, ga.canvas);
-    //If `fps` hasn't been set, run at the maximum frame rate.
-    if (!ga._fps) {
-      //Run the code for each frame.
-      update();
-    }
-    //If `fps` has been set, clamp the frame rate to that upper limit.
-    //If `fps` has't been set, the loop will try to run at the maximum
-    //frame rate that `requestAnimationFrame` can run on the host
-    //system. (This is usually around 60fps, but it depends on the
-    //host system's screen refresh rate.)
-    else {
-      if (Date.now() >= ga._startTime){  
-        //Run the code for each frame. 
-        update();
-        //Set the new start time for the next frame, 
-        //which will be 66 milliseconds ahead of the current time.
-        ga._startTime = Date.now() + ga._frameDuration;
-      }
-    }
-  }
   */
+
 
   //### update
   //The things that should happen in the game loop.
@@ -376,7 +393,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Update all the buttons in the game.
     if (ga.buttons.length > 0) {
       ga.canvas.style.cursor = "auto";
-      for(var i = 0; i < ga.buttons.length; i++) {
+      for(var i = ga.buttons.length - 1; i >= 0; i--) {
         var button = ga.buttons[i];
         button.update(ga.pointer, ga.canvas);
         if (button.state === "over" || button.state === "down") {
@@ -388,12 +405,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
       }
     }
-    
+
     //Update all the tween functions in the game.
     if (ga.tweens.length > 0) {
-      for(var j = 0; j < ga.tweens.length; j++) {
+      for(var j = ga.tweens.length - 1; j >= 0; j--) {
         var tween = ga.tweens[j];
         tween.update();
+      }
+    }
+
+    //Update all the particles in the game.
+    if (ga.particles.length > 0) {
+      for(var k = ga.particles.length - 1; k >= 0; k--) {
+        var particle = ga.particles[k];
+        particle.update();
       }
     }
 
@@ -426,9 +451,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         ga.state = ga.load;
       }
     }
-    //If there aren't any assets to load, 
+    //If there aren't any assets to load,
     //just run the user-defined `setup` function.
-    else {  
+    else {
       ga.setup();
     }
     //Start the game loop.
@@ -465,8 +490,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       },
       set: function(value) {
         ga._fps = value;
-        //ga._startTime = Date.now();
-        //ga._frameDuration = 1000 / ga._fps;
+        ga._startTime = Date.now();
+        ga._frameDuration = 1000 / ga._fps;
       },
       enumerable: true, configurable: true
     },
@@ -475,7 +500,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     backgroundColor: {
       set: function(value) {
         ga.canvas.style.backgroundColor = value;
-      }, 
+      },
       enumerable: true, configurable: true
     }
   });
@@ -492,8 +517,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   - `text`: Single line dynamic text objects.
   - `sprite`: A versatile sprite that can be made from a single image, a frame in a texture atlas,
   a series of frames in sequence on a tileset or a series of frames in a texture atlas.
-  - `button`: An interactive button with three states (up, over and down) 
-  and user-definable `press` and `release` actions. 
+  - `button`: An interactive button with three states (up, over and down)
+  and user-definable `press` and `release` actions.
 
   All sprites can be nested inside other sprites with an `addChild` method, and parent
   sprites have their own local coordinate system. Compose them together to make really complex game objects.
@@ -507,17 +532,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   `stage` is the root container that contains everything in the game.
 
   Use these building blocks for making most of the kinds of things you'll need in your games.
-  When sprites are created, they're assigned all of their basic properties with the help of a method called 
+  When sprites are created, they're assigned all of their basic properties with the help of a method called
   `makeDisplayObject`. This gives the sprites all their default properties. After `makeDisplayObject` runs,
   each sprite type is customized but their own constructor methods.
   */
-   
+
 
   //### makeDisplayObject
   //`makeDisplayObject` assigns properties that are common for all the sprite types.
   function makeDisplayObject (o) {
     //Initialize the velocity.
-    o.vx = 0; 
+    o.vx = 0;
     o.vy = 0;
     //Initialize the `width` and `height`.
     o._width = 0;
@@ -560,7 +585,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Add the sprite's container properties so that you can have
     //a nested parent/child scene graph hierarchy.
-    //Create a `children` array that contains all the 
+    //Create a `children` array that contains all the
     //in this container.
     o.children = [];
     //The `addChild` method lets you add sprites to this container.
@@ -570,7 +595,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if (sprite.parent) {
         sprite.parent.removeChild(sprite);
       }
-      //Make this object the sprite's parent and 
+      //Make this object the sprite's parent and
       //add it to this object's `children` array.
       sprite.parent = o;
       o.children.push(sprite);
@@ -578,7 +603,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.calculateSize();
     };
     //The `removeChild` method lets you remove a sprite from its
-    //parent container. 
+    //parent container.
     o.removeChild = function(sprite) {
       if(sprite.parent === o) {
         o.children.splice(o.children.indexOf(sprite), 1);
@@ -710,7 +735,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           var currentX = o.gx;
           if (o.children && o.children.length > 0) {
             o.children.forEach(function(child) {
-              //The offset is equal to the difference between the 
+              //The offset is equal to the difference between the
               //container's `currentX` position and its new `value`.
               var offset = value - currentX;
               child.gx += offset;
@@ -729,7 +754,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           var currentY = o.gy;
           if (o.children && o.children.length > 0) {
             o.children.forEach(function(child) {
-              //The offset is equal to the difference between the 
+              //The offset is equal to the difference between the
               //container's `currentY` position and its new `value`.
               var offset = value - currentY;
               child.gy += offset;
@@ -850,7 +875,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         set: function(value) {
           o._layer = value;
-          o.parent.children.sort(byLayer);          
+          o.parent.children.sort(byLayer);
         },
         enumerable: true, configurable: true
       },
@@ -929,17 +954,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       },
       //The `localBounds` and `globalBounds` methods return an object
       //with `x`, `y`, `width`, and `height` properties that define
-      //the dimensions and position of the sprite. This is a convenience 
+      //the dimensions and position of the sprite. This is a convenience
       //to help you set or test boundaries without having to know
       //these numbers or request them specifically in your code.
       localBounds: {
         get: function() {
           var rectangle = {
-            x: 0, 
-            y: 0, 
-            width: o.width, 
+            x: 0,
+            y: 0,
+            width: o.width,
             height: o.height
-          }; 
+          };
           return rectangle;
         },
         enumerable: true, configurable: true
@@ -947,11 +972,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       globalBounds: {
         get: function() {
           rectangle = {
-            x: o.gx, 
-            y: o.gy, 
-            width: o.gx + o.width, 
+            x: o.gx,
+            y: o.gy,
+            width: o.gx + o.width,
             height: o.gy + o.height
-          }; 
+          };
           return rectangle;
         },
         enumerable: true, configurable: true
@@ -973,7 +998,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
 
   //### remove
-  //`remove` is a global convenience method that will 
+  //`remove` is a global convenience method that will
   //remove any sprite, or an argument list of sprites, from its parent.
   ga.remove = function(spritesToRemove) {
     var sprites = Array.prototype.slice.call(arguments);
@@ -1009,7 +1034,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         set: function (value) {
           o.width = value * 2;
           o.height = value * 2;
-        }, 
+        },
         enumerable: true, configurable: true
       }
     });
@@ -1033,16 +1058,16 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.gy = 0;
     //Make the stage its own parent
     o.parent = o;
-    return o; 
+    return o;
   }
 
   //### group
   //A `group` is a special kind of display object that doesn't have any
-  //visible content. Instead, you can use it as a parent container to 
+  //visible content. Instead, you can use it as a parent container to
   //group other sprites. Supply any number of
   //sprites to group as arguments, or don't supply any arguments if
   //you want to create an empty group. (You can always add sprites to
-  //the group later using `addChild`). 
+  //the group later using `addChild`).
   ga.group = function(spritesToGroup) {
     var o = {};
     //Make the group a display object.
@@ -1160,7 +1185,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Calculate the `width` and `height` properties.
       width: {
         get: function() {
-          return Math.abs(o.bx - o.ax); 
+          return Math.abs(o.bx - o.ax);
         },
         enumerable: true, configurable: true
       },
@@ -1289,7 +1314,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.fillText(
         o.content,
         0,
-        0        
+        0
       );
     };
     //Return the text sprite.
@@ -1311,7 +1336,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.height = height;
     return o;
   };
-  
+
   //### frames
   //The `frames` function returns and object that defines
   //the position and size of many sub-images in a single tileset image.
@@ -1327,7 +1352,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
 
   //### filmstrip
-  //If you have a complex animation in a single image, you can use the 
+  //If you have a complex animation in a single image, you can use the
   //`filmstrip` method to automatically create an array of x,y
   //coordinates for each animation frame.
   //`filmstrip` arguments:
@@ -1341,7 +1366,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         columns = image.width / frameWidth,
         rows = image.height / frameHeight,
         //Find the total number of frames.
-        numberOfFrames = columns * rows;    
+        numberOfFrames = columns * rows;
 
     for(var i = 0; i < numberOfFrames; i++) {
       //Find the correct row and column for each frame
@@ -1351,10 +1376,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       y = Math.floor(i / columns) * frameHeight;
 
       //Compensate for any optional spacing (padding) around the tiles if
-      //there is any. This bit of code accumulates the spacing offsets from the 
-      //left side of the tileset and adds them to the current tile's position. 
+      //there is any. This bit of code accumulates the spacing offsets from the
+      //left side of the tileset and adds them to the current tile's position.
       if (spacing && spacing > 0) {
-        x += spacing + (spacing * i % columns); 
+        x += spacing + (spacing * i % columns);
         y += spacing + (spacing * Math.floor(i / columns));
       }
 
@@ -1364,7 +1389,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Create and return the animation frames using the `frames` method.
     return ga.frames(imageName, positions, frameWidth, frameHeight);
   };
-  
+
   //### sprite
   //`sprite` creates and returns a sprite using a JavaScript Image object, a tileset
   //`frame`, a `filmstrip`, or a frame from a texture atlas (in
@@ -1479,7 +1504,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.sourceX = o.frames[frameNumber][0];
           o.sourceY = o.frames[frameNumber][1];
         }
-        //If each frame isn't an array, and it has a sub-object called `frame`, 
+        //If each frame isn't an array, and it has a sub-object called `frame`,
         //then the frame must be a texture atlas id name.
         //In that case, get the source position from the `frame` object.
         else if (g.assets[o.frames[frameNumber]].frame) {
@@ -1508,7 +1533,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       Object.defineProperty(o, "currentFrame", {
         get: function() {
           return o._currentFrame;
-        }, 
+        },
         enumerable: false, configurable: false
       });
     }
@@ -1550,7 +1575,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
 
   //### makeInteractive
-  //The `makeInteractive` function lets you assign `press` and `release` actions to sprites.
+  //The `makeInteractive` function lets you assign `press`, `release`, `over`
+  //and `out` actions to sprites.
   //Also tells you the pointer's state of interaction with the sprite.
   //`makeInteractive` is called on a sprite when a sprite's
   //`interactive` property is set to `true`.
@@ -1568,6 +1594,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //`pressed` is a Boolean that helps track whether or not
     //the button has been pressed down.
     o.pressed = false;
+    //`hoverOver` is a Boolean which checkes whether the pointer
+    //has hoverd over the button.
+    o.hoverOver = false;
     //Add the button into the global `buttons` array so that it
     //can be updated by the game engine.
     ga.buttons.push(o);
@@ -1584,7 +1613,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //Show the first frame, if this is a button.
         if (o.subtype === "button") o.show(0);
       }
-      //If the pointer is touching the button, figure out 
+      //If the pointer is touching the button, figure out
       //if the over or down state should be displayed.
       if (hit) {
         //Over state.
@@ -1604,7 +1633,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             if (o.frames.length === 3) {
               o.show(2);
             } else {
-              o.show(1); 
+              o.show(1);
             }
           }
         }
@@ -1614,7 +1643,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //a. Run the `press` method if the button state is "down" and
       //the button hasn't already been pressed.
       if (o.state === "down") {
-        if (!o.pressed) { 
+        if (!o.pressed) {
           if (o.press) o.press();
           o.pressed = true;
           o.action = "pressed";
@@ -1628,6 +1657,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.pressed = false;
           o.action = "released";
         }
+        //Run the `over` method if it has been assigned
+        if (!o.hoverOver) {
+          if (o.over) o.over();
+          o.hoverOver = true;
+        }
       }
       //c. Check whether the pointer has been released outside
       //the button's area. If the button state is "up" and it's
@@ -1638,15 +1672,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.pressed = false;
           o.action = "released";
         }
+        //Run the `out` method if it has been assigned
+        if (o.hoverOver) {
+          if (o.out) o.out();
+          o.hoverOver = false;
+        }
       }
     };
   }
-  
+
   //A convenience method that lets you access Images by their file names.
   ga.image = function(imageFileName){
     return ga.assets[imageFileName];
   };
-  
+
   //A convenience method that lets you access JSON files by their file names.
   ga.json = function(jsonFileName){
     return ga.assets[jsonFileName];
@@ -1655,7 +1694,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //### addStatePlayer
   //`addStatePlayer` adds a state manager and keyframe animation player for
   //sprites with more than one frame. Its called automatically when
-  //`sprite`s are created. 
+  //`sprite`s are created.
   ga.addStatePlayer = function(sprite) {
     var frameCounter = 0,
         numberOfFrames = 0,
@@ -1663,7 +1702,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         endFrame = 0,
         timerInterval = undefined,
         playing = false;
-    
+
     //The `show` function (to display static states.)
     function show(frameNumber) {
       //Reset any possible previous animations.
@@ -1673,7 +1712,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //correct frame.
       if (typeof frameNumber !== "string") {
         sprite.gotoAndStop(frameNumber);
-      } 
+      }
       //If `frameNumber` is string that describes a sprite's frame id,
       //then go to the index number that matches that id name.
       else {
@@ -1685,7 +1724,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function play() {
       playSequence([0, sprite.frames.length - 1]);
     }
-    
+
     //The `stop` function stops the animation at the current frame.
     function stop() {
       reset();
@@ -1710,7 +1749,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if(numberOfFrames === 1){
         numberOfFrames = 2;
         frameCounter += 1;
-      }; 
+      };
       //Calculate the frame rate. Set a default fps of 12.
       if (!sprite.fps) sprite.fps = 12;
       var frameRate = 1000 / sprite.fps;
@@ -1722,12 +1761,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         playing = true;
       }
     }
-    
+
     //`advanceFrame` is called by `setInterval` to display the next frame
     //in the sequence based on the `frameRate`. When frame sequence
     //reaches the end, it will either stop it or loop it.
     function advanceFrame() {
-      //Advance the frame if `frameCounter` is less than 
+      //Advance the frame if `frameCounter` is less than
       //the state's total frames.
       if (frameCounter < numberOfFrames) {
         //Advance the frame.
@@ -1743,7 +1782,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
       }
     }
-    
+
     function reset() {
       //Reset `playing` to `false`, set the `frameCounter` to 0,
       //and clear the `timerInterval`.
@@ -1763,7 +1802,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     sprite.stop = stop;
     sprite.playSequence = playSequence;
   };
-  
+
 
   /*
   Rendering
@@ -1773,7 +1812,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   Ga uses it inside the game loop to render the sprites like this:
 
       ga.render(canvasContext);
-      
+
   */
 
   ga.render = function(canvas) {
@@ -1781,8 +1820,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     var ctx = canvas.ctx;
     //Clear the canvas.
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    //Display the all the sprites. 
-    for (var i = 0; i < ga.stage.children.length; i++) {  
+    //Display the all the sprites.
+    for (var i = 0; i < ga.stage.children.length; i++) {
       var sprite = ga.stage.children[i];
       displaySprite(sprite);
     }
@@ -1792,7 +1831,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       /*
       if (
         sprite.visible
-        && sprite.gx < canvas.width 
+        && sprite.gx < canvas.width
         && sprite.gx + sprite.width > -1
         && sprite.gy < canvas.height
         && sprite.gy + sprite.height > -1
@@ -1800,7 +1839,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       */
       if (
         sprite.visible
-        && sprite.gx < canvas.width 
+        && sprite.gx < canvas.width
         && sprite.gx + sprite.width > -1
         && sprite.gy < canvas.height
         && sprite.gy + sprite.height > -1
@@ -1834,9 +1873,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight
           );
         }
-        
+
         //Rotate the sprite using its `rotation` value.
         ctx.rotate(sprite.rotation);
+        //Scale the sprite using its `scaleX` and scaleY` properties.
+        ctx.scale(sprite.scaleX, sprite.scaleY);
         //Use the sprite's custom `render` method to figure out how to
         //draw the sprite. This is only run if the sprite actually has
         //a `render` method. Most do, but `group` sprites don't and
@@ -1846,7 +1887,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //`children` array, display them by calling this very same
         //`displaySprite` function again.
         if (sprite.children && sprite.children.length > 0) {
-          for (var j = 0; j < sprite.children.length; j++) {  
+          for (var j = 0; j < sprite.children.length; j++) {
             //Find the sprite's child
             var child = sprite.children[j];
             //display the child
@@ -1855,7 +1896,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
         //The context's original position will only be restored after
         //the child sprites have been rendered. This is why the children have
-        //the same rotation and alpha as the parents. 
+        //the same rotation and alpha as the parents.
         ctx.restore();
       } else {
        //console.log(sprite.height)
@@ -1876,23 +1917,23 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Properties to help track the assets being loaded.
     toLoad: 0,
     loaded: 0,
-    
+
     //File extensions for different types of assets.
     imageExtensions: ["png", "jpg", "gif"],
     fontExtensions: ["ttf", "otf", "ttc", "woff"],
     audioExtensions: ["mp3", "ogg", "wav", "webm"],
     jsonExtensions: ["json"],
-    
+
     //The callback function that should run when all assets have loaded.
     //Assign this when you load the fonts, like this: `assets.whenLoaded = makeSprites;`.
     whenLoaded: undefined,
-    
+
     //The load method creates and loads all the assets. Use it like this:
     //`assets.load(["images/anyImage.png", "fonts/anyFont.otf"]);`.
-    
+
     load: function(sources) {
       console.log("Loading assets...");
-      //Get a reference to this asset object so we can 
+      //Get a reference to this asset object so we can
       //refer to it in the `forEach` loop ahead.
       var self = this;
       //Find the number of files that need to be loaded.
@@ -1900,9 +1941,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       sources.forEach(function(source){
         //Find the file extension of the asset.
         var extension = source.split('.').pop();
-        
+
         //#### Images
-        //Load images that have file extensions that match 
+        //Load images that have file extensions that match
         //the `imageExtensions` array.
         if (self.imageExtensions.indexOf(extension) !== -1) {
           //Create a new image and add a loadHandler
@@ -1918,10 +1959,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           self[image.name] = image;
           //Set the image's src property so we can start loading the image.
           image.src = source;
-        } 
+        }
 
         //#### Fonts
-        //Load fonts that have file extensions that match the `fontExtensions` array. 
+        //Load fonts that have file extensions that match the `fontExtensions` array.
         else if (self.fontExtensions.indexOf(extension) !== -1) {
           //Use the font's file name as the `fontFamily` name.
           var fontFamily = source.split("/").pop().split(".")[0];
@@ -1935,10 +1976,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //Tell the loadHandler we're loading a font.
           self.loadHandler();
         }
-        
+
         //#### Sounds
-        //Load audio files that have file extensions that match 
-        //the `audioExtensions` array. 
+        //Load audio files that have file extensions that match
+        //the `audioExtensions` array.
         else if (self.audioExtensions.indexOf(extension) !== -1) {
           //Create a sound sprite.
           var soundSprite = ga.makeSound(source, self.loadHandler.bind(self));
@@ -1953,8 +1994,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
 
         //#### JSON
-        //Load JSON files that have file extensions that match 
-        //the `jsonExtensions` array. 
+        //Load JSON files that have file extensions that match
+        //the `jsonExtensions` array.
         else if (self.jsonExtensions.indexOf(extension) !== -1) {
           //Create a new `xhr` object and an object to store the file.
           var xhr = new XMLHttpRequest();
@@ -1986,7 +2027,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //Send the request to load the file.
           xhr.send();
         }
-        
+
         //Display a message if a file type isn't recognized.
         else {
           console.log("File type not recognized: " + source);
@@ -2026,7 +2067,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         self.loadHandler();
       }
     },
-    
+
     //#### loadHandler
     //The `loadHandler` will be called each time an asset finishes loading.
     loadHandler: function () {
@@ -2045,7 +2086,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     }
   };
- 
+
   //### makePointer
   //Makes a pointer object that unifies touch and mouse interactivity.
   //The pointer has `x` and `y` properties and `isUp`, `isDown` and
@@ -2091,7 +2132,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The drag offsets to help drag sprites.
     o.dragOffsetX = 0;
     o.dragOffsetY = 0;
-     
+
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
       //Get the element that's firing the event.
@@ -2103,7 +2144,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     };
 
     //The pointer's `touchmoveHandler`.
-    o.touchmoveHandler = function(event) { 
+    o.touchmoveHandler = function(event) {
       //Find the touch point's x and y position.
       o.x = event.targetTouches[0].pageX - ga.canvas.offsetLeft;
       o.y = event.targetTouches[0].pageY - ga.canvas.offsetTop;
@@ -2120,7 +2161,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Capture the current time.
       o.downTime = Date.now();
     };
-    
+
     //The pointer's `touchstartHandler`.
     o.touchstartHandler = function(event) {
       //Find the touch point's x and y position.
@@ -2143,11 +2184,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //If it's less than 200 milliseconds, it must be a tap or click.
       if (o.elapsedTime <= 200) {
         o.tapped = true;
-      } 
+      }
       o.isUp = true;
       o.isDown = false;
     };
-    
+
     //The pointer's `touchendHandler`.
     o.touchendHandler = function(event) {
       //Figure out how much time the pointer has been down.
@@ -2155,7 +2196,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //If it's less than 200 milliseconds, it must be a tap or click.
       if (o.elapsedTime <= 200) {
         o.tapped = true;
-      } 
+      }
       o.isUp = true;
       o.isDown = false;
     };
@@ -2226,15 +2267,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     o.updateDragAndDrop = function() {
       if (o.isDown) {
-        //Capture the co-ordinates at which the pointer was 
+        //Capture the co-ordinates at which the pointer was
         //pressed down and find out if it's touching a sprite.
         if (o.dragSprite === null) {
           //Loop through the draggable sprites in reverse to start searching at the bottom of the stack.
           for (var i = ga.draggableSprites.length - 1; i > -1; i--) {
-            var sprite = ga.draggableSprites[i];  
+            var sprite = ga.draggableSprites[i];
             //Check for a collision with the pointer using `hitTestPoint`.
             if (o.hitTestSprite(sprite) && sprite.draggable) {
-              //Calculate the difference between the pointer's 
+              //Calculate the difference between the pointer's
               //position and the sprite's position.
               o.dragOffsetX = o.x - sprite.gx;
               o.dragOffsetY = o.y - sprite.gy;
@@ -2246,7 +2287,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
               //its parent's `children` array.
               var children = sprite.parent.children;
               children.splice(children.indexOf(sprite), 1);
-              //Next, push the `dragSprite` to the end of its `children` array so that it's 
+              //Next, push the `dragSprite` to the end of its `children` array so that it's
               //displayed last, above all the other sprites.
               children.push(sprite);
               break;
@@ -2279,13 +2320,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Return the pointer.
     return o;
   }
-  
+
   /*
   ### keyboard
   The `keyboard` function creates `key` objects
   that listen for keyboard events. Create a new key object like
   this:
-     
+
      var keyObject = g.keyboard(asciiKeyCodeNumber);
 
   Then assign `press` and `release` methods like this:
@@ -2333,14 +2374,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       "keyup", key.upHandler.bind(key), false
     );
     return key;
-  } 
+  }
 
   /*
   ### makeKeys
   `makeKeys` is called when Ga is initialized. It pre-defines the
   arrow keys and space bar so that you can use them right away in
   your games like this:
-  
+
       g.key.leftArrow.press = function() {
         //left arrow pressed.
       };
@@ -2368,7 +2409,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.space = keyboard(32);
     return o;
   }
-  
+
   //### byLayer
   //`byLayer` is an array sort method that's called when a sprite's
   //`layer` property is changed.
@@ -2392,7 +2433,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   `makeSound` creates and returns and WebAudio sound sprite. It's
   called by `assets.load` when sounds are loaded into the Ga engine.
   After the sound is loaded you can access and use it like this:
-  
+
       var anySound = g.sound("sounds/anyLoadedSound.wav");
       anySound.loop = true;
       anySound.pan = 0.8;
@@ -2447,7 +2488,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.soundNode.start(
         0, o.startOffset % o.buffer.duration
       );
-      //Set `isPlaying` to `true` to help control the 
+      //Set `isPlaying` to `true` to help control the
       //`pause` and `restart` methods.
       o.isPlaying = true;
     };
@@ -2493,9 +2534,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           return o.panValue;
         },
         set: function(value) {
-          //Panner objects accept x, y and z coordinates for 3D 
+          //Panner objects accept x, y and z coordinates for 3D
           //sound. However, because we're only doing 2D left/right
-          //panning we're only interested in the x coordinate, 
+          //panning we're only interested in the x coordinate,
           //the first one. However, for a natural effect, the z
           //value also has to be set proportionately.
           var x = value,
@@ -2515,19 +2556,19 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       xhr.open("GET", source, true);
       xhr.responseType = "arraybuffer";
       xhr.addEventListener("load", function() {
-        //Decode the sound and store a reference to the buffer. 
+        //Decode the sound and store a reference to the buffer.
         o.actx.decodeAudioData(
-          xhr.response, 
+          xhr.response,
           function(buffer) {
             o.buffer = buffer;
             o.hasLoaded = true;
             //This next bit is optional, but important.
             //If you have a load manager in your game, call it here so that
-            //the sound is registered as having loaded. 
+            //the sound is registered as having loaded.
             if (loadHandler) {
               loadHandler();
             }
-          }, 
+          },
           //Throw an error if the sound can't be decoded.
           function(error) {
             throw new Error("Audio could not be decoded: " + error);
@@ -2538,7 +2579,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       xhr.send();
     };
     //Load the sound.
-    o.load();   
+    o.load();
     //Return the sound object.
     return o;
   };
@@ -2555,11 +2596,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //Initialize the plugins, if they exist.
   if (GA.plugins !== undefined) GA.plugins(ga);
-  
+
   //Install any user-defined plugins or custom initialization code.
   if (GA.custom !== undefined) GA.custom(ga);
 
   //Return `ga`.
   return ga;
-}; 
+};
 

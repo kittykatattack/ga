@@ -10,18 +10,18 @@
 Ga plugins
 ==========
 Weclome to the `plugins.js` file!
-This file contains lots of extra tools that are really useful for making games, 
-but which are more specialized that than the universal tools in `ga.js` file. 
+This file contains lots of extra tools that are really useful for making games,
+but which are more specialized that than the universal tools in `ga.js` file.
 
-How can use these plugins? The easiest way is just to link this entire file 
-with a `<script>` tag. Then you have immediate access to all this code 
-and you can decide later what you really need. 
+How can use these plugins? The easiest way is just to link this entire file
+with a `<script>` tag. Then you have immediate access to all this code
+and you can decide later what you really need.
 
 Your own custom plugins
 -----------------------
 
-If you wan to keep you game file size small, create 
-your own custom plugins file. Here's how: 
+If you wan to keep you game file size small, create
+your own custom plugins file. Here's how:
 
 1. Make a new JS file called `custom.js` (or an other name you want to give it.)
 2. Add this:
@@ -32,7 +32,7 @@ your own custom plugins file. Here's how:
 
 3. Link `custom.js` to your game's main HTML document with a `<script>` tag.
 
-4. Then just copy/paste any plugin functions from this 
+4. Then just copy/paste any plugin functions from this
 file (`plugins.js`) into your own `custom.js` file. Like this:
 
     GA.custom = function(ga) {
@@ -42,18 +42,18 @@ file (`plugins.js`) into your own `custom.js` file. Like this:
       };
     };
 
-The `GA.custom` function is called by Ga as soon as the engine has 
-finished initializing, but before the game runs. This means you 
-can use it to run any other custom setup task that you want to 
-perform before any of the game code runs. You could also use the 
-`GA.custom` function to overwrite any of Ga's default properties 
+The `GA.custom` function is called by Ga as soon as the engine has
+finished initializing, but before the game runs. This means you
+can use it to run any other custom setup task that you want to
+perform before any of the game code runs. You could also use the
+`GA.custom` function to overwrite any of Ga's default properties
 with your own. Go wild!
 
 The plugins in this file
 ------------------------
 
-The code in this `plugins.js` file is organized into chapters. 
-Use your text editor's search features to find what you're looking for. 
+The code in this `plugins.js` file is organized into chapters.
+Use your text editor's search features to find what you're looking for.
 Here's the table of contents to get you started:
 
 ### Chapter 1: Utilities
@@ -65,6 +65,8 @@ Here's the table of contents to get you started:
 `slide`: Ease a sprite to a specific position.
 `fadeIn`: Fade in a sprite.
 `fadeOut`: Fade out a sprite.
+`fade`: Fades in or out.
+`pulse`: Uses the `fade` method to make a sprite's alpha ocillate.
 `follow`: Make a sprite follow another sprite at a fixed speed.
 `rotateAround`: Make a sprite rotate around the center of another sprite.
 `rotatePoint`: Make any x/y point rotate around any other point.
@@ -86,6 +88,7 @@ Here's the table of contents to get you started:
 `shoot`: A function for making sprites shoot bullets.
 `grid`: Easily plot a grid of sprites. Returns a container full of sprite `children`.
 `progressBar`: A loading progress bar you can use to display while game assets are loading.`
+`burst`: A versatile particle explosion effect.
 
 ### Chapter 4: Collision
 
@@ -154,9 +157,9 @@ GA.plugins = function(ga) {
   ### distance
 
   Find the distance in pixels between two sprites.
-  Parameters: 
-  a. A sprite object with `centerX` and `centerX` properties. 
-  b. A sprite object with `centerY` and `centerY` properties. 
+  Parameters:
+  a. A sprite object with `centerX` and `centerX` properties.
+  b. A sprite object with `centerY` and `centerY` properties.
   The function returns the number of pixels distance between the sprites.
 
   */
@@ -171,7 +174,7 @@ GA.plugins = function(ga) {
   ### ease
 
   Make a sprite ease to the position of another sprite.
-  Parameters: 
+  Parameters:
   a. A sprite object with `centerX` and `centerY` properties. This is the `follower`
   sprite.
   b. A sprite object with `centerX` and `centerY` properties. This is the `leader` sprite that
@@ -184,8 +187,8 @@ GA.plugins = function(ga) {
     var vx = leader.centerX - follower.centerX;
     var vy = leader.centerY - follower.centerY;
     var distance = Math.sqrt(vx * vx + vy * vy);
-    
-    //Move the follower if it's more than 1 pixel 
+
+    //Move the follower if it's more than 1 pixel
     //away from the leader
     if (distance >= 1) {
       follower.x += vx * speed;
@@ -197,7 +200,7 @@ GA.plugins = function(ga) {
   ### follow
 
   Make a sprite move towards another sprite at a regular speed.
-  Parameters: 
+  Parameters:
   a. A sprite object with `centerX` and `centerY` properties. This is the `follower`
   sprite.
   b. A sprite object with `centerX` and `centerY` properties. This is the `leader` sprite that
@@ -211,8 +214,8 @@ GA.plugins = function(ga) {
     var vx = leader.centerX - follower.centerX;
     var vy = leader.centerY - follower.centerY;
     var distance = Math.sqrt(vx * vx + vy * vy);
-    
-    //Move the follower if it's more than 1 move 
+
+    //Move the follower if it's more than 1 move
     //away from the leader
     if (distance >= speed) {
       follower.x += (vx / distance) * speed;
@@ -224,14 +227,14 @@ GA.plugins = function(ga) {
   //Make a sprite rotate around another sprite
 
   ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
-    rotatingSprite.x 
+    rotatingSprite.x
       = centerSprite.centerX - centerSprite.x
-      + (distance * Math.cos(angle)) 
+      + (distance * Math.cos(angle))
       - rotatingSprite.halfWidth;
 
-    rotatingSprite.y 
-      = centerSprite.centerY - centerSprite.y 
-      + (distance *  Math.sin(angle)) 
+    rotatingSprite.y
+      = centerSprite.centerY - centerSprite.y
+      + (distance *  Math.sin(angle))
       - rotatingSprite.halfWidth;
   };
 
@@ -249,7 +252,7 @@ GA.plugins = function(ga) {
   ### angle
 
   Return the angle in Radians between two sprites.
-  Parameters: 
+  Parameters:
   a. A sprite object with `centerX` and `centerY` properties.
   b. A sprite object with `centerX` and `centerY` properties.
   You can use it to make a sprite rotate towards another sprite like this:
@@ -268,8 +271,8 @@ GA.plugins = function(ga) {
   /*
   ### random
 
-  Return a random integer between a minimum and maximum value
-  Parameters: 
+  Returns a random integer between a minimum and maximum value
+  Parameters:
   a. An integer.
   b. An integer.
   Here's how you can use it to get a random number between, 1 and 10:
@@ -281,11 +284,17 @@ GA.plugins = function(ga) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
+  //### randomFloat
+  // Returns a random floating point number between a minimum and maximum value
+  ga.randomFloat = function(min, max) {
+    return min + Math.random()*(max-min);
+  }
+
   //### wait
   ga.wait = function(duration, callBack) {
     setTimeout(callBack, duration);
   };
-    
+
   //### worldCamera
   /*
   The `worldCamera` method returns a `camera` object
@@ -318,6 +327,12 @@ GA.plugins = function(ga) {
       set y(value) {
         this._y = value;
         world.y = -this._y;
+      },
+      get centerX() {
+        return this.x + (this.width / 2);
+      },
+      get centerY() {
+        return this.y + (this.height / 2);
       },
       get rightInnerBoundary() {
         return this.x + (this.width / 2) + (this.width / 4);
@@ -358,7 +373,7 @@ GA.plugins = function(ga) {
         }
         if(this.y + this.height > world.height) {
           this.y = world.height - this.height;
-        } 
+        }
       },
       centerOver: function(sprite) {
         //Center the camera over a sprite
@@ -463,7 +478,7 @@ GA.plugins = function(ga) {
       get: function() {
         //Return the `tween` object's `playing` value
         return yoyo.tween.playing;
-      }, 
+      },
       enumerable: false, configurable: false
     });
     //Pause and play the yoyo's tween
@@ -475,6 +490,7 @@ GA.plugins = function(ga) {
     };
     return yoyo;
   };
+
 
   //### fadeOut
   //`fadeOut` arguments:
@@ -549,6 +565,99 @@ GA.plugins = function(ga) {
     //Return the tween object
     return tween;
   };
+  
+  //### fade
+  //Use `fade` to fade-in or fade-out any spirte.
+  //It's usually used along with the `pulse` effect (below.)
+  //`fade` arguments:
+  //sprite, speed, finalValue
+  ga.fade = function(sprite, speed, finalValue) {
+    finalValue = finalValue || 0;
+    var tween = {};
+    tween.playing = true;
+    tween.update = function() {
+      if (tween.playing) {
+        //Fade out
+        if (finalValue < sprite._alpha) {
+          //Important! Use the sprite's `_alpha` property for this
+          //instead of its relative `alpha` property. That's because we
+          //want to tween the alpha property without taking into account
+          //the sprite's parent's alpha as well.
+          if (sprite._alpha > finalValue) {
+            sprite._alpha -= speed;
+            if (sprite._alpha < finalValue) sprite._alpha = finalValue;
+          } else {
+            tween.playing = false;
+            if (tween.onComplete) tween.onComplete();
+            //Remove the tween from Ga's `tweens` array.
+            ga.tweens.splice(ga.tweens.indexOf(tween), 1);
+          }
+        }
+        else {
+          //Fade in
+          if (sprite._alpha < finalValue) {
+            sprite._alpha += speed;
+            if (sprite._alpha > finalValue) sprite._alpha = finalValue;
+          } else {
+            tween.playing = false;
+            if (tween.onComplete) tween.onComplete();
+            //Remove the tween from Ga's `tweens` array.
+            ga.tweens.splice(ga.tweens.indexOf(tween), 1);
+          }
+        }
+      }
+    };
+    tween.pause = function() {
+      tween.playing = false;
+    };
+    tween.play = function() {
+      tween.playing = true;
+    };
+    //Add the tween to Ga's `tweens` array. The `tweens` array is
+    //updated on each frame.
+    ga.tweens.push(tween);
+    //Return the tween object
+    return tween;
+  };
+
+  //### pulse
+  //Oscilates a sprite's alpha between 1 and 10
+  //`pulse` arguments:
+  //sprite, speedOfFade, finalAlphaValue, delayTimeInMillisecionds
+
+  ga.pulse = function(sprite, speed, finalAlpha, delay) {
+    if (delay === undefined) delay = 0;
+    var pulse = {};
+    function repeat(sprite, speed, finalAlpha, delay) {
+      pulse.tween = ga.fade(sprite, speed, finalAlpha);
+      pulse.tween.onComplete = function() {
+        ga.wait(delay, function() {
+          if(sprite._alpha < 1) {
+            repeat(sprite, speed, 1, delay);
+          } else {
+            repeat(sprite, speed, 0, delay);
+          }
+        });
+      };
+    };
+    repeat(sprite, finalAlpha, speed, delay);
+    //Define the `playing` property
+    Object.defineProperty(pulse, "playing", {
+      get: function() {
+        //Return the `tween` object's `playing` value
+        return pulse.tween.playing;
+      },
+      enumerable: false, configurable: false
+    });
+    //Pause and play the pulse's tween
+    pulse.pause = function() {
+      pulse.tween.playing = false;
+    };
+    pulse.play = function() {
+      pulse.tween.playing = true;
+    };
+    return pulse;
+  };
 
   //### removeTween
   ga.removeTween = function(tweenObject) {
@@ -572,24 +681,24 @@ GA.plugins = function(ga) {
   //### shoot
 
   ga.shoot = function(
-      shooter, angle, offsetFromCenter, 
+      shooter, angle, offsetFromCenter,
       bulletSpeed, bulletSprite, bulletArray) {
     //Make a new sprite using the user-supplied `bulletSprite` function
     var bullet = bulletSprite();
 
     //Set the bullet's start point
-    bullet.x 
-      = shooter.centerX - bullet.halfWidth 
+    bullet.x
+      = shooter.centerX - bullet.halfWidth
       + (offsetFromCenter * Math.cos(angle));
-    bullet.y 
-      = shooter.centerY - bullet.halfHeight 
+    bullet.y
+      = shooter.centerY - bullet.halfHeight
       + (offsetFromCenter * Math.sin(angle));
 
     //Set the bullet's velocity
     bullet.vx = Math.cos(angle) * bulletSpeed;
     bullet.vy = Math.sin(angle) * bulletSpeed;
 
-    //Push the bullet into the 
+    //Push the bullet into the
     bulletArray.push(bullet);
   };
 
@@ -608,7 +717,7 @@ GA.plugins = function(ga) {
           gridGroup = grid(
 
             //Set the grid's properties
-            anInstanceOfGa, rows, columns, cellWidth, cellHeight, 
+            anInstanceOfGa, rows, columns, cellWidth, cellHeight,
             areSpirtesCentered?, xOffset, yOffset,
 
             //A function that returns a sprite
@@ -619,12 +728,12 @@ GA.plugins = function(ga) {
           );
   */
 
-  ga.grid = function( 
-      columns, rows, cellWidth, cellHeight, 
+  ga.grid = function(
+      columns, rows, cellWidth, cellHeight,
       centerCell, xOffset, yOffset,
-      makeSprite, 
+      makeSprite,
       extra
-    ){ 
+    ){
     //Set the defaults
     if (!columns && columns !== 0) columns = 0;
     if (!rows && rows !== 0) rows = 0;
@@ -671,12 +780,12 @@ GA.plugins = function(ga) {
   ### progressBar
   Use the `progressBar` to display the percentage of assetes being loaded.
   To use it, first make sure you define a `load` state when you intialize Ga.
-  Here's an example of a Ga instance that's intialized with 5 assets. The last 
+  Here's an example of a Ga instance that's intialized with 5 assets. The last
   argument, `load`, tells Ga that it should apply the `load` state as soon as
   Ga starts.
 
       var g = ga(
-        512, 512, setup, 
+        512, 512, setup,
         [
           "images/blixyiiUI.png",
           "images/blixyiiTileset.png",
@@ -687,7 +796,7 @@ GA.plugins = function(ga) {
         load
       );
       g.start();
-  
+
   Next, create a `load` function. It will run in a loop while the assets are loading
   and before the `setup` state is run. Here's how to create and update the progress
   bar in the load state
@@ -710,7 +819,7 @@ GA.plugins = function(ga) {
 
   */
   ga.progressBar = {
-    maxWidth: 0, 
+    maxWidth: 0,
     height: 0,
     backgroundColor: "gray",
     foregroundColor: "cyan",
@@ -733,12 +842,12 @@ GA.plugins = function(ga) {
         this.backBar.x = (ga.canvas.width / 2) - (this.maxWidth / 2);
         this.backBar.y = (ga.canvas.height / 2) - 16;
 
-        //2. Create the blue foreground. This is the element of the 
+        //2. Create the blue foreground. This is the element of the
         //progress bar that will increase in width as assets load
         this.frontBar = ga.rectangle(this.maxWidth, 32, this.foregroundColor);
         this.frontBar.x = (ga.canvas.width / 2) - (this.maxWidth / 2);
         this.frontBar.y = (ga.canvas.height / 2) - 16;
-        
+
         //3. A text sprite that will display the percentage
         //of assets that have loaded
         this.percentage = ga.text("0%", "28px sans-serif", "black");
@@ -750,13 +859,13 @@ GA.plugins = function(ga) {
       }
     },
     update: function() {
-      //Change the width of the blue `frontBar` to match the 
+      //Change the width of the blue `frontBar` to match the
       //ratio of assets that have loaded. Adding `+ 1` to
       //`assets.loaded` means that the loading bar will appear at 100%
       //when the last asset is being loaded, which is reassuring for the
       //player.
       var ratio = (this.assets.loaded + 1) / this.assets.toLoad;
-      this.frontBar.scaleX = ratio; 
+      this.frontBar.scaleX = ratio;
       //Display the percentage
       this.percentage.content = Math.floor((ratio) * 100) + "%";
     },
@@ -767,6 +876,110 @@ GA.plugins = function(ga) {
       g.remove(this.percentage);
     }
   };
+
+  /*
+  ### burst
+  A versatile particle explosion effect. It has lots of little parameters to tweak for maaking
+  all sorts of particle burst effects. Here's an example of how to use it:
+
+    g.burst(
+      sprite.x, sprite.y,   //x and y
+      function(){           //A function that returns the sprite to use for the particle
+        return g.sprite(g.frame("images/tileset.png", 112, 0, 16, 16));
+      },
+      g.random(5, 10),      //numberOfParticles
+      4, 16,                //size
+      3, 0.5,               //speed
+      0.01, 0.05,           //scale speed
+      0.01, 0.05,           //scale speed
+      0.01, 0.02,           //alpha speed
+      0.01, 0.03            //rotation speed
+    );
+
+  */
+
+  ga.burst = function(
+    x, y, 
+    spriteFunction,
+    numberOfParticles, 
+    minSize, maxSize, 
+    minSpeed, maxSpeed,
+    minScaleSpeed, maxScaleSpeed,
+    minAlphaSpeed, maxAlphaSpeed,
+    minRotationSpeed, maxRotationSpeed
+  ) {
+
+    //Assign defaults
+    x = x || 0;
+    y = y || 0;
+    spriteFunction = spriteFunction || function(){return ga.circle(10, "red")}
+    minSize = minSize || 4;
+    maxSize = maxSize || 16;
+    numberOfParticles = numberOfParticles || 10;
+    minSpeed = minSpeed || 0.1;
+    maxSpeed = maxSpeed || 1;
+    minScaleSpeed = minScaleSpeed || 0.01;
+    maxScaleSpeed = maxScaleSpeed || 0.05;
+    minAlphaSpeed = minAlphaSpeed || 0.02;
+    maxAlphaSpeed = maxAlphaSpeed || 0.02;
+    minRotationSpeed = minRotationSpeed || 0.01;
+    maxRotationSpeed = maxRotationSpeed || 0.03;
+
+    //Create an angle value between 0 and 360 for each particle
+    var angle;
+    for (angle = 0; angle < 360; angle += Math.round(360 / numberOfParticles)) {
+      makeParticle();
+    }
+
+    //Make the particle
+    function makeParticle() {
+      //Create the particle using the supplied sprite function
+      var particle = spriteFunction();
+      //Set the x and y position
+      particle.x = x;
+      particle.y = y;
+      //Set a random width and height
+      var size = ga.randomFloat(minSize, maxSize);
+      particle.width = size;
+      particle.height = size;
+      //Set a random speed to change the scale, alpha and rotation
+      particle.scaleSpeed = ga.randomFloat(minScaleSpeed, maxScaleSpeed);
+      particle.alphaSpeed = ga.randomFloat(minAlphaSpeed, maxAlphaSpeed);
+      particle.rotationSpeed = ga.randomFloat(minRotationSpeed, maxRotationSpeed);
+      //Set a random velocity at which the particle should move
+      var speed = ga.randomFloat(minSpeed, maxSpeed);
+      particle.vx = speed * Math.cos(angle * Math.PI / 180);
+      particle.vy = speed * Math.sin(angle * Math.PI / 180);
+
+      //The particle's `update` method is called on each frame of the
+      //game loop
+      particle.update = function(){
+        //Move the particle
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        //Change the particle's `scale`
+        if (particle.scaleX - particle.scaleSpeed > 0) {
+          particle.scaleX -= particle.scaleSpeed;
+        }
+        if (particle.scaleY - particle.scaleSpeed > 0) {
+          particle.scaleY -= particle.scaleSpeed;
+        }
+        //Change the particle's rotation
+        particle.rotation += particle.rotationSpeed;
+        //Change the particle's `alpha`
+        particle.alpha -= particle.alphaSpeed;
+        //Remove the particle if its `alpha` reaches zero
+        if (particle.alpha <= 0) {
+          ga.remove(particle);
+          ga.particles.splice(ga.particles.indexOf(particle), 1);
+        }
+      };
+      //Push the particles into ga's `particles` array
+      //The `ga.particles` array is updated by the game loop each
+      //frame
+      ga.particles.push(particle);
+    }
+  }
 
   /*
   Chapter 4: Collision
@@ -785,7 +998,7 @@ GA.plugins = function(ga) {
         width = bounds.width,
         height = bounds.height;
 
-    //The `collision` object is used to store which 
+    //The `collision` object is used to store which
     //side of the containing rectangle the sprite hits
     var collision;
 
@@ -809,8 +1022,8 @@ GA.plugins = function(ga) {
     //The `extra` function runs if there was a collision
     //and `extra` has been defined
     if (collision && extra) extra(collision);
-    
-    //Return the `collision` object   
+
+    //Return the `collision` object
     return collision;
   };
 
@@ -825,7 +1038,7 @@ GA.plugins = function(ga) {
     //Set `bounce` to `false` by default
     bounce = bounce || false;
 
-    //The `collision` object is used to store which 
+    //The `collision` object is used to store which
     //side of the containing rectangle the sprite hits
     var collision;
 
@@ -833,7 +1046,7 @@ GA.plugins = function(ga) {
     if (s.x < x) {
       //Bounce the sprite if `bounce` is true
       if (bounce) s.vx *= -1;
-      //If the sprite has `mass`, let the mass 
+      //If the sprite has `mass`, let the mass
       //affect the sprite's velocity
       if(s.mass) s.vx /= s.mass;
       s.x = x;
@@ -864,8 +1077,8 @@ GA.plugins = function(ga) {
     //The `extra` function runs if there was a collision
     //and `extra` has been defined
     if (collision && extra) extra(collision);
-    
-    //Return the `collision` object   
+
+    //Return the `collision` object
     return collision;
   };
 
@@ -878,7 +1091,7 @@ GA.plugins = function(ga) {
   #### hitTestPoint
 
   Use it to find out if a point is touching a circular or rectangular sprite.
-  Parameters: 
+  Parameters:
   a. An object with `x` and `y` properties.
   b. A sprite object with `x`, `y`, `centerX` and `centerY` properties.
   If the sprite has a `radius` property, the function will interpret
@@ -930,7 +1143,7 @@ GA.plugins = function(ga) {
   #### hitTestCircle
 
   Use it to find out if two circular sprites are touching.
-  Parameters: 
+  Parameters:
   a. A sprite object with `centerX`, `centerY` and `radius` properties.
   b. A sprite object with `centerX`, `centerY` and `radius`.
   */
@@ -953,7 +1166,7 @@ GA.plugins = function(ga) {
     }
 
     //Find the distance between the circles by calculating
-    //the vector's magnitude (how long the vector is)  
+    //the vector's magnitude (how long the vector is)
     magnitude = Math.sqrt(vx * vx + vy * vy);
 
     //Add together the circles' total radii
@@ -971,7 +1184,7 @@ GA.plugins = function(ga) {
   #### hitTestRectangle
 
   Use it to find out if two rectangular sprites are touching.
-  Parameters: 
+  Parameters:
   a. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
   b. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
 
@@ -1021,9 +1234,9 @@ GA.plugins = function(ga) {
   /*
   #### rectangleCollision
 
-  Use it to prevent two rectangular sprites from overlapping. 
+  Use it to prevent two rectangular sprites from overlapping.
   Optionally, make the first retangle bounceoff the second rectangle.
-  Parameters: 
+  Parameters:
   a. A sprite object with `x`, `y` `center.x`, `center.y`, `halfWidth` and `halfHeight` properties.
   b. A sprite object with `x`, `y` `center.x`, `center.y`, `halfWidth` and `halfHeight` properties.
   c. Optional: true or false to indicate whether or not the first sprite
@@ -1033,7 +1246,7 @@ GA.plugins = function(ga) {
   ga.rectangleCollision = function(r1, r2, bounce, global) {
     var collision, combinedHalfWidths, combinedHalfHeights,
         overlapX, overlapY, vx, vy;
-      
+
     //Set `bounce` to a default value of `true`
     if(bounce === undefined) bounce = false;
 
@@ -1048,17 +1261,17 @@ GA.plugins = function(ga) {
       vx = r1.centerX - r2.centerX;
       vy = r1.centerY - r2.centerY;
     }
-    
+
     //Figure out the combined half-widths and half-heights
     combinedHalfWidths = r1.halfWidth + r2.halfWidth;
     combinedHalfHeights = r1.halfHeight + r2.halfHeight;
 
-    //Check whether vx is less than the combined half widths 
+    //Check whether vx is less than the combined half widths
     if (Math.abs(vx) < combinedHalfWidths) {
-      //A collision might be occurring! 
-      //Check whether vy is less than the combined half heights 
+      //A collision might be occurring!
+      //Check whether vy is less than the combined half heights
       if (Math.abs(vy) < combinedHalfHeights) {
-        //A collision has occurred! This is good! 
+        //A collision has occurred! This is good!
         //Find out the size of the overlap on both the X and Y axes
         overlapX = combinedHalfWidths - Math.abs(vx);
         overlapY = combinedHalfHeights - Math.abs(vy);
@@ -1068,7 +1281,7 @@ GA.plugins = function(ga) {
         //axis that is
 
         if (overlapX >= overlapY) {
-          //The collision is happening on the X axis 
+          //The collision is happening on the X axis
           //But on which side? vy can tell us
           if (vy > 0) {
             collision = "top";
@@ -1086,15 +1299,15 @@ GA.plugins = function(ga) {
             /*Alternative
             //Find the bounce surface's vx and vy properties
             var s = {};
-            s.vx = r2.x - r2.x + r2.width; 
+            s.vx = r2.x - r2.x + r2.width;
             s.vy = 0;
-    
+
             //Bounce r1 off the surface
             //bounceOffSurface(r1, s);
             */
           }
         } else {
-          //The collision is happening on the Y axis 
+          //The collision is happening on the Y axis
           //But on which side? vx can tell us
           if (vx > 0) {
             collision = "left";
@@ -1112,9 +1325,9 @@ GA.plugins = function(ga) {
             /*Alternative
             //Find the bounce surface's vx and vy properties
             var s = {};
-            s.vx = 0; 
+            s.vx = 0;
             s.vy = r2.y - r2.y + r2.height;
-      
+
             //Bounce r1 off the surface
             bounceOffSurface(r1, s);
             */
@@ -1127,7 +1340,7 @@ GA.plugins = function(ga) {
       //No collision
     }
     //Return the collision string. it will be either "top", "right",
-    //"bottom", or "left" depening on which side of r1 is touching r2. 
+    //"bottom", or "left" depening on which side of r1 is touching r2.
     return collision;
   }
 
@@ -1136,11 +1349,11 @@ GA.plugins = function(ga) {
 
   Use this function to prevent a moving circular sprite from overlapping and optionally
   bouncing off a non-moving circular sprite.
-  Parameters: 
+  Parameters:
   a. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
   b. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
   c. Optional: `true` or `false` to indicate whether or not the first sprite
-  d. Optional: `true` or `false` to indicate whether or not local or global sprite positions should be used. 
+  d. Optional: `true` or `false` to indicate whether or not local or global sprite positions should be used.
   This defaults to `true` so set it to `false` if you want to use the sprite's local coordinates.
   should bounce off the second sprite.
   The sprites can contain an optional mass property that should be greater than 1.
@@ -1171,7 +1384,7 @@ GA.plugins = function(ga) {
     }
 
     //Find the distance between the circles by calculating
-    //the vector's magnitude (how long the vector is) 
+    //the vector's magnitude (how long the vector is)
     magnitude = Math.sqrt(vx * vx + vy * vy);
 
     //Add together the circles' combined half-widths
@@ -1183,7 +1396,7 @@ GA.plugins = function(ga) {
       //Yes, a collision is happening.
       hit = true;
 
-      //Find the amount of overlap between the circles 
+      //Find the amount of overlap between the circles
       overlap = combinedRadii - magnitude;
 
       //Add some "quantum padding". This adds a tiny amount of space
@@ -1201,12 +1414,12 @@ GA.plugins = function(ga) {
       dy = vy / magnitude;
 
       //Move circle 1 out of the collision by multiplying
-      //the overlap with the normalized vector and subtract it from 
+      //the overlap with the normalized vector and subtract it from
       //circle 1's position
       c1.x -= overlap * dx;
       c1.y -= overlap * dy;
 
-      //Bounce    
+      //Bounce
       if (bounce) {
         //Create a collision vector object, `s` to represent the bounce surface.
         //Find the bounce surface's x and y properties
@@ -1233,7 +1446,7 @@ GA.plugins = function(ga) {
   #### movingCircleCollision
 
   Use it to make two moving circles bounce off each other.
-  Parameters: 
+  Parameters:
   a. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
   b. A sprite object with `x`, `y` `centerX`, `centerY` and `radius` properties.
   The sprites can contain an optional mass property that should be greater than 1.
@@ -1242,13 +1455,15 @@ GA.plugins = function(ga) {
 
   ga.movingCircleCollision = function(c1, c2, global) {
     var combinedRadii, overlap, xSide, ySide,
+        //`s` refers to the collision surface
         s = {},
         p1A = {}, p1B = {}, p2A = {}, p2B = {},
         hit = false;
 
+    //Apply mass, if the circles have mass properties
     c1.mass = c1.mass || 1;
     c2.mass = c2.mass || 1;
-    
+
     //Set `global` to a default value of `true`
     if(global === undefined) global = true;
 
@@ -1264,7 +1479,7 @@ GA.plugins = function(ga) {
     }
 
     //Find the distance between the circles by calculating
-    //the vector's magnitude (how long the vector is) 
+    //the vector's magnitude (how long the vector is)
     s.magnitude = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
 
     //Add together the circles' combined half-widths
@@ -1276,7 +1491,7 @@ GA.plugins = function(ga) {
       //Yes, a collision is happening
       hit = true;
 
-      //Find the amount of overlap between the circles 
+      //Find the amount of overlap between the circles
       overlap = combinedRadii - s.magnitude;
 
       //Add some "quantum padding" to the overlap
@@ -1297,7 +1512,7 @@ GA.plugins = function(ga) {
       (c1.y > c2.y) ? ySide = 1 : ySide = -1;
 
       //Move c1 out of the collision by multiplying
-      //the overlap with the normalized vector and adding it to 
+      //the overlap with the normalized vector and adding it to
       //the circle's positions
       c1.x = c1.x + (s.vxHalf * xSide);
       c1.y = c1.y + (s.vyHalf * ySide);
@@ -1378,10 +1593,10 @@ GA.plugins = function(ga) {
     if(global === undefined) global = true;
     //marble collisions
     for (var i = 0; i < arrayOfCircles.length; i++) {
-      //The first marble to use in the collision check 
+      //The first marble to use in the collision check
       var c1 = arrayOfCircles[i];
       for (var j = i + 1; j < arrayOfCircles.length; j++) {
-        //The second marble to use in the collision check 
+        //The second marble to use in the collision check
         var c2 = arrayOfCircles[j];
         //Check for a collision and bounce the marbles apart if
         //they collide. Use an optional mass property on the sprite
@@ -1396,7 +1611,7 @@ GA.plugins = function(ga) {
 
   Use this to bounce an object off another object. It's only used by the other collision functions,
   so you don't need to call it yourself.
-  Parameters: 
+  Parameters:
   a. An object with `vx` and `vy` properties. This represents the object that is colliding
   with a surface.
   b. An object with `x` and `y` properties. This represents the surface that the object
@@ -1457,7 +1672,7 @@ GA.plugins = function(ga) {
   /*
   //#### hit
   An universal collision method that works for rectangular and circular sprites.
-  it figures out what kinds of sprites are involved in the collision and 
+  it figures out what kinds of sprites are involved in the collision and
   automatically chooses the correct collision method.
   */
 
@@ -1476,11 +1691,11 @@ GA.plugins = function(ga) {
     } else {
       //If one of the arguments isn't an array, find out what type of
       //collision check to run
-      collision = findCollisionType(a, b); 
+      collision = findCollisionType(a, b);
       if (collision && extra) extra(collision);
     }
     //Return the result of the collision.
-    //It will be `undefined` if there's no collision and `true` if 
+    //It will be `undefined` if there's no collision and `true` if
     //there is a collision. `rectangleCollision` sets `collsision` to
     //"top", "bottom", "left" or "right" depeneding on which side the
     //collision is occuring on
@@ -1509,7 +1724,7 @@ GA.plugins = function(ga) {
         throw new Error("I'm sorry, " + a + " and " + b + " cannot be use together in a collision test.");
       }
     }
-    
+
     function spriteVsArray() {
       //If `a` happens to be the array, flip it around so that it becomes `b`
       if (a instanceof Array) {
@@ -1520,7 +1735,7 @@ GA.plugins = function(ga) {
       //Loop through the array in reverse
       for (var i = b.length - 1; i >= 0; i--) {
         var sprite = b[i];
-        collision = findCollisionType(a, sprite); 
+        collision = findCollisionType(a, sprite);
         if (collision && extra) extra(collision, sprite);
       }
     }
@@ -1530,7 +1745,7 @@ GA.plugins = function(ga) {
       //just test to see if they're touching
       if(!react) {
         return ga.hitTestCircle(a, b, global);
-      } 
+      }
       //Yes, the circles should react to the collision
       else {
         //Are they both moving?
@@ -1552,24 +1767,24 @@ GA.plugins = function(ga) {
       //test to see if they're touching
       if(!react) {
         return ga.hitTestRectangle(a, b, global);
-      } 
+      }
       //Yes
       else {
         //Should they bounce apart?
         //Yes
         if(bounce) {
           return ga.rectangleCollision(a, b, true, global);
-        } 
+        }
         //No
         else {
-          return ga.rectangleCollision(a, b, false, global); 
+          return ga.rectangleCollision(a, b, false, global);
         }
       }
     }
   };
 
   //### 2D Tile based collision utilities
-  
+
   //#### getIndex
   //The `getIndex` helper method
   //converts a sprite's x and y position to an array index number.
@@ -1590,7 +1805,7 @@ GA.plugins = function(ga) {
   converts a tile's index number into x/y screen
   coordinates, and capture's the tile's grid index (`gid`) number.
   It returns an object with `x`, `y`, `centerX`, `centerY`, `width`, `height`, `halfWidth`
-  `halffHeight` and `gid` properties. (The `gid` number is the value that the tile has in the 
+  `halffHeight` and `gid` properties. (The `gid` number is the value that the tile has in the
   mapArray) This lets you use the returned object
   with the 2d geometric collision functions like `hitTestRectangle`
   or `rectangleCollision`
@@ -1621,7 +1836,7 @@ GA.plugins = function(ga) {
   The `surroundingCells` helper method returns an array containing 9
   index numbers of map array cells around any given index number.
   Use it for an efficient broadphase/narrowphase collision test.
-  The 2 arguments are the index number that represents the center cell, 
+  The 2 arguments are the index number that represents the center cell,
   and the width of the map array.
   */
 
@@ -1647,7 +1862,7 @@ GA.plugins = function(ga) {
   smaller rectangular area inside the sprite, that collision
   area will be used istead of the sprite's dimensions. Here's
   How you could define a `collsionArea` on a sprite:
-  
+
       elf.collisionArea = {x: 22, y: 44, width: 20, height: 20};
 
   */
@@ -1660,14 +1875,14 @@ GA.plugins = function(ga) {
         topRight: {x: s.x + ca.x + ca.width, y: s.y + ca.y},
         bottomLeft: {x: s.x + ca.x, y: s.y + ca.y + ca.height},
         bottomRight: {x: s.x + ca.x + ca.width, y: s.y + ca.y + ca.height}
-      }; 
+      };
     } else {
       return {
         topLeft: {x: s.x, y: s.y},
         topRight: {x: s.x + s.width - 1, y: s.y},
         bottomLeft: {x: s.x, y: s.y + s.height - 1},
         bottomRight: {x: s.x + s.width - 1, y: s.y + s.height - 1}
-      }; 
+      };
     }
   };
 
@@ -1675,14 +1890,14 @@ GA.plugins = function(ga) {
   /*
   `hitTestTile` checks for a
   collision between a sprite and a tile in any map array that you
-  specify. It returns a `collision` object. 
+  specify. It returns a `collision` object.
   `collision.hit` is a Boolean that tells you if a sprite is colliding
   with the tile that you're checking. `collision.index` tells you the
   map array's index number of the colliding sprite. You can check for
   a collision with the tile against "every" corner point on the
   sprite, "some" corner points, or the sprite's "center" point.
   `hitTestTile` arguments:
-  sprite, array, collisionTileGridIdNumber, worldObject, spritesPointsToCheck 
+  sprite, array, collisionTileGridIdNumber, worldObject, spritesPointsToCheck
   The `world` object (the 4th argument) has to have these properties:
   `tileheight`, `tilewidth`, `widthInTiles`.
   */
@@ -1692,40 +1907,40 @@ GA.plugins = function(ga) {
     pointsToCheck = pointsToCheck || "some";
 
     //The collision object that will be returned by this function
-    var collision = {}; 
+    var collision = {};
 
     //Which points do you want to check?
     //"every", "some" or "center"?
     switch (pointsToCheck) {
       case "center":
-        //`hit` will be true only if the center point is touching 
+        //`hit` will be true only if the center point is touching
         var point = {center: {x: sprite.centerX, y: sprite.centerY}};
         sprite.collisionPoints = point;
         collision.hit = Object.keys(sprite.collisionPoints).some(checkPoints);
         break;
       case "every":
         //`hit` will be true if every point is touching
-        sprite.collisionPoints = ga.getPoints(sprite); 
+        sprite.collisionPoints = ga.getPoints(sprite);
         collision.hit = Object.keys(sprite.collisionPoints).every(checkPoints);
         break;
       case "some":
         //`hit` will be true only if some points are touching
-        sprite.collisionPoints = ga.getPoints(sprite); 
+        sprite.collisionPoints = ga.getPoints(sprite);
         collision.hit = Object.keys(sprite.collisionPoints).some(checkPoints);
         break;
     }
 
-    //Loop through the sprite's corner points to find out if they are inside 
+    //Loop through the sprite's corner points to find out if they are inside
     //an array cell that you're interested in. Return `true` if they are
-    
+
     function checkPoints(key) {
-      //Get a reference to the current point to check. 
+      //Get a reference to the current point to check.
       //(`topLeft`, `topRight`, `bottomLeft` or `bottomRight` )
       var point = sprite.collisionPoints[key];
 
       //Find the point's index number in the map array
       collision.index = ga.getIndex(
-        point.x, point.y, 
+        point.x, point.y,
         world.tilewidth, world.tileheight, world.widthInTiles
       );
 
@@ -1735,7 +1950,7 @@ GA.plugins = function(ga) {
 
       //If it matches the value of the gid that we're interested, in
       //then there's been a collision
-      if (collision.gid === gidToCheck) { 
+      if (collision.gid === gidToCheck) {
         return true;
       } else {
         return false;
@@ -1759,14 +1974,14 @@ GA.plugins = function(ga) {
   ga.fourKeyController = function(s, speed, up, right, down, left) {
     //Create a `direction` property on the sprite
     s.direction = "";
-    
+
     //Create some keyboard objects
     leftArrow = ga.keyboard(left);
     upArrow = ga.keyboard(up);
     rightArrow = ga.keyboard(right);
     downArrow = ga.keyboard(down);
-    
-    //Assign key `press` and release methods 
+
+    //Assign key `press` and release methods
     leftArrow.press = function() {
       s.vx = -speed;
       s.vy = 0;
@@ -1813,17 +2028,17 @@ GA.plugins = function(ga) {
   Chapter 5: Tiled editor importers
   ---------------------------------
   Ga lets you import JSON files created by the popular Tiled Editor game map and level editor.
-  
+
   www.mapeditor.org
-  
+
   Two functions called `makeTiledWorld` and `makeIsoTiledWorld` (for isometric maps, coming soon!) use this data to
   automatically build your game world for you.
 
   To prepare your Tiled Editor game world for use in Ga, give any significant thing a
-  `name` property. Anything with a `name` property in Tiled Editor can 
-  be accessed in your code by its string name. Tiled Editor layers have a 
+  `name` property. Anything with a `name` property in Tiled Editor can
+  be accessed in your code by its string name. Tiled Editor layers have a
   `name` property by default, and you can assign custom `name`
-  properties to tiles and objects. Not everything needs a `name` property, just 
+  properties to tiles and objects. Not everything needs a `name` property, just
   things that you want to specifically access in the world after its created.
   */
 
@@ -1851,19 +2066,19 @@ GA.plugins = function(ga) {
     //named objects in the map. Named objects all have
     //a `name` property that was assigned in Tiled Editor
     world.objects = [];
-    
+
     //The optional spacing (padding) around each tile
     //This is to account for spacing around tiles
-    //that's commonly used with texture atlas tilesets. Set the 
-    //`spacing` property when you create a new map in Tiled Editor 
-    var spacing = tiledMap.tilesets[0].spacing;  
+    //that's commonly used with texture atlas tilesets. Set the
+    //`spacing` property when you create a new map in Tiled Editor
+    var spacing = tiledMap.tilesets[0].spacing;
 
     //Figure out how many columns there are on the tileset.
     //This is the width of the image, divided by the width
     //of each tile, plus any optional spacing thats around each tile
     var numberOfTilesetColumns =
       Math.floor(
-        tiledMap.tilesets[0].imagewidth 
+        tiledMap.tilesets[0].imagewidth
         / (tiledMap.tilewidth + spacing)
       );
 
@@ -1871,15 +2086,15 @@ GA.plugins = function(ga) {
     tiledMap.layers.forEach(function(tiledLayer){
 
       //Make a group for this layer and copy
-      //all of the layer properties onto it. 
+      //all of the layer properties onto it.
       var layerGroup = ga.group();
-      
+
       Object.keys(tiledLayer).forEach(function(key) {
-        //Add all the layer's properties to the group, except the 
+        //Add all the layer's properties to the group, except the
         //width and height (because the group will work those our for
         //itself based on its content).
         if (key !== "width" && key !== "height") {
-          layerGroup[key] = tiledLayer[key]; 
+          layerGroup[key] = tiledLayer[key];
         }
       });
 
@@ -1900,11 +2115,11 @@ GA.plugins = function(ga) {
 
       //Is this current layer a `tilelayer`?
       if (tiledLayer.type === "tilelayer") {
-        
-        //Loop through the `data` array of this layer 
+
+        //Loop through the `data` array of this layer
         tiledLayer.data.forEach(function(gid, index) {
-          var tileSprite, texture, mapX, mapY, tilesetX, tilesetY, 
-              mapColumn, mapRow, tilesetColumn, tilesetRow; 
+          var tileSprite, texture, mapX, mapY, tilesetX, tilesetY,
+              mapColumn, mapRow, tilesetColumn, tilesetRow;
           //If the grid id number (`gid`) isn't zero, create a sprite
           if (gid !== 0) {
             //Figure out the map column and row number that we're on, and then
@@ -1923,21 +2138,21 @@ GA.plugins = function(ga) {
             tilesetY = tilesetRow * world.tileheight;
 
             //Compensate for any optional spacing (padding) around the tiles if
-            //there is any. This bit of code accumlates the spacing offsets from the 
-            //left side of the tileset and adds them to the current tile's position 
+            //there is any. This bit of code accumlates the spacing offsets from the
+            //left side of the tileset and adds them to the current tile's position
             if (spacing > 0) {
-              tilesetX 
-                += spacing 
-                + (spacing * ((gid - 1) % numberOfTilesetColumns)); 
-              tilesetY 
-                += spacing 
+              tilesetX
+                += spacing
+                + (spacing * ((gid - 1) % numberOfTilesetColumns));
+              tilesetY
+                += spacing
                 + (spacing * Math.floor((gid - 1) / numberOfTilesetColumns));
             }
 
             //Use the above values to create the sprite's image from
             //the tileset image
             texture = ga.frame(
-              tileset, tilesetX, tilesetY, 
+              tileset, tilesetX, tilesetY,
               world.tilewidth, world.tileheight
             );
 
@@ -1959,7 +2174,7 @@ GA.plugins = function(ga) {
               //(This includes the `name` property)
               Object.keys(tileproperties[key]).forEach(function(property) {
                 //console.log(tileproperties[key][property])
-                tileSprite[property] = tileproperties[key][property]; 
+                tileSprite[property] = tileproperties[key][property];
               });
 
               //Push the sprite into the world's `objects` array
@@ -1972,7 +2187,7 @@ GA.plugins = function(ga) {
             else {
               tileSprite = ga.sprite(texture);
             }
-            
+
             //Position the sprite on the map
             tileSprite.x = mapX;
             tileSprite.y = mapY;
@@ -1984,7 +2199,7 @@ GA.plugins = function(ga) {
             //Make a record of the sprite's `gid` on the tileset.
             //This will also be useful for collision detection later
             tileSprite.gid = gid;
-            
+
             //Add the sprite to the current layer group
             layerGroup.addChild(tileSprite);
           }
@@ -1992,7 +2207,7 @@ GA.plugins = function(ga) {
       }
 
       //Is this layer an `objectgroup`?
-      if (tiledLayer.type === "objectgroup") { 
+      if (tiledLayer.type === "objectgroup") {
         tiledLayer.objects.forEach(function(object) {
           //We're just going to capture the object's properties
           //so that we can decide what to do with it later
@@ -2003,7 +2218,7 @@ GA.plugins = function(ga) {
           //Because this is an object layer, it doesn't contain any
           //sprites, just data object. That means it won't be able to
           //calucalte its own height and width. To help it out, give
-          //the `layerGroup` the same `width` and `height` as the `world` 
+          //the `layerGroup` the same `width` and `height` as the `world`
           layerGroup.width = world.width;
           layerGroup.height = world.height;
 
@@ -2015,12 +2230,12 @@ GA.plugins = function(ga) {
 
     //Search functions
     //`world.getObject` and `world.getObjects`  search for and return
-    //any sprites or objects in the `world.objects` array. 
-    //Any object that has a `name` propery in 
+    //any sprites or objects in the `world.objects` array.
+    //Any object that has a `name` propery in
     //Tiled Editor will show up in a search.
     //`getObject` gives you a single object, `getObjects` gives you an array
     //of objects.
-    //`getObject` returns the actual search function, so you 
+    //`getObject` returns the actual search function, so you
     //can use the following format to directly access a single object:
     //sprite.x = world.getObject("anySprite").x;
     //sprite.y = world.getObject("anySprite").y;

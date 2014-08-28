@@ -92,8 +92,9 @@ huge number of useful tools for making games. You can use as many or
 as few of these tools as you want to. Here are some of the goodies
 you'll find in `plugins.js`:
 
+- Make versatile particle explosions with `burst`.
 - Tween functions for sprite and scene transitions: `slide`,
-  `yoyo`, `fadeIn` and `fadeOut`.
+  `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
 - A handful of useful convenience functions: `ease`, `follow`,
   `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`,
   `random`, `contain` and `outsideBounds`.
