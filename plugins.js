@@ -71,7 +71,8 @@ Here's the table of contents to get you started:
 `rotateAround`: Make a sprite rotate around the center of another sprite.
 `rotatePoint`: Make any x/y point rotate around any other point.
 `angle`: Get the angle between the center points of two sprites
-`random`: Generate a random number within a range.
+`random`: Generate a random integer within a range.
+`randomFloat`: Generate a random floating point number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 `worldCamera`: A method that creates and returns a camera for a scrolling game world.
 
@@ -115,6 +116,7 @@ Here's the table of contents to get you started:
 `surroundingCells`: returns an array of 9 index numbers of cells surrounding a center cell.
 `getPoints`: returns an object with the x/y positions of all the sprite's corner points.
 `hitTestTile`: A versatile collision detection function for tile based games.
+`updateMap`: Returns a new map array with the new index positions of spirtes.
 
 ### Chapter 5: Sprite controllers
 
@@ -383,6 +385,41 @@ GA.plugins = function(ga) {
     };
 
     return camera;
+  };
+
+  //### scaleToFit
+  /*
+  Center and scale Ga inside the HTML page. The `dimension` can be either "width" or "height"
+  depending on you want to center the game horizontally ("width") or vertically ("height").
+  */
+  ga.scaleToFit = function(dimension, color) {
+    var scaleX, scaleY, scale;
+
+    if (dimension === "width") {
+      scaleX = ga.canvas.width / window.innerWidth;
+      scaleY = ga.canvas.height / window.innerHeight;
+    }
+    if (dimension === "height") {
+      scaleX = window.innerWidth / ga.canvas.width;
+      scaleY = window.innerHeight / ga.canvas.height;
+    }
+    scale = Math.min(scaleX, scaleY);
+    ga.canvas.style.transformOrigin = "0 0";
+    ga.canvas.style.transform = "scale(" + scale + ")";
+
+    //Set the color of the HTML body background
+    document.body.style.backgroundColor = color;
+
+    //Center the canvas in the HTML body
+    ga.canvas.style.paddingLeft = 0;
+    ga.canvas.style.paddingRight = 0;
+    ga.canvas.style.marginLeft = "auto";
+    ga.canvas.style.marginRight = "auto";
+    ga.canvas.style.display = "block";
+    
+    //Set ga to the correct scale. This important for correct hit testing
+    //between the pointer and sprites
+    ga.scale = scale;
   };
 
   /*
@@ -1963,6 +2000,64 @@ GA.plugins = function(ga) {
     //collision occured
     return collision;
   };
+
+  //### updateMap
+  /*
+  `updateMap` takes a map array and adds a sprite's grid index number (`gid`) to it. 
+  It finds the sprite's new index position, and retuns the new map array.
+  You can use it to do very efficient collision detection in tile based game worlds.
+  `updateMap` arguments:
+  array, singleSpriteOrArrayOfSprites, worldObject
+  The `world` object (the 4th argument) has to have these properties:
+  `tileheight`, `tilewidth`, `widthInTiles`.
+  The sprite objects have to have have these properties:
+  `centerX`, `centerY`, `index`, `gid` (The number in the array that represpents the sprite)
+  Here's an example of how you could use `updateMap` in your game code like this:
+  
+      blockLayer.data = g.updateMap(blockLayer.data, blockLayer.children, world);
+
+  The `blockLayer.data` array would now contain the new index position numbers of all the 
+  child sprites on that layer.
+  */
+
+  ga.updateMap = function(mapArray, spritesToUpdate, world) {
+    //First create a map a new array filled with zeros.
+    //The new map array will be exactly the same size as the original
+    var newMapArray = mapArray.map(function(gid) {
+      gid = 0;
+      return gid;
+    });
+
+    //Is `spriteToUpdate` an array of sprites?
+    if(spritesToUpdate instanceof Array) {
+      //Get the index number of each sprite in the `spritesToUpdate` array
+      //and add the sprite's `gid` to the matching index on the map
+      spritesToUpdate.forEach(function(sprite) {
+        //Find the new index number
+        sprite.index = ga.getIndex(
+          sprite.centerX, sprite.centerY,
+          world.tilewidth, world.tileheight, world.widthInTiles
+        );
+        //Add the sprite's `gid` number to the correct index on the map
+        newMapArray[sprite.index] = sprite.gid;
+      });
+    }
+
+    //Is `spritesToUpdate` just a single sprite?
+    else {
+      var sprite = spritesToUpdate;
+      //Find the new index number
+      sprite.index = ga.getIndex(
+        sprite.centerX, sprite.centerY,
+        world.tilewidth, world.tileheight, world.widthInTiles
+      );
+      //Add the sprite's `gid` number to the correct index on the map
+      newMapArray[sprite.index] = sprite.gid;
+    }
+
+    //Return the new map array to replace the previous one
+    return newMapArray;
+  }
 
   /*
   Chapter 4: Sprite controllers

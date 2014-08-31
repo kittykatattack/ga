@@ -313,6 +313,30 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga._lag = 0;
 
   /*
+  The canvas's x and y scale. These are set by getters and setter in
+  the code ahead. The scale is used in the `makeInteractive`
+  function for correct hit testing between the pointer and sprites
+  in a scaled canvas. Here's some application code you can use to
+  scale the Ga canvas to fit into the maximum size of the browser
+  window.
+
+      var scaleX = g.canvas.width / window.innerWidth,
+          scaleY = g.canvas.height / window.innerHeight,
+          //Or, scale to the height
+          //scaleX = window.innerWidth / g.canvas.width,
+          //scaleY = window.innerHeight / g.canvas.height,
+          scaleToFit = Math.min(scaleX, scaleY);
+    
+      g.canvas.style.transformOrigin = "0 0";
+      g.canvas.style.transform = "scale(" + scaleToFit + ")";
+
+      //Set Ga's scale
+      g.scale = scaleToFit;
+
+  */
+  ga.scale = 1;
+
+  /*
   ### Core game engine methods
   This next sections contains all the important methods that the game engine needs to do its work.
   */
@@ -350,6 +374,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //Reduce the lag counter by the frame duration
         ga._lag -= ga._frameDuration;
       }
+      //Calculate the lag offset and use it to render the sprites
+      var lagOffset = ga._lag / ga._frameDuration;
+      ga.render(ga.canvas, lagOffset);
     }
   }
   
@@ -388,7 +415,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
 
     //Render the canvas.
-    ga.render(ga.canvas);
+    //ga.render(ga.canvas);
 
     //Update all the buttons in the game.
     if (ga.buttons.length > 0) {
@@ -582,6 +609,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Is the sprite `interactive`? If it is, it can become clickable
     //or touchable.
     o._interactive = false;
+    //properties to store the x and y positions from the previous
+    //frame. Use for rendering interpolation
+    o._oldX = undefined;
+    o._oldY = undefined;
 
     //Add the sprite's container properties so that you can have
     //a nested parent/child scene graph hierarchy.
@@ -1575,7 +1606,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   };
 
   //### makeInteractive
-  //The `makeInteractive` function lets you assign `press`, `release`, `over`
+  //The `makeInteractive` function lets you assign `press`, `release`, `over`, `tap`
   //and `out` actions to sprites.
   //Also tells you the pointer's state of interaction with the sprite.
   //`makeInteractive` is called on a sprite when a sprite's
@@ -1656,6 +1687,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           if (o.release) o.release();
           o.pressed = false;
           o.action = "released";
+          //If the pointer was tapped and the user assigned a `tap`
+          //method, call the `tap` method
+          if (ga.pointer.tapped && o.tap) o.tap();
         }
         //Run the `over` method if it has been assigned
         if (!o.hoverOver) {
@@ -1796,10 +1830,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     }
 
-    //Add the `show`, `play`, `stop` and `playSequence` methods to the sprite.
+    //Add the `show`, `play`, `playing`, `stop` and `playSequence` methods to the sprite.
     sprite.show = show;
     sprite.play = play;
     sprite.stop = stop;
+    sprite.playing = playing;
     sprite.playSequence = playSequence;
   };
 
@@ -1815,7 +1850,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   */
 
-  ga.render = function(canvas) {
+  ga.render = function(canvas, lagOffset) {
     //Get a reference to the context.
     var ctx = canvas.ctx;
     //Clear the canvas.
@@ -1828,15 +1863,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function displaySprite(sprite) {
       //Only draw sprites if they're visible and inside the
       //area of the canvas.
-      /*
-      if (
-        sprite.visible
-        && sprite.gx < canvas.width
-        && sprite.gx + sprite.width > -1
-        && sprite.gy < canvas.height
-        && sprite.gy + sprite.height > -1
-      ) {
-      */
       if (
         sprite.visible
         && sprite.gx < canvas.width
@@ -1858,8 +1884,34 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
         }
+        //calculate the render position for interpolation
+        //sprite.renderX = (sprite.gx + sprite.vx) * lagOffset,
+        //sprite.renderY = (sprite.gy + sprite.vy) * lagOffset;
+        if(sprite._oldX === undefined) sprite._oldX = sprite.gx;
+        if(sprite._oldY === undefined) sprite._oldY = sprite.gy;
+        sprite.renderX = (sprite.gx - sprite._oldX) * lagOffset + sprite._oldX;
+        sprite.renderY = (sprite.gy - sprite._oldY) * lagOffset + sprite._oldY;
+        if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
+        if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
         //If the sprite's parent is the stage, position the sprite
         //relative to the top left corner of the canvas
+      
+        if (sprite.parent.stage === true) {
+          ctx.translate(
+            sprite.renderX + sprite.halfWidth,
+            sprite.renderY + sprite.halfHeight
+          );
+        //If the sprite's parent isn't the stage, position the sprite
+        //relative to the sprite's parent's center point
+        } else {
+          ctx.translate(
+            sprite.renderX + sprite.halfWidth - sprite.parent.renderX - sprite.parent.halfWidth,
+            sprite.renderY + sprite.halfHeight - sprite.parent.renderY - sprite.parent.halfHeight
+          );
+        }
+
+        //The same code without interpolation
+        /*
         if (sprite.parent.stage === true) {
           ctx.translate(
             sprite.gx + sprite.halfWidth,
@@ -1873,6 +1925,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight
           );
         }
+        */
+        
 
         //Rotate the sprite using its `rotation` value.
         ctx.rotate(sprite.rotation);
@@ -1901,6 +1955,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       } else {
        //console.log(sprite.height)
       }
+      //Capture the sprite's current positions to use as 
+      //the previous position on the next frame (used for
+      //interpolation)
+      sprite._oldX = sprite.gx;
+      sprite._oldY = sprite.gy;
     }
   }
 
@@ -2099,6 +2158,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //can use the pointer's coordinates with easing
     //and collision functions.
     Object.defineProperties(o, {
+      /*
+      x: {
+        get: function() {
+          o._x * ga.scaleX;
+        },
+        enumerable: true, configurable: true
+      },
+      y: {
+        get: function() {
+          o._y * ga.scaleY;
+        },
+        enumerable: true, configurable: true
+      },
+      */
       centerX: {
         get: function() {
           return o.x;
@@ -2146,8 +2219,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The pointer's `touchmoveHandler`.
     o.touchmoveHandler = function(event) {
       //Find the touch point's x and y position.
-      o.x = event.targetTouches[0].pageX - ga.canvas.offsetLeft;
-      o.y = event.targetTouches[0].pageY - ga.canvas.offsetTop;
+      o.x = (event.targetTouches[0].pageX - ga.canvas.offsetLeft) * 1//ga.scaleX;
+      o.y = (event.targetTouches[0].pageY - ga.canvas.offsetTop) * 1//ga.scaleY;
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2242,10 +2315,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if (!sprite.circular) {
         //Get the position of the sprite's edges using global
         //coordinates.
-        var left = sprite.gx,
-            right = sprite.gx + sprite.width,
-            top = sprite.gy,
-            bottom = sprite.gy + sprite.height;
+        var left = sprite.gx * ga.scale,
+            right = (sprite.gx + sprite.width) * ga.scale,
+            top = sprite.gy * ga.scale,
+            bottom = (sprite.gy + sprite.height) * ga.scale;
 
         //Find out if the point is intersecting the rectangle.
         hit = o.x > left && o.x < right && o.y > top && o.y < bottom;
@@ -2254,8 +2327,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       else {
         //Find the distance between the point and the
         //center of the circle.
-        var vx = o.x - sprite.gx + sprite.halfWidth,
-            vy =  o.y - sprite.gy + sprite.halfHeight,
+        var vx = o.x - ((sprite.gx + sprite.halfWidth) * ga.scale),
+            vy = o.y - ((sprite.gy + sprite.halfHeight) * ga.scale),
             magnitude = Math.sqrt(vx * vx + vy * vy);
 
         //The point is intersecting the circle if the magnitude
@@ -2355,6 +2428,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         key.isDown = true;
         key.isUp = false;
       }
+      event.preventDefault();
     };
 
     //The `upHandler`
@@ -2364,6 +2438,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         key.isDown = false;
         key.isUp = true;
       }
+      event.preventDefault();
     };
 
     //Attach event listeners
