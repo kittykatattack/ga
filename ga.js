@@ -281,6 +281,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   
   //An array to store the particles.
   ga.particles = [];
+  
+  //An array to store shaking sprites.
+  ga.shakingSprites = [];
 
   //Set the game `state`.
   ga.state = undefined;
@@ -363,6 +366,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           elapsed = current - ga._startTime;
       
       if (elapsed > 1000) elapsed = ga._frameDuration;
+      //For interpolation:
       ga._startTime = current;
       //Add the elapsed time to the lag counter
       ga._lag += elapsed;
@@ -446,6 +450,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       for(var k = ga.particles.length - 1; k >= 0; k--) {
         var particle = ga.particles[k];
         particle.update();
+      }
+    }
+    
+    //Update all the shaking sprites in the game.
+    if (ga.shakingSprites.length > 0) {
+      for(var l = ga.shakingSprites.length - 1; l >= 0; l--) {
+        var shakingSprite = ga.shakingSprites[l];
+        shakingSprite.updateShake();
       }
     }
 
@@ -1885,14 +1897,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowBlur = sprite.shadowBlur;
         }
         //calculate the render position for interpolation
-        //sprite.renderX = (sprite.gx + sprite.vx) * lagOffset,
-        //sprite.renderY = (sprite.gy + sprite.vy) * lagOffset;
         if(sprite._oldX === undefined) sprite._oldX = sprite.gx;
         if(sprite._oldY === undefined) sprite._oldY = sprite.gy;
         sprite.renderX = (sprite.gx - sprite._oldX) * lagOffset + sprite._oldX;
         sprite.renderY = (sprite.gy - sprite._oldY) * lagOffset + sprite._oldY;
-        if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
-        if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
+        //sprite.renderX = sprite.gx + sprite.vx * lagOffset,
+        //sprite.renderY = sprite.gy + sprite.vy * lagOffset;
+        //if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
+        //if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
         //If the sprite's parent is the stage, position the sprite
         //relative to the top left corner of the canvas
       
@@ -1911,7 +1923,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
 
         //The same code without interpolation
-        /*
+        /*  
         if (sprite.parent.stage === true) {
           ctx.translate(
             sprite.gx + sprite.halfWidth,
@@ -1926,8 +1938,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           );
         }
         */
-        
-
         //Rotate the sprite using its `rotation` value.
         ctx.rotate(sprite.rotation);
         //Scale the sprite using its `scaleX` and scaleY` properties.

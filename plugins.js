@@ -75,6 +75,7 @@ Here's the table of contents to get you started:
 `randomFloat`: Generate a random floating point number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 `worldCamera`: A method that creates and returns a camera for a scrolling game world.
+`shake`: Make a sprite or group shake. You can use it for a screen shake effect.
 
 ### Chapter 2: Tween methods for sprite and scene transitions
 
@@ -116,7 +117,7 @@ Here's the table of contents to get you started:
 `surroundingCells`: returns an array of 9 index numbers of cells surrounding a center cell.
 `getPoints`: returns an object with the x/y positions of all the sprite's corner points.
 `hitTestTile`: A versatile collision detection function for tile based games.
-`updateMap`: Returns a new map array with the new index positions of spirtes.
+`updateMap`: Returns a new map array with the new index positions of sprites.
 
 ### Chapter 5: Sprite controllers
 
@@ -125,6 +126,9 @@ Here's the table of contents to get you started:
 ### Chapter 6: Tiled editor importers
 
 `makeTiledWorld`: Creates a game world using Tiled Editor's JSON export data.
+
+### Chapter 7: Resources
+`colors`: A 2D array containing 1000 colors. 100 color palettes of 5 colors each.
 
 */
 
@@ -416,11 +420,54 @@ GA.plugins = function(ga) {
     ga.canvas.style.marginLeft = "auto";
     ga.canvas.style.marginRight = "auto";
     ga.canvas.style.display = "block";
+    ga.canvas.style.minHeight = "100%";
+    
+    //Fix some quirkiness in scaling for Safari
+    var ua = navigator.userAgent.toLowerCase(); 
+    if (ua.indexOf('safari') != -1) { 
+      if (ua.indexOf('chrome') > -1) {
+        // Chrome
+      } else {
+        // Safari
+        ga.canvas.style.maxHeight = "100%";
+        ga.canvas.style.minHeight = "100%";
+      }
+    }
     
     //Set ga to the correct scale. This important for correct hit testing
     //between the pointer and sprites
     ga.scale = scale;
   };
+
+  /*
+  ### shake
+  Use `shake` to create a shaking effect, like shaking the screen
+  `shake` arguments: sprite, magnitude
+  */
+  ga.shake = function (sprite, magnitude) {
+    var counter = 1,
+        startX = sprite.x;
+        startY = sprite.y;
+    
+    magnitude = magnitude || 64;    
+    
+    sprite.updateShake = function() {
+      if (counter < 10) {
+        sprite.x = startX;
+        sprite.y = startY;
+        magnitude -= counter;
+        sprite.x = ga.random(-magnitude, magnitude);
+        sprite.y = ga.random(-magnitude, magnitude);
+        counter += 1;
+      }
+      if (counter >= 10) {
+        sprite.x = startX;
+        sprite.y = startY;
+        ga.shakingSprites.splice(ga.shakingSprites.indexOf(sprite), 1);
+      }
+    };
+    ga.shakingSprites.push(sprite);
+  }
 
   /*
   Chapter 2: Tween methods for sprite and scene transitions
@@ -928,7 +975,6 @@ GA.plugins = function(ga) {
       4, 16,                //size
       3, 0.5,               //speed
       0.01, 0.05,           //scale speed
-      0.01, 0.05,           //scale speed
       0.01, 0.02,           //alpha speed
       0.01, 0.03            //rotation speed
     );
@@ -1017,6 +1063,7 @@ GA.plugins = function(ga) {
       ga.particles.push(particle);
     }
   }
+
 
   /*
   Chapter 4: Collision
@@ -2120,7 +2167,7 @@ GA.plugins = function(ga) {
   };
 
   /*
-  Chapter 5: Tiled editor importers
+  Chapter 6: Tiled editor importers
   ---------------------------------
   Ga lets you import JSON files created by the popular Tiled Editor game map and level editor.
 
@@ -2374,6 +2421,128 @@ GA.plugins = function(ga) {
     //Finally, return the `world` object back to the game program
     return world;
   };
+
+  /*
+  Chapter 7: Resources
+  ---------------------------------
+  */
+
+  /*
+  ### colors
+  A 2D array containing 1000 colors. Each sub-array is a color palette made up of 
+  5 colors that look good together
+  */
+ga.colors = [
+    ["#FFABAB", "#FFDAAB", "#DDFFAB", "#ABE4FF", "#D9ABFF"],
+    ["#BCB968", "#ECB3BA", "#CCD4BD", "#9E3B36", "#FCA055"],
+    ["#CC353A", "#ADCC6B", "#F1F690", "#6A9674", "#FFA825"],
+    ["#FFF381", "#C87CFF", "#B89CFF", "#EBD7FF", "#D05D7E"],
+    ["#B2FFA9", "#F5A9FF", "#FFF8D3", "#FFE38F", "#F30303"],
+    ["#FFD4DF", "#FDF7DF", "#C7C572", "#7A69F6", "#EE7A7A"],
+    ["#E3B0A6", "#E3C4A6", "#E8E3B3", "#A8B8A3", "#AEA3B8"],
+    ["#FDDE37", "#CADBF1", "#EE0BAB", "#EEB8E7", "#9233DA"],
+    ["#D8D79C", "#8978F2", "#D986E5", "#EFB3C0", "#E54773"],
+    ["#5779FF", "#FEFF69", "#C035FF", "#FF2EC3", "#5AFFC2"],
+    //10-19
+    ["#69D2E7", "#A7DBD8", "#E0E4CC", "#F38630", "#FA6900"],
+    ["#ECD078", "#D95B43", "#C02942", "#542437", "#53777A"],
+    ["#556270", "#4ECDC4", "#C7F464", "#FF6B6B", "#C44D58"],
+    ["#CFF09E", "#A8DBA8", "#79BD9A", "#3B8686", "#0B486B"],
+    ["#774F38", "#E08E79", "#F1D4AF", "#ECE5CE", "#C5E0DC"],
+    ["#E8DDCB", "#CDB380", "#036564", "#033649", "#031634"],
+    ["#D1F2A5", "#EFFAB4", "#FFC48C", "#FF9F80", "#F56991"],
+    ["#490A3D", "#BD1550", "#E97F02", "#F8CA00", "#8A9B0F"],
+    ["#D9CEB2", "#948C75", "#D5DED9", "#7A6A53", "#99B2B7"],
+    ["#594F4F", "#547980", "#45ADA8", "#9DE0AD", "#E5FCC2"],      
+    //20-29
+    ["#E94E77", "#D68189", "#C6A49A", "#C6E5D9", "#F4EAD5"],
+    ["#3FB8AF", "#7FC7AF", "#DAD8A7", "#FF9E9D", "#FF3D7F"],
+    ["#413E4A", "#73626E", "#B38184", "#F0B49E", "#F7E4BE"],
+    ["#343838", "#005F6B", "#008C9E", "#00B4CC", "#00DFFC"],
+    ["#A79C8E", "#F8ECC9", "#F1BBBA", "#EB9F9F", "#6B5344"],
+    ["#00A8C6", "#40C0CB", "#F9F2E7", "#AEE239", "#8FBE00"],
+    ["#8C2318", "#5E8C6A", "#88A65E", "#BFB35A", "#F2C45A"],
+    ["#BCBDAC", "#CFBE27", "#F27435", "#F02475", "#3B2D38"],
+    ["#5D4157", "#838689", "#A8CABA", "#CAD7B2", "#EBE3AA"],
+    ["#F8F4D7", "#F4DEC2", "#F4B36C", "#E98977", "#F2B4A8"],
+    //30-39
+    ["#5E412F", "#FCEBB6", "#78C0A8", "#F07818", "#F0A830"],
+    ["#EEE6AB", "#C5BC8E", "#696758", "#45484B", "#36393B"],
+    ["#1B676B", "#519548", "#88C425", "#BEF202", "#EAFDE6"],
+    ["#F8B195", "#F67280", "#C06C84", "#6C5B7B", "#355C7D"],
+    ["#452632", "#91204D", "#E4844A", "#E8BF56", "#E2F7CE"],
+    ["#2A044A", "#0B2E59", "#0D6759", "#7AB317", "#A0C55F"],
+    ["#300018", "#5A3D31", "#837B47", "#ADB85F", "#E5EDB8"],
+    ["#B9D7D9", "#668284", "#2A2829", "#493736", "#7B3B3B"],
+    ["#67917A", "#170409", "#B8AF03", "#CCBF82", "#E33258"],
+    ["#BBBB88", "#CCC68D", "#EEDD99", "#EEC290", "#EEAA88"],
+    //40-49
+    ["#B3CC57", "#ECF081", "#FFBE40", "#EF746F", "#AB3E5B"],
+    ["#FFED90", "#A8D46F", "#359668", "#3C3251", "#341139"],
+    ["#AB526B", "#BCA297", "#C5CEAE", "#F0E2A4", "#F4EBC3"],
+    ["#755C3B", "#FCFBE3", "#FBCFCF", "#CDBB99", "#A37E58"],
+    ["#607848", "#789048", "#C0D860", "#F0F0D8", "#604848"],
+    ["#F7F9FE", "#ECF1F2", "#DCE8EB", "#CBDBE0", "#BED2D9"],
+    ["#EDEBE6", "#D6E1C7", "#94C7B6", "#403B33", "#D3643B"],
+    ["#A8E6CE", "#DCEDC2", "#FFD3B5", "#FFAAA6", "#FF8C94"],
+    ["#300030", "#480048", "#601848", "#C04848", "#F07241"],
+    ["#FDF1CC", "#C6D6B8", "#987F69", "#E3AD40", "#FCD036"],
+    //50-59
+    ["#AAB3AB", "#C4CBB7", "#EBEFC9", "#EEE0B7", "#E8CAAF"],
+    ["#3A111C", "#574951", "#83988E", "#BCDEA5", "#E6F9BC"],
+    ["#E8F3F8", "#DBE6EC", "#C2CBCE", "#A4BCC2", "#81A8B8"],
+    ["#5E3929", "#CD8C52", "#B7D1A3", "#DEE8BE", "#FCF7D3"],
+    ["#B9D3B0", "#81BDA4", "#B28774", "#F88F79", "#F6AA93"],
+    ["#1693A5", "#02AAB0", "#00CDAC", "#7FFF24", "#C3FF68"],
+    ["#4E395D", "#827085", "#8EBE94", "#CCFC8E", "#DC5B3E"],
+    ["#5C323E", "#A82743", "#E15E32", "#C0D23E", "#E5F04C"],
+    ["#C2412D", "#D1AA34", "#A7A844", "#A46583", "#5A1E4A"],
+    ["#9D7E79", "#CCAC95", "#9A947C", "#748B83", "#5B756C"],
+    //60-69
+    ["#DAD6CA", "#1BB0CE", "#4F8699", "#6A5E72", "#563444"],
+    ["#382F32", "#FFEAF2", "#FCD9E5", "#FBC5D8", "#F1396D"],
+    ["#8DCCAD", "#988864", "#FEA6A2", "#F9D6AC", "#FFE9AF"],
+    ["#A7C5BD", "#E5DDCB", "#EB7B59", "#51D26B", "#524656"],
+    ["#5E9FA3", "#DCD1B4", "#FAB87F", "#F87E7B", "#B05574"],
+    ["#951F2B", "#F5F4D7", "#E0DFB1", "#A5A36C", "#535233"],
+    ["#AAFF00", "#FFAA00", "#FF00AA", "#AA00FF", "#00AAFF"],
+    ["#3B1C4A", "#6B3162", "#B0587B", "#F6B076", "#F8E192"],
+    ["#7D9E3C", "#73581D", "#FFFEC0", "#FFE2A6", "#FE9F8C"],
+    ["#BED6C7", "#ADC0B4", "#8A7E66", "#A79B83", "#BBB2A1"],
+    //70-79
+    ["#F5F2C4", "#BCCF9F", "#3FB094", "#87244C", "#30162B"],
+    ["#107FC9", "#0E4EAD", "#0B108C", "#0C0F66", "#07093D"],
+    ["#C7FCD7", "#D9D5A7", "#D9AB91", "#E6867A", "#ED4A6A"],
+    ["#BF496A", "#B39C82", "#B8C99D", "#F0D399", "#595151"],
+    ["#1B325F", "#9CC4E4", "#E9F2F9", "#3A89C9", "#F26C4F"],
+    ["#2B222C", "#5E4352", "#965D62", "#C7956D", "#F2D974"],
+    ["#F5DD9D", "#BCC499", "#92A68A", "#7B8F8A", "#506266"],
+    ["#D3D5B0", "#B5CEA4", "#9DC19D", "#8C7C62", "#71443F"],
+    ["#69D2E7", "#15A8C2", "#CB07D1", "#FA00D3", "#EF99E4"],
+    ["#E7DD96", "#E16639", "#AD860A", "#B7023F", "#55024A"],
+    //80-89
+    ["#FDCFBF", "#FEB89F", "#E23D75", "#5F0D3B", "#742365"],
+    ["#FD8603", "#F4F328", "#00DA3C", "#00CBE7", "#FA6A64"],
+    ["#8E9E82", "#CACCB6", "#F2F0DF", "#A9C1D9", "#607890"],
+    ["#91CFCA", "#A6D1C8", "#C7D5C8", "#E7D6CF", "#EFBDC0"],
+    ["#F0C27B", "#D38157", "#7F2B51", "#4B1248", "#1D0B38"],
+    ["#F8DAFB", "#E8DAFB", "#DADDFB", "#DAEDFB", "#DAFBF8"],
+    ["#D1026C", "#F2D43F", "#61C155", "#048091", "#492D61"],
+    ["#FDF0CC", "#FDCBB1", "#E8A0A2", "#C2768E", "#4A536B"],
+    ["#FFFF99", "#D9CC8C", "#B39980", "#8C6673", "#663366"],
+    ["#ACDEB2", "#E1EAB5", "#EDAD9E", "#FE4B74", "#390D2D"],
+    //90-99
+    ["#001449", "#012677", "#005BC5", "#00B4FC", "#17F9FF"],
+    ["#F9BA15", "#900402", "#8EAC00", "#127A97", "#452B72"],
+    ["#899AA1", "#BDA2A2", "#FBBE9A", "#FAD889", "#FAF5C8"],
+    ["#2F2BAD", "#AD2BAD", "#E42692", "#F7DB15", "#58B5A8"],
+    ["#434367", "#0A8690", "#86BD55", "#FBEC5F", "#F9A600"],
+    ["#EB9D8D", "#93865A", "#A8BB9A", "#C5CBA6", "#EFD8A9"],
+    ["#67484D", "#C5AB70", "#F7DFB9", "#DA9B97", "#C95074"],
+    ["#AB505E", "#D9A071", "#CFC88F", "#A5B090", "#607873"],
+    ["#B877A8", "#B8008A", "#FF3366", "#FFCC33", "#CCFF33"],
+    ["#FF0092", "#FFCA1B", "#B6FF00", "#228DFF", "#BA01FF"]
+];
 
 //plugins ends
 };

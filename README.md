@@ -70,6 +70,9 @@ Here's Ga's full feature list:
 - An optional `load` state that lets you run actions while assets are
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
+- A sophisticated game loop using a fixed timestep with variable rendering
+  and sprite interpolation. That means you get ultra-smooth sprite animations
+  at any framerate.
 - A `plugins.js` file full of extra tools. 
 - A compact and powerful "Haiku" style API that's centered on shallow,
   composable components. Get more done writing less code.
