@@ -463,10 +463,10 @@ GA.plugins = function(ga) {
       if (counter >= 10) {
         sprite.x = startX;
         sprite.y = startY;
-        ga.shakingSprites.splice(ga.shakingSprites.indexOf(sprite), 1);
+        ga.particles.splice(ga.particles.indexOf(sprite), 1);
       }
     };
-    ga.shakingSprites.push(sprite);
+    ga.particles.push(sprite);
   }
 
   /*
