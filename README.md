@@ -1187,7 +1187,7 @@ you're ready, read on!
 
 There are three main ways you can use images in your Ga games. 
 
-- Use individual image files for each sprite
+- Use individual image files for each sprite.
 - Use a **texture atlas**. This is a single image file that includes
   sub-images for each sprite in your game. The image file is
   accompanied by a matching JSON
@@ -1210,7 +1210,8 @@ this next section we'll update Treasure Hunter with image sprites, and
 you'll learn all three ways of adding images to your games.
 
 (All the images in this section were created by Lanea Zimmerman. You
-can find more of her artwork [here](http://opengameart.org/users/sharm)
+can find more of her artwork
+[here](http://opengameart.org/users/sharm).
 Thanks, Lanea!)
 
 #### Individual images
@@ -1253,9 +1254,9 @@ var g = ga(
 g.start();
 ```
 (If you open up the JavaScript console in the web browser, you can
-monitor the loading progress of the assets.)
+monitor the loading progress of these assets.)
 
-Now you can then access any of these images in your game code like this:
+Now you can access any of these images in your game code like this:
 
     g.image("images/blob.png")
 
@@ -1291,14 +1292,14 @@ use them to make sprites.
 
 ##### Making sprites with images
 
-Create a image sprite using the `sprite` method, in format you learnt
+Create an image sprite using the `sprite` method, in format you learnt
 above. Here's how to create a sprite using the `dungeon.png` image.
 (`dungeon.png` is a 512 by 512 pixel background image.)
 
     dungeon = g.sprite("images/dungeon.png");
 
 That's all! Now instead of displaying as a simple colored rectangle,
-the sprite will be displayed as an 512 by 512 image. There's no need
+the sprite will be displayed as a 512 by 512 image. There's no need
 to specify the width or height, because Ga figures that our for you
 automatically based on the size of the image. You can use all the other
 sprite properties, like `x`, `y`, `width`, and `height`, just as you
