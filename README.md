@@ -24,7 +24,8 @@ compressed file size of no more than 6.5k.
 
 Yes, it can be done!
 
-Take a look at the feature list and the `examples` folder to get started. 
+Take a look at the feature list and the `examples` folder to get
+started. Keep scrolling and you'll find a complete beginner's turtorial ahead. 
 
 Features
 --------
@@ -96,11 +97,12 @@ as few of these tools as you want to. Here are some of the goodies
 you'll find in `plugins.js`:
 
 - Make versatile particle explosions with `burst`.
+- Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
 - A handful of useful convenience functions: `ease`, `follow`,
   `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`,
-  `random`, `contain` and `outsideBounds`.
+  `random`, `randomFloat`, `contain` and `outsideBounds`.
 - A fast, universal `hit` method that handles collision testing and
   reactions for all types of sprites. Use one collision method for
   everything: rectangles, circles, points, and arrays of sprites.
@@ -117,6 +119,8 @@ you'll find in `plugins.js`:
   checking you'll need for tile-based games. You can use it in combination
   with the any of the 2D geometric collision methods for optimized
   broadphase/narrowphase collision checking if you want to.
+- Use `updateMap` to keep a tile-based world's map data array up-to-date
+  with moving sprites.
 - Create a `worldCamera` that follows sprites around a scrolling game
   world.
 
@@ -210,6 +214,7 @@ There are also some good internet resources to help get you started:
 
 [Khan Academy: Computer
 Programming](http://www.khanacademy.org/computing/cs)
+
 [Code Academy:
 JavaScript](http://www.codecademy.com/tracks/javascript)
 
@@ -225,7 +230,7 @@ enemy avoidance game called Treasure Hunter. Open the file
 `tutorials` folder, and you'll need to run it in a
 [webserver](https://github.com/nodeapps/http-server)).
 
-![Treasure Hunter](/tutorials/screenshots/01.png);
+![Treasure Hunter](/tutorials/screenshots/01.png)
 
 Use the keyboard to move the explorer (the blue square), collect the
 treasure (the yellow square), avoid the monsters (the red squares) and
@@ -248,7 +253,7 @@ video](https://www.youtube.com/watch?v=Fy0aCDmgnxg) and
 [read this article](http://www.gamasutra.com/view/feature/130848/how_to_prototype_a_game_in_under_7_.php?print=1) to learn
 about this essential game design ingredient.)
 
-If you can make a game simple like Treasure Hunter, you can make
+If you can make a simple game like Treasure Hunter, you can make
 almost any other kind of game. Yes, really! Getting from Treasure Hunter to Skyrim
 is just a matter of lots of small steps; adding more
 detail as you go. How much detail you want to add is up to you. 
@@ -333,13 +338,13 @@ pixels. That's specified by the first two arguments.
     512, 512, setup,
 
 The third argument, `setup`, means that as soon as Ga is initialized,
-it should look for an run a function in your game code called `setup`.
+it should look for and run a function in your game code called `setup`.
 Whatever code is in the `setup` function is entirely up to you, and
 you'll soon see how you can used it to initialize a game. (You don't
 have to call this function `setup`, you can use any name you like.) 
 
 Ga lets you pre-load game assets with an optional 4th argument, which
-is an array of file path names. In this first example, you only need to preload one file: `chimes.wav`
+is an array of file names. In this first example, you only need to preload one file: `chimes.wav`
 You can see that the full file path to `chimes.wav` is listed as a
 string in the
 initialization array:
@@ -383,12 +388,12 @@ space](http://stackoverflow.com/questions/17058606/why-using-self-executing-func
 
 As soon as Ga starts, it will look for and run a function in your game
 code called `setup` (or whatever other name you want to give this
-function). The `setup` function is only run once, and lets you perform
+function.) The `setup` function is only run once, and lets you perform
 one-time setup tasks for your game. It's a great place to create and initialize
 objects, create sprites, game scenes, populate data arrays or parse
 loaded JSON game data. 
 
-Here's an abridged birds-eye view of the `setup` function in Treasure Hunter,
+Here's an abridged, birds-eye view of the `setup` function in Treasure Hunter,
 and the tasks that it performs
 
 ```
@@ -413,7 +418,7 @@ function setup() {
 The last line of code, `g.state = play` is perhaps the most important
 because it starts the `play` function. The `play` function runs all the game logic
 in a loop. But before we look at how that works, let's see what the
-specific code inside the `setup` function is does.
+specific code inside the `setup` function does.
 
 ##### Customizing the canvas
 
@@ -425,7 +430,7 @@ g.backgroundColor = "white";
 ```
 Here's the effect these two lines have on the Ga canvas:
 
-![Treasure Hunter](/tutorials/screenshots/02.png);
+![Treasure Hunter](/tutorials/screenshots/02.png)
 
 Ga uses an ordinary 2D canvas element to display the game graphics,
 and you can access it in your code at any time with `g.canvas`. You
@@ -445,7 +450,7 @@ Alternatively, you can access any assets that you've loaded via Ga's
 
     g.assets["sounds/chimes.wav"]
 
-Any asset that you've preloaded like this are accessible in the
+Any assets that you've preloaded like this are accessible in the
 `assets` object.
 
 Many assets that you might want to use, like sounds, fonts, and JSON
@@ -535,7 +540,7 @@ gameScene.addChild(treasure);
 Notice that after each sprite is created, it's added to the
 `gameScene` using `addChild`. Here's what the above code produces:
 
-![Treasure Hunter](/tutorials/screenshots/03.png);
+![Treasure Hunter](/tutorials/screenshots/03.png)
 
 All sprites have `x` and `y` properties that you can use to precisely
 position sprites on the canvas. They also have `width` and `height`
@@ -606,7 +611,7 @@ for (var i = 0; i < numberOfEnemies; i++) {
 ```
 Here's what this code produces:
 
-![Treasure Hunter](/tutorials/screenshots/04.png);
+![Treasure Hunter](/tutorials/screenshots/04.png)
 
 The code gives each of the enemies a random `y` position with the help
 of Ga's `random` method:
@@ -650,9 +655,9 @@ You'll notice that when the player
 touches one of the enemies, the width of the health bar at the top right corner of
 the screen decreases. 
 
-![Treasure Hunter](/tutorials/screenshots/05.png);
+![Treasure Hunter](/tutorials/screenshots/05.png)
 
-How was this made? It's just two rectangle sprites at the same
+How was this health bar made? It's just two rectangle sprites at the same
 position: a black rectangle behind, and a green rectangle in front. They're grouped
 together to make a single compound sprite called `healthBar`. The
 `healthBar` is then added to the `gameScene`.
@@ -681,7 +686,7 @@ it will be convenient to access later.
 
     healthBar.inner = innerBar;
 
-You don't **have** to do this; but, hey why not! It means that if you
+You don't *have* to do this; but, hey why not! It means that if you
 want to control the width of the `innerBar`, you can write some smooth code
 that looks like this:
 
@@ -693,10 +698,10 @@ That's pretty neat and readable, so we'll keep it!
 
 If the player's health drops to zero, or the player manages to
 carry the treasure to the exit, the game ends and the game over screen
-is displayed. It's just some text that displays "You won!" or "You
+is displayed.  The game over scene is just some text that displays "You won!" or "You
 lost!" depending on the outcome. 
 
-![Treasure Hunter](/tutorials/screenshots/06.png);
+![Treasure Hunter](/tutorials/screenshots/06.png)
 
 How was this made? The text is made with a `text` sprite. 
 
@@ -721,7 +726,7 @@ message = g.text("Game Over!", "64px Futura", "black", 20, 20);
 message.x = 120;
 message.y = g.canvas.height / 2 - 64;
 ```
-Next, a new group is then created called `gameOverScene`. The `message` text
+Next, a new `group` is created called `gameOverScene`. The `message` text
 is added to it. The `gameOverScene`'s `visible` property is set to
 `false` so that it's not visible when the game first starts.
 
@@ -813,7 +818,7 @@ right, bottom and left keys. (You can remember this because their
 order is listed clockwise, starting from the top.)
 
 Reference to the arrow keys and space key are built-in to Ga, but you
-if want to use other keys, you can easily create an assign your own
+if want to use other keys, you can easily create and assign your own
 with Ga's `keybaord` method:
 
     var customKey = g.keyboard(asciiCode);
@@ -840,7 +845,7 @@ This makes Ga look for and run a function called `play`. By default,
 any function assigned to the game state will run in a continuous loop, at
 60 frames per second. (You can change the frame rate at any time by setting Ga's
 `fps` property). Game logic usually runs in a continuous loop, which
-is known as the `game loop`. Ga handles the loop management for you,
+is known as the **game loop**. Ga handles the loop management for you,
 so you don't need to worry about how it works. (In case you're curious, Ga uses
 a `requestAnimationFrame` loop with a [fixed logic time step and variable rendering time](http://gameprogrammingpatterns.com/game-loop.html). It
 also does sprite position interpolation to smooth out any inconsistent
@@ -950,7 +955,7 @@ if (playerHitsEdges) {
 When the player hits any of the enemies, the width of the health bar
 decreases and the player becomes semi-transparent.
 
-![Treasure Hunter](/tutorials/screenshots/07.png);
+![Treasure Hunter](/tutorials/screenshots/07.png)
 
 How does this work?
 
@@ -1068,7 +1073,7 @@ sound plays. The player can then
 carry the treasure to the exit. The treasure is centered over the player and
 moves along with it. 
 
-![Treasure Hunter](/tutorials/screenshots/08.png);
+![Treasure Hunter](/tutorials/screenshots/08.png)
 
 Here's the code from the `play` function that achieves these effects.
 
@@ -1120,9 +1125,13 @@ a value between 0 and 1. Here's how to set the `volume` to mid-level
 You can set the sound object's `pan` by assigning a value between -1 (left speaker)
 to 1 (right speaker). A pan value of 0 makes the sound equal volume in
 both speakers. Here's how you could set the `pan` to be slightly more
-prominent on the left speaker.
+prominent in the left speaker.
 
     soundObject.pan = -0.2;
+
+If you want to make a sound repeat continuously, set its `loop` property to `true`.
+
+    soundObject.loop = true;
 
 Ga uses a [lightweight wrapper for the WebAudio
 API](https://gist.github.com/kittykatattack/cd41b480e94fd32d8ad5) to achieve all these
