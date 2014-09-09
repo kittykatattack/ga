@@ -65,7 +65,7 @@ Table of contents
 `ga.sprite`: Creates a sprite from an image, `frame`, `filmstrip`, or a frame from a texture atlas.
 `ga.button`: An interactive button with `up` `over` and `down` states. Optional `press` and `release` actions.
 `makeInteractive`: Assigns `press` and `release` actions to sprites and adds pointer interactivity.
-`ga.images`: Access Image objects by their file names.
+`ga.image`: Access Image objects by their file names.
 `ga.json`: Access JSON files by their file names.
 `ga.addStatePlayer`: Adds `play`, `stop`, `show`, and `playSequence` methods to sprites.
 

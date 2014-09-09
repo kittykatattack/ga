@@ -1183,6 +1183,193 @@ And that's it for Treasure Hunter! Before you continue, try making
 your own game from scratch using some of these same techniques. When
 you're ready, read on!
 
-### Adding images
+### Using images
 
-... Coming soon!
+There are three main ways you can use images in your Ga games. 
+
+- Use individual image files for each sprite
+- Use a **texture atlas**. This is a single image file that includes
+  sub-images for each sprite in your game. The image file is
+  accompanied by a matching JSON
+  data file that describes the name, size and location of each
+  sub-image.
+- Use a **tileset** (also known as a **spritesheet**). This is also a single
+  image file that includes sub-images for each sprite. However, unlike a
+  texture atlas, it doesn't come with a JSON file describing the
+  sprite data. Instead, you need to specify the size and location of
+  each sprite in your game code with JavaScript. This can have some
+  advantages over a texture atlas in certain circumstances.
+
+All three ways of making image sprites use Ga's `sprite` method.
+Here's the simplest way of using it to make an image sprite.
+
+    var imageSprite = g.sprite("images/theSpriteImage.png");
+
+In
+this next section we'll update Treasure Hunter with image sprites, and
+you'll learn all three ways of adding images to your games.
+
+(All the images in this section were created by Lanea Zimmerman. You
+can find more of her artwork [here](http://opengameart.org/users/sharm)
+Thanks, Lanea!)
+
+#### Individual images
+
+Open and play the next version of Treasure Hunter:
+`02_treasureHunterImages.html` (you'll find in the `tutorials`
+folder.) It plays exactly the same as the first version, but all the
+colored squares have been replaced by images.
+
+![Treasure Hunter](/tutorials/screenshots/09.png)
+
+Take a look at the source code, and you'll notice that the game logic
+and structure is exactly the same as the first version of the game.
+The only thing that's changed is the appearance of the sprites.
+How was this done?
+
+##### Loading image files 
+
+Each sprite in the game uses an individual PNG image file. You'll find
+all the images in the tutorials' `images` sub-folder.
+
+![Treasure Hunter](/tutorials/screenshots/10.png)
+
+Before you can use them to make sprites, you need to pre-load them into
+Ga's `assets`. The easiest way to do this is to list the image names,
+with their full file paths, in Ga's assets array when you first
+initialize the engine.
+```
+var g = ga(
+  512, 512, setup,
+  [
+    "images/explorer.png",
+    "images/dungeon.png",
+    "images/blob.png",
+    "images/treasure.png",
+    "images/door.png",
+    "sounds/chimes.wav"
+  ]
+);
+g.start();
+```
+(If you open up the JavaScript console in the web browser, you can
+monitor the loading progress of the assets.)
+
+Now you can then access any of these images in your game code like this:
+
+    g.image("images/blob.png")
+
+This is just a short-cut for accessing the image directly in the
+`assets` object like this:
+
+    g.assets["images/blob.png"]
+
+You can use whichever style you prefer. In any case, the image file
+is just an ordinary JavaScript `Image` object, so you can use
+it the same way you would any other `Image` object. 
+
+Although pre-loading the images and other assets is the simplest way
+to get them into your game, you can also load assets at any other time
+using the `assets` object's `load` method. Just supply an array of strings
+that list the asset names and their file paths.
+```
+g.assets.load([
+  "images/imageOne.png", 
+  "images/imageTwo.png",
+  "sounds/chimes.wav"
+]);
+```
+Next, assign a callback function called `whenLoaded` that will run when the assets have
+loaded. 
+```
+g.assets.whenLoaded = function() {
+  //Do something when the assets have loaded
+};
+```
+Now that you've loaded the images into the game, let's find out how to
+use them to make sprites.
+
+##### Making sprites with images
+
+Create a image sprite using the `sprite` method, in format you learnt
+above. Here's how to create a sprite using the `dungeon.png` image.
+(`dungeon.png` is a 512 by 512 pixel background image.)
+
+    dungeon = g.sprite("images/dungeon.png");
+
+That's all! Now instead of displaying as a simple colored rectangle,
+the sprite will be displayed as an 512 by 512 image. There's no need
+to specify the width or height, because Ga figures that our for you
+automatically based on the size of the image. You can use all the other
+sprite properties, like `x`, `y`, `width`, and `height`, just as you
+would with ordinary rectangle sprites. 
+
+Here's the code from the `setup` function that creates the dungeon
+background, exit door, player and treasure, and adds them all to the
+`gameScene` group. 
+```
+//The dungeon background
+dungeon = g.sprite("images/dungeon.png");
+
+//The exit door
+exit = g.sprite("images/door.png");
+exit.x = 32;
+
+//The player sprite
+player = g.sprite("images/explorer.png");
+player.x = 68;
+player.y = g.canvas.height / 2 - player.halfWidth;
+
+//Create the treasure
+treasure = g.sprite("images/treasure.png");
+
+//Position it next to the left edge of the canvas
+treasure.x = g.canvas.width - treasure.width - 32;
+treasure.y = g.canvas.height / 2 - treasure.halfHeight;
+
+//Create a `pickedUp` property on the treasure to help us Figure
+//out whether or not the treasure has been picked up by the player
+treasure.pickedUp = false;
+
+//Create the `gameScene` group and add all the sprites
+gameScene = g.group(dungeon, exit, player, treasure);
+```
+(As a slightly more efficient improvement to the
+original version of this code, `group` creates the `gameScene` and groups
+the sprites in a single step.)
+
+Look familiar? That's right, the only code that has changed are the
+lines that create the sprites. This modularity is a feature of Ga that lets you create quick
+game prototypes using simple shapes that you can easily swap out for
+detailed images as your game idea develops. The rest of the code in the
+game can remain as-is.
+
+##### Fine-tuning the containment area
+
+One small improvement that was made to this new version Treasure
+Hunter is the new way that the sprites are contained inside the walls of the
+dungeon. They're contained in such a way that naturally matches the 2.5D perspective of the
+artwork, as shown by the green square in this screen shot:
+
+![Treasure Hunter](/tutorials/screenshots/11.png)
+
+This is a very easy modification to make. All you need to do is supply
+the `contain` method with a custom object that defines the size and
+position of the containing rectangle. Here's how:
+```
+g.contain(
+  player,
+  {
+    x: 32, y: 16,
+    width: g.canvas.width - 32,
+    height: g.canvas.height - 32
+  }
+);
+```
+Just tweak the `x`, `y`, `width` and `height` values so that the
+containing area looks natural for the game you're making.
+
+#### Using a texture atlas
+
+... Coming soon! (But if you're in a hurry, check the examples of how
+to use a texture atlas in the `examples` folder.)
