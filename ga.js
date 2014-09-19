@@ -573,8 +573,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.vx = 0;
     o.vy = 0;
     //Initialize the `width` and `height`.
-    o._width = 0;
-    o._height = 0;
+    o.width = 0;
+    o.height = 0;
     //The sprite's width and height scale factors.
     o.scaleX = 1;
     o.scaleY = 1;
@@ -653,11 +653,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if (o.children.length > 0 && o.stage === false) {
         for(var i = 0; i < o.children.length - 1; i++) {
           var child = o.children[i];
-          if (child.x + child.width > o._width) {
-            o._width = child.x + child.width;
+          if (child.x + child.width > o.width) {
+            o.width = child.x + child.width;
           }
-          if (child.y + child.height > o._height) {
-            o._height = child.y + child.height;
+          if (child.y + child.height > o.height) {
+            o.height = child.y + child.height;
           }
         }
       }
@@ -864,10 +864,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       },
       //The width and height are calculated by multiplying
       //the base width by the sprite's x and y scale factors.
+      /*
       width: {
         get: function() {
           //Return the width, multiplied by the scale factor
-          return o._width * o.scaleX;
+          return o._width; 
         },
         set: function(value){
           o._width = value;
@@ -877,13 +878,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       height: {
         get: function() {
           //Return the height, multiplied by the scale factor
-          return o._height * o.scaleY;
+          return o._height;
         },
         set: function(value){
           o._height = value;
         },
         enumerable: true, configurable: true
       },
+      */
       //The sprite's center point.
       centerX: {
         get: function() {
@@ -1859,11 +1861,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Display the all the sprites.
     for (var i = 0; i < ga.stage.children.length; i++) {
       var sprite = ga.stage.children[i];
-      displaySprite(sprite);
-    }
-    function displaySprite(sprite) {
       //Only draw sprites if they're visible and inside the
       //area of the canvas.
+      /*
       if (
         sprite.visible
         && sprite.gx < canvas.width
@@ -1871,13 +1871,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         && sprite.gy < canvas.height
         && sprite.gy + sprite.height > -1
       ) {
+      }
+      */
+        displaySprite(sprite);
+    }
+    function displaySprite(sprite) {
         //Save the current context state.
         ctx.save();
         //Shape properties.
         ctx.strokeStyle = sprite.strokeStyle;
         ctx.lineWidth = sprite.lineWidth;
         ctx.fillStyle = sprite.fillStyle;
-        ctx.globalAlpha = sprite.alpha;
         //Add a shadow if the sprite's `shadow` property is `true`.
         if(sprite.shadow) {
           ctx.shadowColor = sprite.shadowColor;
@@ -1886,10 +1890,16 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowBlur = sprite.shadowBlur;
         }
         //calculate the render position for interpolation
+        /*
         if(sprite._oldX === undefined) sprite._oldX = sprite.gx;
         if(sprite._oldY === undefined) sprite._oldY = sprite.gy;
         sprite.renderX = (sprite.gx - sprite._oldX) * lagOffset + sprite._oldX;
         sprite.renderY = (sprite.gy - sprite._oldY) * lagOffset + sprite._oldY;
+        */
+        if(sprite._oldX === undefined) sprite._oldX = sprite.x;
+        if(sprite._oldY === undefined) sprite._oldY = sprite.y;
+        sprite.renderX = (sprite.x - sprite._oldX) * lagOffset + sprite._oldX;
+        sprite.renderY = (sprite.y - sprite._oldY) * lagOffset + sprite._oldY;
         //sprite.renderX = sprite.gx + sprite.vx * lagOffset,
         //sprite.renderY = sprite.gy + sprite.vy * lagOffset;
         //if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
@@ -1897,6 +1907,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //If the sprite's parent is the stage, position the sprite
         //relative to the top left corner of the canvas
       
+        /*
         if (sprite.parent.stage === true) {
           ctx.translate(
             sprite.renderX + sprite.halfWidth,
@@ -1910,6 +1921,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             sprite.renderY + sprite.halfHeight - sprite.parent.renderY - sprite.parent.halfHeight
           );
         }
+        */
+        ctx.translate(
+          sprite.renderX + sprite.halfWidth,
+          sprite.renderY + sprite.halfHeight
+        );
 
         //The same code without interpolation
         /*  
@@ -1927,6 +1943,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           );
         }
         */
+        //Set the alpha
+        ctx.globalAlpha = sprite.alpha;
         //Rotate the sprite using its `rotation` value.
         ctx.rotate(sprite.rotation);
         //Scale the sprite using its `scaleX` and scaleY` properties.
@@ -1940,6 +1958,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //`children` array, display them by calling this very same
         //`displaySprite` function again.
         if (sprite.children && sprite.children.length > 0) {
+          //Reset the context back to the parent sprite's top left corner
+          ctx.translate(-sprite.halfWidth, -sprite.halfHeight);
           for (var j = 0; j < sprite.children.length; j++) {
             //Find the sprite's child
             var child = sprite.children[j];
@@ -1951,14 +1971,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents.
         ctx.restore();
-      } else {
-       //console.log(sprite.height)
-      }
-      //Capture the sprite's current positions to use as 
-      //the previous position on the next frame (used for
-      //interpolation)
-      sprite._oldX = sprite.gx;
-      sprite._oldY = sprite.gy;
+        //Capture the sprite's current positions to use as 
+        //the previous position on the next frame (used for
+        //interpolation)
+        /*
+        sprite._oldX = sprite.gx;
+        sprite._oldY = sprite.gy;
+        */
+        sprite._oldX = sprite.x;
+        sprite._oldY = sprite.y;
     }
   }
 
