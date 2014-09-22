@@ -54,6 +54,13 @@ function setup() {
   box = g.rectangle(32, 32, "cyan", "white", 4, 32, 32);
   box.rotation = 0.5;
 
+  //You can optionally set the `pivotX` and `pivotY` properties of any
+  //sprite to set the point around which the sprite should rotate.
+  //0.5 is the default center point. Assign any percentage between
+  //0.01 and 0.99 to shift the center of rotation.
+  //box.pivotX = 0.25;
+  //box.pivotY = 0.25;
+
   //`circle` argumenets:
   //diameter, fillstyle, stroketyle, lineWidth, x, y 
   ball = g.circle(42, "Plum", "PowderBlue", 8, 95, 45);

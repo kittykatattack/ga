@@ -581,6 +581,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The sprite's width and height scale factors.
     o.scaleX = 1;
     o.scaleY = 1;
+    //The sprite's pivot point, which is its center of rotation.
+    //This is a percentage between 0.01 and 0.99.
+    o.pivotX = 0.5;
+    o.pivotY = 0.5;
     //The sprite's rotation and visibility.
     o.rotation = 0;
     o.visible = true;
@@ -1137,9 +1141,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.beginPath();
       //Draw the rectangle around the context's center `0` point.
       ctx.rect(
-        Math.floor(-o.halfWidth),
-        Math.floor(-o.halfHeight),
-        o.width,
+        -o.width * o.pivotX, 
+        -o.width * o.pivotY, 
+        o.width, 
         o.height
       );
       ctx.closePath();
@@ -1178,7 +1182,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.lineWidth = o.lineWidth;
       ctx.fillStyle = o.fillStyle;
       ctx.beginPath();
-      ctx.arc(0, 0, o.radius, 0, 2*Math.PI, false);
+      ctx.arc(0, 0, o.diameter * o.pivotY, 0, 2*Math.PI, false);
       ctx.closePath();
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
@@ -1355,7 +1359,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.strokeStyle = o.strokeStyle;
       ctx.lineWidth = o.lineWidth;
       ctx.fillStyle = o.fillStyle;
-      ctx.translate(-o.halfWidth, -o.halfHeight)
+      ctx.translate(-o.width * o.pivotX, -o.height * o.pivotY)
       ctx.font = o.font;
       ctx.textBaseline = o.textBaseline;
       ctx.fillText(
@@ -1597,8 +1601,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.source,
         o.sourceX, o.sourceY,
         o.sourceWidth, o.sourceHeight,
-        Math.floor(-o.halfWidth),
-        Math.floor(-o.halfHeight),
+        -o.width * o.pivotX,
+        -o.height * o.pivotY,
         o.width, o.height
       );
     };
@@ -1922,15 +1926,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
         */
         ctx.translate(
-          sprite.renderX + sprite.halfWidth,
-          sprite.renderY + sprite.halfHeight
+          sprite.renderX + (sprite.width * sprite.pivotX),
+          sprite.renderY + (sprite.height * sprite.pivotY)
         );
 
         //The same code without interpolation
         /*
         ctx.translate(
-          sprite.x + sprite.halfWidth,
-          sprite.y + sprite.halfHeight
+          sprite.x + (sprite.width * sprite.pivotX),
+          sprite.y + (sprite.height * sprite.pivotY)
         );
         */
         /*  
@@ -1971,7 +1975,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //`displaySprite` function again.
         if (sprite.children && sprite.children.length > 0) {
           //Reset the context back to the parent sprite's top left corner
-          ctx.translate(-sprite.halfWidth, -sprite.halfHeight);
+          ctx.translate(-sprite.width * sprite.pivotX, -sprite.height * sprite.pivotY);
           for (var j = 0; j < sprite.children.length; j++) {
             //Find the sprite's child
             var child = sprite.children[j];

@@ -25,7 +25,9 @@ compressed file size of no more than 6.5k.
 Yes, it can be done!
 
 Take a look at the feature list and the `examples` folder to get
-started. Keep scrolling and you'll find a complete beginner's turtorial ahead. 
+started. Keep scrolling and you'll find a complete beginner's
+turtorial ahead. If you've never made a game before, the tutorials are
+the best place to start.
 
 Features
 --------
@@ -37,7 +39,8 @@ Here's Ga's full feature list:
   sprites with one only line of code. You can also create your own custom sprite
   types.
 - A complete scene graph with nested child-parent hierarchies (including
-  a `stage`, and `addChild`/`removeChild` methods), local and global coordinates, and depth layers.
+  a `stage`, and `addChild`/`removeChild` methods), local and global
+  coordinates, depth layers, and rotation pivots.
 - `group` sprites together to make game scenes. 
 - A game loop with a user-definable `fps` and fully customizable and
   drop-dead-simple game state manager. `pause` and `resume` the game
@@ -138,7 +141,7 @@ compile time, so it's ready to use before your game code runs.
 
 - Tiled Editor isometric maps support.
 - Many more examples including complete game prototypes.
-- Detailed documentation, and tutorials.
+- Additional documentation, examples, and tutorials.
 
 Ga's philosophy and technical constraints
 -----------------------------------------
@@ -157,7 +160,7 @@ Ga's philosophy and technical constraints
   so that anyone can rip it apart and easily drop it into something
   else.
 - Any special features, like Tiled Editor support, can be added to the
-  plugins.js file, so that game developers can pick and choose  a
+  plugins.js file, so that game developers can pick and choose a
   minimal custom set of components they want for specific games without bloating the core engine.
 
 Minifying, crushing and compressing
