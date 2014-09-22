@@ -97,11 +97,11 @@ function setup() {
   
   //The paddle
   paddle = g.sprite(g.frame(tileset, 0, 0, 96, 18));
-  g.stage.put.bottom(paddle, 0, -18);
+  g.stage.putBottom(paddle, 0, -18);
   
   //The ball
   ball = g.sprite(g.frame(tileset, 96, 0, 18, 18));
-  g.stage.put.bottom(ball, 0, -128);
+  g.stage.putBottom(ball, 0, -128);
 
   //Set the ball's initial velocity
   ball.vx = 12;
@@ -296,8 +296,8 @@ function restart() {
   blocks.x = 0;
 
   //Reset the ball and paddle positions
-  g.stage.put.bottom(paddle, 0, -18);
-  g.stage.put.bottom(ball, 0, -128);
+  g.stage.putBottom(paddle, 0, -18);
+  g.stage.putBottom(ball, 0, -128);
 
   //Reset the ball's velocity
   ball.vx = 12;

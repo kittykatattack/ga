@@ -47,12 +47,12 @@ function setup() {
   square = g.rectangle(128, 128, "lightblue", "black", 1);
   square.shadow = true;
 
-  //Use the stage's `put.center` method to put the square
-  //in the center of the stage. You can also use `put.top`,
-  //`put.right`, `put.bottom` and `put.left`. If you want to offset
+  //Use the stage's `putCenter` method to put the square
+  //in the center of the stage. You can also use `putTop`,
+  //`putRight`, `putBottom` and `putLeft`. If you want to offset
   //the position, use x and y offset values as the second and third
-  //arguments: `sprite.put.top(anySprite, -10, -5)` 
-  g.stage.put.center(square);
+  //arguments: `sprite.putTop(anySprite, -10, -5)` 
+  g.stage.putCenter(square);
 
   //Make the cat sprite from a tileset
   cat = g.sprite(g.frame("images/platforms.png", 32, 32, 32, 32));
@@ -64,7 +64,7 @@ function setup() {
   //Add the cat as a child of the square, and put it at the bottom of
   //the square
   square.addChild(cat);
-  square.put.bottom(cat, 0, -cat.height);
+  square.putBottom(cat, 0, -cat.height);
 
   //Create some text that we'll use to display the cat's local position
   localMessage = g.text("", "11px sans-serif", "black");
@@ -86,7 +86,7 @@ function setup() {
 
   //Add the star to the cat and position it to the right of the cat  
   cat.addChild(star);
-  cat.put.right(star);
+  cat.putRight(star);
 
   //Add an `angle` property to the star that we'll use to 
   //help make the star rotate around the cat
@@ -94,7 +94,7 @@ function setup() {
 
   //Create some text that will display the cat's global position
   globalMessage = g.text("This is some text to start", "11px sans-serif", "black");
-  g.stage.put.bottom(globalMessage, 0, -20);
+  g.stage.putBottom(globalMessage, 0, -20);
 
   //Add some text to display the side on which
   //the cat is colliding with the edges of the square
