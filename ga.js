@@ -1182,7 +1182,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.lineWidth = o.lineWidth;
       ctx.fillStyle = o.fillStyle;
       ctx.beginPath();
-      ctx.arc(0, 0, o.diameter * o.pivotY, 0, 2*Math.PI, false);
+      ctx.arc(
+        o.radius + (-o.diameter * o.pivotX),  
+        o.radius + (-o.diameter * o.pivotY), 
+        o.radius, 
+        0, 2*Math.PI, false
+      );
       ctx.closePath();
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
