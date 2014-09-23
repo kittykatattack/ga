@@ -1142,7 +1142,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Draw the rectangle around the context's center `0` point.
       ctx.rect(
         -o.width * o.pivotX, 
-        -o.width * o.pivotY, 
+        -o.height * o.pivotY, 
         o.width, 
         o.height
       );
