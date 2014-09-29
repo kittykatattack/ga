@@ -1515,9 +1515,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.sourceX = 0;
           o.sourceY = 0;
           o.width = o.source.width;
-          o.height = o.source.width;
+          o.height = o.source.height;
           o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.width;
+          o.sourceHeight = o.source.height;
         }
       }
     }
