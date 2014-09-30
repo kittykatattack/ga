@@ -602,6 +602,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.shadowOffsetX = 3;
     o.shadowOffsetY = 3;
     o.shadowBlur = 3;
+    //Optional blend mode
+    o.blendMode = undefined;
     //The sprite's private properties that are just used for internal
     //calculations. All these properties will be changed or accessed through a matching getter/setter
     o._alpha = 1;
@@ -1970,6 +1972,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
         } 
+        //Add an optional blend mode
+        if (sprite.blendMode) ctx.globalCompositeOperation = sprite.blendMode;
         //Use the sprite's custom `render` method to figure out how to
         //draw the sprite. This is only run if the sprite actually has
         //a `render` method. Most do, but `group` sprites don't and
