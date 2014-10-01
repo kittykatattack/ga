@@ -52,6 +52,9 @@ var g = ga(512, 512, setup,
 );
 g.start();
 
+//Set the frames per second to 30
+g.fps = 30;
+
 //Declare global sprites, objects, and variables
 //that you want to access in all the game functions and states
 
@@ -248,6 +251,8 @@ function play() {
     //To prevent the elf from moving, subtract its velocity from its position
     elf.x -= elf.vx;
     elf.y -= elf.vy;
+    elf.vx = 0;
+    elf.vy = 0;
     
     //You can find the gid number of the thing the elf hit like this:
     //console.log(obstaclesMapArray[elfVsGround.index]);

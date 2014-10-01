@@ -196,6 +196,8 @@ function play() {
     //To prevent the alien from moving, subtract its velocity from its position
     alien.x -= alien.vx;
     alien.y -= alien.vy;
+    alien.vx = 0;
+    alien.vy = 0;
   }
 
   //Let the alien pick up bombs

@@ -143,7 +143,7 @@ function play() {
   //Use the `hit` method to check for a collision between the 
   //player and the platforms
   var playerVsPlatforms = g.hit(
-    player, world.platforms, true, false, true,
+    player, world.platforms, true, false, false,
     function(collision, platform) {
       //Use the collision variable to figure out what side of the player
       //is hitting the platform
@@ -153,6 +153,7 @@ function play() {
         player.isOnGround = true;
         //Neutralize gravity by applying its
         //exact opposite force to the character's vy
+        //player.vy = -player.gravity;
         player.vy = -player.gravity;
       }
       else if(collision === "top" && player.vy <= 0) {

@@ -1906,12 +1906,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         sprite.renderX = (sprite.gx - sprite._oldX) * lagOffset + sprite._oldX;
         sprite.renderY = (sprite.gy - sprite._oldY) * lagOffset + sprite._oldY;
         */
+        /*
         if(sprite._oldX === undefined) sprite._oldX = sprite.x;
         if(sprite._oldY === undefined) sprite._oldY = sprite.y;
         sprite.renderX = (sprite.x - sprite._oldX) * lagOffset + sprite._oldX;
         sprite.renderY = (sprite.y - sprite._oldY) * lagOffset + sprite._oldY;
-        //sprite.renderX = sprite.gx + sprite.vx * lagOffset,
-        //sprite.renderY = sprite.gy + sprite.vy * lagOffset;
+        */
+        //sprite.renderX = sprite.x + sprite.vx * lagOffset,
+        //sprite.renderY = sprite.y + sprite.vy * lagOffset;
+        //sprite.renderX = sprite.vx * lagOffset + (sprite.x - sprite.vx);
+        //sprite.renderY = sprite.vy * lagOffset + (sprite.y - sprite.vy);
+        previousX = sprite.x - sprite.vx * lagOffset;
+        previousY = sprite.y - sprite.vy * lagOffset;
+        sprite.renderX = sprite.vx * lagOffset + previousX;
+        sprite.renderY = sprite.vy * lagOffset + previousY;
         //if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
         //if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
         //If the sprite's parent is the stage, position the sprite
