@@ -34,17 +34,17 @@ function setup() {
   g.canvas.style.border = "1px black dashed";
 
   //Figure out a random diameter for the falling ball
-  var randomDiameter = g.random(8, 32);
+  var randomDiameter = g.randomInt(8, 32);
  
   //Create the ball using the random diameter
   ball = g.circle(randomDiameter, "red");
 
   //Position the ball randomly somewhere across the top of the canvas
-  ball.x = g.random(0, g.canvas.width - ball.diameter);
+  ball.x = g.randomInt(0, g.canvas.width - ball.diameter);
   ball.y = 0;
 
   //Set the ball's velocity
-  ball.vx = g.random(-3, 6);
+  ball.vx = g.randomInt(-3, 6);
   ball.vy = 0;
 
   //Set the ball's gravity, friction and mass
@@ -91,8 +91,8 @@ function setup() {
     true, 0, 0,
     //A function that describes how to make each peg in the grid
     function() {
-      var peg = g.circle(g.random(8, 32), "blue");
-      peg.fillStyle = colors[g.random(0, 4)];
+      var peg = g.circle(g.randomInt(8, 32), "blue");
+      peg.fillStyle = colors[g.randomInt(0, 4)];
       return peg;
     },
     //Run any extra code after each peg is made, if you want to

@@ -270,7 +270,7 @@ function makeWorld(level) {
     //be rock, if it's "dead" it will be sky
     var cellIsAlive = function() {
       var alive, chanceToLive;
-      chanceToLive = g.random(0, 3);
+      chanceToLive = g.randomInt(0, 3);
       (chanceToLive > 0) ? alive = false : alive = true;
       return alive;
     };
@@ -369,7 +369,7 @@ function makeWorld(level) {
     //The `findStartLocation` helper function returns a random cell
     var findStartLocation = function() {
       //Randomly choose a start location from the itemLocations array
-      var randomIndex = g.random(0, world.itemLocations.length - 1);
+      var randomIndex = g.randomInt(0, world.itemLocations.length - 1);
       var location = world.itemLocations[randomIndex];
       //Splice the cell from the array so we don't choose the
       //same cell for another item

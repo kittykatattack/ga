@@ -124,7 +124,7 @@ function setup() {
     false, 0, 0,
     function() {
       //Choose a random block from the tileset for each grid cell
-      var randomX = g.random(0, 4) * cellWidth;
+      var randomX = g.randomInt(0, 4) * cellWidth;
       return g.sprite(g.frame(tileset, randomX, 64, 64, 64));
     }
   );
@@ -286,7 +286,7 @@ function restart() {
     gridWidth, gridHeight, 64, 64,
     false, 0, 0,
     function() {
-      var randomX = g.random(0, 4) * cellWidth;
+      var randomX = g.randomInt(0, 4) * cellWidth;
       return g.sprite(g.frame(tileset, randomX, 64, 64, 64));
     }
   );

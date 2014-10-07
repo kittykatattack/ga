@@ -68,11 +68,11 @@ function setup() {
     function() {
       var frames = g.filmstrip("images/marbles.png", 96, 96)
       var marble = g.sprite(frames);
-      marble.show(g.random(0, 5));
+      marble.show(g.randomInt(0, 5));
       marble.circular = true;
-      marble.diameter = g.random(8, 32);
-      marble.vx = g.random(-10, 10);
-      marble.vy = g.random(-10, 10);
+      marble.diameter = g.randomInt(8, 32);
+      marble.vx = g.randomInt(-10, 10);
+      marble.vy = g.randomInt(-10, 10);
       marble.frictionX = 0.99;
       marble.frictionY = 0.99;
       marble.mass = 0.75 + (marble.diameter / 32);

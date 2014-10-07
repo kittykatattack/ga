@@ -38,7 +38,7 @@ file (`plugins.js`) into your own `custom.js` file. Like this:
 
     GA.custom = function(ga) {
       //Create a random number within a specific range
-      ga.random = function(min, max) {
+      ga.randomInt = function(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
       };
     };
@@ -72,7 +72,7 @@ Here's the table of contents to get you started:
 `rotateAround`: Make a sprite rotate around the center of another sprite.
 `rotatePoint`: Make any x/y point rotate around any other point.
 `angle`: Get the angle between the center points of two sprites
-`random`: Generate a random integer within a range.
+`randomInt`: Generate a random integer within a range.
 `randomFloat`: Generate a random floating point number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 `worldCamera`: A method that creates and returns a camera for a scrolling game world.
@@ -284,10 +284,10 @@ GA.plugins = function(ga) {
   b. An integer.
   Here's how you can use it to get a random number between, 1 and 10:
 
-      random(1, 10);
+      randomInt(1, 10);
 
   */
-  ga.random = function(min, max) {
+  ga.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   };
 
@@ -457,8 +457,8 @@ GA.plugins = function(ga) {
         sprite.x = startX;
         sprite.y = startY;
         magnitude -= counter;
-        sprite.x = ga.random(-magnitude, magnitude);
-        sprite.y = ga.random(-magnitude, magnitude);
+        sprite.x = ga.randomInt(-magnitude, magnitude);
+        sprite.y = ga.randomInt(-magnitude, magnitude);
         counter += 1;
       }
       if (counter >= 10) {
@@ -972,7 +972,7 @@ GA.plugins = function(ga) {
       function(){           //A function that returns the sprite to use for the particle
         return g.sprite(g.frame("images/tileset.png", 112, 0, 16, 16));
       },
-      g.random(5, 10),      //numberOfParticles
+      g.randomInt(5, 10),      //numberOfParticles
       4, 16,                //size
       3, 0.5,               //speed
       0.01, 0.05,           //scale speed

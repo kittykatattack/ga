@@ -167,8 +167,9 @@ function setup() {
     //An array of color names
     var colors = ["Gold", "Lavender", "Crimson", "DarkSeaGreen"];
     //Set the ball's `fillStyle` and `strokeStyle` to a random color
-    ball.fillStyle = colors[g.random(0, 3)];
-    ball.strokeStyle = colors[g.random(0, 3)];
+    //the `randomInt` method
+    ball.fillStyle = colors[g.randomInt(0, 3)];
+    ball.strokeStyle = colors[g.randomInt(0, 3)];
   };
 
   //`line` arguments:

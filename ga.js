@@ -312,6 +312,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga._frameDuration = 1000 / ga._fps;
   ga._lag = 0;
 
+  //Should the sprite's rendered frame positions be extrapolated between
+  //logic update frames for smooth rendering at low framerates?
+  //(Setting it to true makes animation smooth but physics less precise)
+  ga.extrapolate = false;
+
   /*
   The canvas's x and y scale. These are set by getters and setter in
   the code ahead. The scale is used in the `makeInteractive`
@@ -1916,10 +1921,19 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //sprite.renderY = sprite.y + sprite.vy * lagOffset;
         //sprite.renderX = sprite.vx * lagOffset + (sprite.x - sprite.vx);
         //sprite.renderY = sprite.vy * lagOffset + (sprite.y - sprite.vy);
-        previousX = sprite.x - sprite.vx * lagOffset;
-        previousY = sprite.y - sprite.vy * lagOffset;
-        sprite.renderX = sprite.vx * lagOffset + previousX;
-        sprite.renderY = sprite.vy * lagOffset + previousY;
+        if (ga.extrapolate) {
+          sprite.renderX = sprite.vx * lagOffset + sprite.x;
+          sprite.renderY = sprite.vy * lagOffset + sprite.y;
+        } else {
+          sprite.renderX = sprite.x;
+          sprite.renderY = sprite.y;
+        }
+        /*
+        previousX = (sprite.x - sprite.vx) * (1 - lagOffset);
+        previousY = (sprite.y - sprite.vy) * (1 - lagOffset);
+        sprite.renderX = sprite.x * lagOffset + previousX//((sprite.x - sprite.vx) * (1 - lagOffset));
+        sprite.renderY = sprite.y * lagOffset + previousY//((sprite.y - sprite.vy) * (1 - lagOffset));
+        */
         //if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
         //if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
         //If the sprite's parent is the stage, position the sprite
