@@ -327,6 +327,7 @@ GA.plugins = function(ga) {
       set x(value) {
         this._x = value;
         world.x = -this._x;
+        world._previousX = world.x;
       },
       get y() {
         return this._y;
@@ -334,6 +335,7 @@ GA.plugins = function(ga) {
       set y(value) {
         this._y = value;
         world.y = -this._y;
+        world._previousY = world.y;
       },
       get centerX() {
         return this.x + (this.width / 2);
@@ -357,16 +359,20 @@ GA.plugins = function(ga) {
         //Check the sprites position in relation to the inner boundary
         if(sprite.x < this.leftInnerBoundary) {
           //Move the camera to follow the sprite if the sprite strays outside
-          this.x = Math.floor(sprite.x - (this.width / 4));
+          //this.x = Math.floor(sprite.x - (this.width / 4));
+          this.x = sprite.x - (this.width / 4);
         }
         if(sprite.y < this.topInnerBoundary) {
-          this.y = Math.floor(sprite.y - (this.height / 4));
+          //this.y = Math.floor(sprite.y - (this.height / 4));
+          this.y = sprite.y - (this.height / 4);
         }
         if(sprite.x + sprite.width > this.rightInnerBoundary) {
-          this.x = Math.floor(sprite.x + sprite.width - (this.width / 4 * 3));
+          //this.x = Math.floor(sprite.x + sprite.width - (this.width / 4 * 3));
+          this.x = sprite.x + sprite.width - (this.width / 4 * 3);
         }
         if(sprite.y + sprite.height > this.bottomInnerBoundary) {
-          this.y = Math.floor(sprite.y + sprite.height - (this.height / 4 * 3));
+          //this.y = Math.floor(sprite.y + sprite.height - (this.height / 4 * 3));
+          this.y = sprite.y + sprite.height - (this.height / 4 * 3);
         }
         //If the camera reaches the edge of the map, stop it from moving
         if(this.x < 0) {
@@ -391,6 +397,101 @@ GA.plugins = function(ga) {
 
     return camera;
   };
+  
+   /*
+  ga.worldCamera = function(world, canvas) {
+    var camera = ga.group();
+    camera.width = canvas.width;
+    camera.height = canvas.height;
+    camera._x = 0;
+    camera._y = 0;
+    Object.defineProperties(camera, {
+      x: {
+        get: function() {
+          return this._x; 
+        },
+        set: function(value) {
+          this._x = value;
+          world.x = -this._x;
+          //world._previousX = world.x;
+        },
+        enumerable: true, configurable: true
+      },
+      y: {
+        get: function() {
+          return this._y; 
+        },
+        set: function(value) {
+          this._y = value;
+          world.y = -this._y;
+          //world._previousY = world.y;
+        },
+        enumerable: true, configurable: true
+      },
+      rightInnerBoundary: {
+        get: function() {
+          return this.x + (this.width / 2) + (this.width / 4);
+        },
+        enumerable: true, configurable: true
+      },
+      leftInnerBoundary: {
+        get: function() {
+          return this.x + (this.width / 2) - (this.width / 4);
+        },
+        enumerable: true, configurable: true
+      },
+      topInnerBoundary: {
+        get: function() {
+          return this.y + (this.height / 2) - (this.height / 4);
+        },
+        enumerable: true, configurable: true
+      },
+      bottomInnerBoundary: {
+        get: function() {
+          return this.y + (this.height / 2) + (this.height / 4);
+        },
+        enumerable: true, configurable: true
+      }
+    });
+    camera.follow = function(sprite) {
+      //Check the sprites position in relation to the inner boundary
+      if(sprite.x < this.leftInnerBoundary) {
+        //Move the camera to follow the sprite if the sprite strays outside
+        this.x = Math.floor(sprite.x - (this.width / 4));
+      }
+      if(sprite.y < this.topInnerBoundary) {
+        this.y = Math.floor(sprite.y - (this.height / 4));
+      }
+      if(sprite.x + sprite.width > this.rightInnerBoundary) {
+        this.x = Math.floor(sprite.x + sprite.width - (this.width / 4 * 3));
+      }
+      if(sprite.y + sprite.height > this.bottomInnerBoundary) {
+        this.y = Math.floor(sprite.y + sprite.height - (this.height / 4 * 3));
+      }
+      //If the camera reaches the edge of the map, stop it from moving
+      if(this.x < 0) {
+        this.x = 0;
+      }
+      if(this.y < 0) {
+        this.y = 0;
+      }
+      if(this.x + this.width > world.width) {
+        this.x = world.width - this.width;
+      }
+      if(this.y + this.height > world.height) {
+        this.y = world.height - this.height;
+      }
+    };
+    camera.centerOver = function(sprite) {
+      //Center the camera over a sprite
+      this.x = (sprite.x + sprite.halfWidth) - (this.width / 2);
+      this.y = (sprite.y + sprite.halfHeight) - (this.height / 2);
+      console.log(world)
+    };
+
+    return camera;
+  };
+  */
 
   //### scaleToFit
   /*

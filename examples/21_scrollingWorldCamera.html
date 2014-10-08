@@ -154,7 +154,7 @@ function setup() {
     left: 9,
     down: 18,
     right: 27,
-    walkUp: [0, 8],
+    walkUp: [1, 8],
     walkLeft: [10, 17],
     walkDown: [19, 26],
     walkRight: [28, 35]
@@ -162,7 +162,7 @@ function setup() {
 
   //Use the `show` method to display the elf's `right` state
   elf.show(elf.states.right);
-  elf.fps = 24;
+  elf.fps = 18;
  
   //Create some keyboard objects
   leftArrow = g.keyboard(37);
@@ -174,7 +174,7 @@ function setup() {
   //show and play the elf's different states
   leftArrow.press = function() {
     elf.playSequence(elf.states.walkLeft);
-    elf.vx = -3;
+    elf.vx = -2;
     elf.vy = 0;
   };
   leftArrow.release = function() {
@@ -185,7 +185,7 @@ function setup() {
   };
   upArrow.press = function() {
     elf.playSequence(elf.states.walkUp);
-    elf.vy = -3;
+    elf.vy = -2;
     elf.vx = 0;
   };
   upArrow.release = function() {
@@ -196,7 +196,7 @@ function setup() {
   };
   rightArrow.press = function() {
     elf.playSequence(elf.states.walkRight);
-    elf.vx = 3;
+    elf.vx = 2;
     elf.vy = 0;
   };
   rightArrow.release = function() {
@@ -207,7 +207,7 @@ function setup() {
   };
   downArrow.press = function() {
     elf.playSequence(elf.states.walkDown);
-    elf.vy = 3;
+    elf.vy = 2;
     elf.vx = 0;
   };
   downArrow.release = function() {

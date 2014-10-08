@@ -312,11 +312,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga._frameDuration = 1000 / ga._fps;
   ga._lag = 0;
 
-  //Should the sprite's rendered frame positions be extrapolated between
-  //logic update frames for smooth rendering at low framerates?
-  //(Setting it to true makes animation smooth but physics less precise)
-  ga.extrapolate = false;
-
   /*
   The canvas's x and y scale. These are set by getters and setter in
   the code ahead. The scale is used in the `makeInteractive`
@@ -375,6 +370,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Update the frame if the lag counter is greater than or
       //equal to the frame duration
       while (ga._lag >= ga._frameDuration){  
+        //Capture the sprites' previous positions for rendering
+        //interpolation
+        capturePreviousSpritePositions();
         //Update the logic
         update();
         //Reduce the lag counter by the frame duration
@@ -385,31 +383,26 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ga.render(ga.canvas, lagOffset);
     }
   }
-  
-  
-  //The old game loop. Yay, archeology!
-  /*
-  function gameLoop() {
-    //If `fps` hasn't been set, the loop will try to run at the maximum
-    //frame rate that `requestAnimationFrame` can run on the host
-    //system. (This is usually around 60fps, but it depends on the
-    //host system's screen refresh rate.)
-    if (!ga._fps) {
-      //If `fps` hasn't been set, run at the maximum frame rate.
-      requestAnimationFrame(gameLoop, ga.canvas);
-      //Run the code for each frame.
-      update();
-    }
-    //If `fps` has been set, clamp the frame rate to that upper limit.
-    else {
-      setTimeout(function() {
-        requestAnimationFrame(gameLoop);
-        update();
-      }, 1000 / ga._fps);
+
+  //### capturePreviousSpritePositions
+  //This function is run in the game loop just before the logic update
+  //to store all the sprites' previous positions from the last frame.
+  //It alows the render function to interpolate the sprite positions
+  //for ultra-smooth sprite rendering at any frame rate
+  function capturePreviousSpritePositions() {
+    ga.stage.children.forEach(function(sprite) {
+      setPosition(sprite);
+    });
+    function setPosition(sprite) {
+      sprite._previousX = sprite.x;
+      sprite._previousY = sprite.y;
+      if (sprite.children && sprite.children.length > 0) {
+        sprite.children.forEach(function(child) {
+          setPosition(child);
+        });
+      }
     }
   }
-  */
-
 
   //### update
   //The things that should happen in the game loop.
@@ -623,8 +616,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o._interactive = false;
     //properties to store the x and y positions from the previous
     //frame. Use for rendering interpolation
-    o._oldX = undefined;
-    o._oldY = undefined;
+    o._previousX = undefined;
+    o._previousY = undefined;
 
     //Add the sprite's container properties so that you can have
     //a nested parent/child scene graph hierarchy.
@@ -1904,83 +1897,22 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ) {
         //Save the current context state.
         ctx.save();
-        //calculate the render position for interpolation
-        /*
-        if(sprite._oldX === undefined) sprite._oldX = sprite.gx;
-        if(sprite._oldY === undefined) sprite._oldY = sprite.gy;
-        sprite.renderX = (sprite.gx - sprite._oldX) * lagOffset + sprite._oldX;
-        sprite.renderY = (sprite.gy - sprite._oldY) * lagOffset + sprite._oldY;
-        */
-        /*
-        if(sprite._oldX === undefined) sprite._oldX = sprite.x;
-        if(sprite._oldY === undefined) sprite._oldY = sprite.y;
-        sprite.renderX = (sprite.x - sprite._oldX) * lagOffset + sprite._oldX;
-        sprite.renderY = (sprite.y - sprite._oldY) * lagOffset + sprite._oldY;
-        */
-        //sprite.renderX = sprite.x + sprite.vx * lagOffset,
-        //sprite.renderY = sprite.y + sprite.vy * lagOffset;
-        //sprite.renderX = sprite.vx * lagOffset + (sprite.x - sprite.vx);
-        //sprite.renderY = sprite.vy * lagOffset + (sprite.y - sprite.vy);
-        if (ga.extrapolate) {
-          sprite.renderX = sprite.vx * lagOffset + sprite.x;
-          sprite.renderY = sprite.vy * lagOffset + sprite.y;
+        //Calculate the sprites' interpolated render positions
+        if (sprite._previousX !== undefined || sprite._previousX !== sprite.x) {
+          sprite.renderX = (sprite.x - sprite._previousX) * lagOffset + sprite._previousX;
         } else {
           sprite.renderX = sprite.x;
+        }
+        if (sprite.renderY !== undefined || sprite._previousY !== sprite.y) {
+          sprite.renderY = (sprite.y - sprite._previousY) * lagOffset + sprite._previousY;
+        } else {
           sprite.renderY = sprite.y;
         }
-        /*
-        previousX = (sprite.x - sprite.vx) * (1 - lagOffset);
-        previousY = (sprite.y - sprite.vy) * (1 - lagOffset);
-        sprite.renderX = sprite.x * lagOffset + previousX//((sprite.x - sprite.vx) * (1 - lagOffset));
-        sprite.renderY = sprite.y * lagOffset + previousY//((sprite.y - sprite.vy) * (1 - lagOffset));
-        */
-        //if(!sprite.parent.renderX) sprite.parent.renderX = sprite.parent.gx;
-        //if(!sprite.parent.renderY) sprite.parent.renderY = sprite.parent.gy;
-        //If the sprite's parent is the stage, position the sprite
-        //relative to the top left corner of the canvas
-      
-        /*
-        if (sprite.parent.stage === true) {
-          ctx.translate(
-            sprite.renderX + sprite.halfWidth,
-            sprite.renderY + sprite.halfHeight
-          );
-        //If the sprite's parent isn't the stage, position the sprite
-        //relative to the sprite's parent's center point
-        } else {
-          ctx.translate(
-            sprite.renderX + sprite.halfWidth - sprite.parent.renderX - sprite.parent.halfWidth,
-            sprite.renderY + sprite.halfHeight - sprite.parent.renderY - sprite.parent.halfHeight
-          );
-        }
-        */
+        //Draw the sprite
         ctx.translate(
           sprite.renderX + (sprite.width * sprite.pivotX),
           sprite.renderY + (sprite.height * sprite.pivotY)
         );
-
-        //The same code without interpolation
-        /*
-        ctx.translate(
-          sprite.x + (sprite.width * sprite.pivotX),
-          sprite.y + (sprite.height * sprite.pivotY)
-        );
-        */
-        /*  
-        if (sprite.parent.stage === true) {
-          ctx.translate(
-            sprite.gx + sprite.halfWidth,
-            sprite.gy + sprite.halfHeight
-          );
-        //If the sprite's parent isn't the stage, position the sprite
-        //relative to the sprite's parent's center point
-        } else {
-          ctx.translate(
-            sprite.gx + sprite.halfWidth - sprite.parent.gx - sprite.parent.halfWidth,
-            sprite.gy + sprite.halfHeight - sprite.parent.gy - sprite.parent.halfHeight
-          );
-        }
-        */
         //Set the alpha
         ctx.globalAlpha = sprite.alpha;
         //Rotate the sprite using its `rotation` value.
