@@ -1898,12 +1898,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //Save the current context state.
         ctx.save();
         //Calculate the sprites' interpolated render positions
-        if (sprite._previousX !== undefined || sprite._previousX !== sprite.x) {
+        if (sprite._previousX !== undefined) {
           sprite.renderX = (sprite.x - sprite._previousX) * lagOffset + sprite._previousX;
         } else {
           sprite.renderX = sprite.x;
         }
-        if (sprite.renderY !== undefined || sprite._previousY !== sprite.y) {
+        if (sprite._previousY !== undefined) {
           sprite.renderY = (sprite.y - sprite._previousY) * lagOffset + sprite._previousY;
         } else {
           sprite.renderY = sprite.y;
