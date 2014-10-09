@@ -312,6 +312,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga._frameDuration = 1000 / ga._fps;
   ga._lag = 0;
 
+  //Set sprite rendering position interpolation to
+  //`true` by default
+  ga.interpolation = true;
+
   /*
   The canvas's x and y scale. These are set by getters and setter in
   the code ahead. The scale is used in the `makeInteractive`
@@ -1890,22 +1894,28 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function displaySprite(sprite) {
       if (
         sprite.visible
-        && sprite.gx < canvas.width
+        && sprite.gx < canvas.width + 1
         && sprite.gx + sprite.width > -1
-        && sprite.gy < canvas.height
+        && sprite.gy < canvas.height + 1
         && sprite.gy + sprite.height > -1
       ) {
         //Save the current context state.
         ctx.save();
-        //Calculate the sprites' interpolated render positions
-        if (sprite._previousX !== undefined) {
-          sprite.renderX = (sprite.x - sprite._previousX) * lagOffset + sprite._previousX;
+        //Calculate the sprites' interpolated render positions if
+        //`ga.interpolate` is `true` (It is true by default)
+        if (ga.interpolate) {
+          if (sprite._previousX !== undefined) {
+            sprite.renderX = (sprite.x - sprite._previousX) * lagOffset + sprite._previousX;
+          } else {
+            sprite.renderX = sprite.x;
+          }
+          if (sprite._previousY !== undefined) {
+            sprite.renderY = (sprite.y - sprite._previousY) * lagOffset + sprite._previousY;
+          } else {
+            sprite.renderY = sprite.y;
+          }
         } else {
           sprite.renderX = sprite.x;
-        }
-        if (sprite._previousY !== undefined) {
-          sprite.renderY = (sprite.y - sprite._previousY) * lagOffset + sprite._previousY;
-        } else {
           sprite.renderY = sprite.y;
         }
         //Draw the sprite
@@ -2152,26 +2162,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //`tapped` Boolean states.
   function makePointer(){
     var o = {};
-    o.x = 0;
-    o.y = 0;
+    o._x = 0;
+    o._y = 0;
     //Add `centerX` and `centerY` getters so that we
     //can use the pointer's coordinates with easing
     //and collision functions.
     Object.defineProperties(o, {
-      /*
       x: {
         get: function() {
-          o._x * ga.scaleX;
+          return o._x / ga.scale;
         },
         enumerable: true, configurable: true
       },
       y: {
         get: function() {
-          o._y * ga.scaleY;
+          return o._y / ga.scale;
         },
         enumerable: true, configurable: true
       },
-      */
       centerX: {
         get: function() {
           return o.x;
@@ -2208,19 +2216,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
+      console.log(o.x)
       //Get the element that's firing the event.
       var element = event.target;
       //Find the pointer’s x and y position (for mouse).
       //Subtract the element's top and left offset from the browser window.
-      o.x = (event.pageX - element.offsetLeft);
-      o.y = (event.pageY - element.offsetTop);
+      o._x = (event.pageX - element.offsetLeft);
+      o._y = (event.pageY - element.offsetTop);
     };
 
     //The pointer's `touchmoveHandler`.
     o.touchmoveHandler = function(event) {
       //Find the touch point's x and y position.
-      o.x = (event.targetTouches[0].pageX - ga.canvas.offsetLeft);
-      o.y = (event.targetTouches[0].pageY - ga.canvas.offsetTop);
+      o._x = (event.targetTouches[0].pageX - ga.canvas.offsetLeft);
+      o._y = (event.targetTouches[0].pageY - ga.canvas.offsetTop);
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2315,10 +2324,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if (!sprite.circular) {
         //Get the position of the sprite's edges using global
         //coordinates.
-        var left = sprite.gx * ga.scale,
-            right = (sprite.gx + sprite.width) * ga.scale,
-            top = sprite.gy * ga.scale,
-            bottom = (sprite.gy + sprite.height) * ga.scale;
+        var left = sprite.gx,// * ga.scale,
+            right = (sprite.gx + sprite.width),// * ga.scale,
+            top = sprite.gy,// * ga.scale,
+            bottom = (sprite.gy + sprite.height),// * ga.scale;
 
         //Find out if the point is intersecting the rectangle.
         hit = o.x > left && o.x < right && o.y > top && o.y < bottom;
@@ -2327,8 +2336,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       else {
         //Find the distance between the point and the
         //center of the circle.
-        var vx = o.x - ((sprite.gx + sprite.halfWidth) * ga.scale),
-            vy = o.y - ((sprite.gy + sprite.halfHeight) * ga.scale),
+        var vx = o.x - ((sprite.gx + sprite.halfWidth)),// * ga.scale),
+            vy = o.y - ((sprite.gy + sprite.halfHeight)),// * ga.scale),
             magnitude = Math.sqrt(vx * vx + vy * vy);
 
         //The point is intersecting the circle if the magnitude
