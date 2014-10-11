@@ -235,12 +235,12 @@ GA.plugins = function(ga) {
 
   ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
     rotatingSprite.x
-      = centerSprite.centerX - centerSprite.x
+      = centerSprite.centerX - rotatingSprite.parent.x//centerSprite.x
       + (distance * Math.cos(angle))
       - rotatingSprite.halfWidth;
 
     rotatingSprite.y
-      = centerSprite.centerY - centerSprite.y
+      = centerSprite.centerY - rotatingSprite.parent.y//centerSprite.y
       + (distance *  Math.sin(angle))
       - rotatingSprite.halfWidth;
   };
