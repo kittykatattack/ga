@@ -1894,10 +1894,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     function displaySprite(sprite) {
       if (
         sprite.visible
-        && sprite.gx < canvas.width + 1
-        && sprite.gx + sprite.width > -1
-        && sprite.gy < canvas.height + 1
-        && sprite.gy + sprite.height > -1
+        && sprite.gx < canvas.width + sprite.width
+        && sprite.gx + sprite.width > -sprite.width
+        && sprite.gy < canvas.height + sprite.height
+        && sprite.gy + sprite.height > -sprite.height
       ) {
         //Save the current context state.
         ctx.save();
