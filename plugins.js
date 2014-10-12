@@ -246,12 +246,15 @@ GA.plugins = function(ga) {
   };
 
   //### rotatePoint
-  //Make a point rotate around another point
+  //Make a point rotate around another point.
+  //If distanceX and distanceY are the same value, the rotation will
+  //be circular. If they're different values, the rotation will be
+  //ellipical.
 
-  ga.rotatePoint = function(pointX, pointY, distance, angle) {
+  ga.rotatePoint = function(pointX, pointY, distanceX, distanceY, angle) {
     var point = {};
-    point.x = pointX + Math.cos(angle) * distance;
-    point.y = pointY + Math.sin(angle) * distance;
+    point.x = pointX + Math.cos(angle) * distanceX;
+    point.y = pointY + Math.sin(angle) * distanceY;
     return point;
   };
 
