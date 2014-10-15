@@ -55,16 +55,16 @@ function setup() {
   g.stage.interactive = true;
   g.stage.press = function() {
     g.shoot(
-      box,           //The shooter
-      box.rotation,  //The angle at which to shoot
+      tank,           //The shooter
+      tank.rotation,  //The angle at which to shoot
       32,            //The bullet's offset from the center
       7,             //The bullet's speed (pixels per frame)
+      bullets,        //The array used to store the bullets
       //A function that returns the sprite that should
-      //be used to make each bullet:
+      //be used to make each bullet
       function() {
         return g.circle(8, "red");
-      },
-      bullets        //The array used to store the bullets
+      }
     )
   };
 

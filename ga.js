@@ -2372,6 +2372,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
               //Next, push the `dragSprite` to the end of its `children` array so that it's
               //displayed last, above all the other sprites.
               children.push(sprite);
+              //Reorganize the `draggableSpites` array in the same way
+              ga.draggableSprites.splice(ga.draggableSprites.indexOf(sprite), 1);
+              ga.draggableSprites.push(sprite);
               break;
             }
           }

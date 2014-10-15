@@ -871,7 +871,7 @@ GA.plugins = function(ga) {
 
   ga.shoot = function(
       shooter, angle, offsetFromCenter,
-      bulletSpeed, bulletSprite, bulletArray) {
+      bulletSpeed, bulletArray, bulletSprite) {
     //Make a new sprite using the user-supplied `bulletSprite` function
     var bullet = bulletSprite();
 
