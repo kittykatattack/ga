@@ -2216,7 +2216,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
-      console.log(o.x)
       //Get the element that's firing the event.
       var element = event.target;
       //Find the pointer’s x and y position (for mouse).

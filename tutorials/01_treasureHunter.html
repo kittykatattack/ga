@@ -81,7 +81,7 @@ function setup() {
     var x = spacing * i + xOffset;
 
     //Give the enemy a random y position
-    var y = g.random(0, g.canvas.height - enemy.height);
+    var y = g.randomInt(0, g.canvas.height - enemy.height);
 
     //Set the enemy's direction
     enemy.x = x;
