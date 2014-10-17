@@ -1960,15 +1960,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents.
         ctx.restore();
-        //Capture the sprite's current positions to use as 
-        //the previous position on the next frame (used for
-        //interpolation)
-        /*
-        sprite._oldX = sprite.gx;
-        sprite._oldY = sprite.gy;
-        */
-        sprite._oldX = sprite.x;
-        sprite._oldY = sprite.y;
       }
     }
   }
