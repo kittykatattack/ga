@@ -906,7 +906,7 @@ GA.plugins = function(ga) {
           gridGroup = grid(
 
             //Set the grid's properties
-            anInstanceOfGa, rows, columns, cellWidth, cellHeight,
+            columns, rows, cellWidth, cellHeight,
             areSpirtesCentered?, xOffset, yOffset,
 
             //A function that returns a sprite
@@ -952,8 +952,8 @@ GA.plugins = function(ga) {
           sprite.y = y + yOffset;
         }
         else {
-          sprite.x = x + (sprite.width / 2) + xOffset;
-          sprite.y = y + (sprite.height / 2) + yOffset;
+          sprite.x = x + (cellWidth / 2 ) - sprite.halfWidth + xOffset;
+          sprite.y = y + (cellHeight / 2) - sprite.halfHeight + yOffset;
         }
         //Run any optional extra code. This calls the
         //`extra` method supplied by the constructor
