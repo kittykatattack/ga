@@ -20,7 +20,7 @@ This file requires these convenience functions from `plugins.js`:
 
 //Create a new GA instance, and start it.
 
-var g = ga(256, 256, setup, ["images/marbles.png"]);
+var g = ga(320, 320, setup, ["images/marbles.png"]);
 g.start();
 
 //Declare global sprites, objects, and variables
@@ -49,7 +49,7 @@ function setup() {
       gridGroup = grid(
 
         //Set the grid's properties
-        rows, columns, cellWidth, cellHeight, 
+        columns, rows, cellWidth, cellHeight, 
         areSpirtesCentered?, xOffset, yOffset,
 
         //A function that returns a sprite
@@ -62,15 +62,16 @@ function setup() {
   */
   marbles = g.grid(
     //Set the grid's properties
-    5, 5, 48, 48, 
+    5, 5, 64, 64, 
     true, 0, 0,
     //A function that describes how to make each peg in the grid
     function() {
-      var frames = g.filmstrip("images/marbles.png", 96, 96)
+      var frames = g.filmstrip("images/marbles.png", 32, 32)
       var marble = g.sprite(frames);
       marble.show(g.randomInt(0, 5));
       marble.circular = true;
-      marble.diameter = g.randomInt(8, 32);
+      var sizes = [8, 12, 16, 20, 24, 28, 32];
+      marble.diameter = sizes[g.randomInt(0, 6)];
       marble.vx = g.randomInt(-10, 10);
       marble.vy = g.randomInt(-10, 10);
       marble.frictionX = 0.99;
