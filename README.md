@@ -67,7 +67,8 @@ Here's Ga's full feature list:
 - Import and play sounds using a built-in WebAudio API sound manager.
   Control sounds with `play`, `pause`, `stop`, `restart`, and
   `playFrom` methods. Change a sound's `volume` and `pan`.
-- Conveniently position sprites relative to other sprites using `put`.
+- Conveniently position sprites relative to other sprites using
+  `putTop`, `putRight`, `putBottom`, `putLeft` and `putCenter`.
 - A universal asset loader to pre-load images, fonts, sounds and JSON
   data files. All popular file formats are supported. You can load new assets into the game at
   any time.
@@ -105,7 +106,7 @@ you'll find in `plugins.js`:
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
 - A handful of useful convenience functions: `ease`, `follow`,
   `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`,
-  `random`, `randomFloat`, `contain` and `outsideBounds`.
+  `randomInt`, `randomFloat`, `contain` and `outsideBounds`.
 - A fast, universal `hit` method that handles collision testing and
   reactions for all types of sprites. Use one collision method for
   everything: rectangles, circles, points, and arrays of sprites.
@@ -589,7 +590,7 @@ for (var i = 0; i < numberOfEnemies; i++) {
   var x = spacing * i + xOffset;
 
   //Give the enemy a random y position
-  var y = g.random(0, g.canvas.height - enemy.height);
+  var y = g.randomInt(0, g.canvas.height - enemy.height);
 
   //Set the enemy's direction
   enemy.x = x;
@@ -619,7 +620,7 @@ Here's what this code produces:
 The code gives each of the enemies a random `y` position with the help
 of Ga's `random` method:
 ```
-var y = g.random(0, g.canvas.height - enemy.height);
+var y = g.randomInt(0, g.canvas.height - enemy.height);
 ```
 `random` will give you a random number between any two integers that you
 provide in the arguments. (If you need a random decimal number, use
@@ -1375,5 +1376,118 @@ containing area looks natural for the game you're making.
 
 #### Using a texture atlas
 
-... Coming soon! (But if you're in a hurry, check the examples of how
-to use a texture atlas in the `examples` folder.)
+If you’re working on a big, complex game, you’ll want a fast and
+efficient way to work with images. A texture atlas can help you do
+this. A texture atlas is actually two separate files that are closely
+related:
+
+- A single PNG **tileset** image file that contains all the images you
+  want to use in your game. (A tileset image is sometimes called a
+  spritesheet.)
+-	A JSON file that describes the size and position of those sub-images
+  in the tileset.
+
+Using a texture atlas is a big time saver. You can arrange the
+tileset’s sub-images in any order and, and the JSON file will keep
+track of their sizes and positions for you. This is really convenient
+because it means the sizes and positions of the sub-images aren’t
+hard-coded into your game program. If you make changes to the tileset,
+like adding images, resizing them, or removing them, just re-publish
+the JSON file and your game will use that updated data to display the
+images correctly. If you’re going to be making anything bigger than a
+very small game, you’ll definitely want to use a texture atlas.
+
+The de-facto standard for tileset JSON data is the format that is
+output by a popular software tool called [Texture Packer](https://www.codeandweb.com/texturepacker) (Texture
+Packer's "Essential" license is free ). Even if you
+don’t use Texture Packer, similar tools like [Shoebox](http://renderhjs.net/shoebox/) output JSON files
+in the same format. Let’s find out how to use it to make a texture
+atlas with Texture Packer, and how to load it into a game.
+
+##### Preparing the images
+
+You first need individual PNG images for each image in your game.
+You've already got them for Treasure Hunter, so you're all set. Open Texture
+Packer and choose the {JS} configuration option. Drag your game images
+into its workspace. You can also point Texture Packer to any folder that contains
+your images. Texture Packer will automatically arrange the images on a
+single tileset image, and give them names that match their original
+image file names. It will give them a 2 pixel padding by default.
+
+![Texture Packer](/tutorials/screenshots/12.png)
+
+Each of the sub-images in the atlas is called a **frame**. Although
+it's just one big image, the texture atlas has 5 frames. The name of each
+frame is the same its original PNG file name: "dungeon.png",
+"blob.png", "explorer.png", "treasure.png" and "door.png". These
+frames names are used to help the atlas reference each sub-image.
+
+When you’re done, make sure the Data Format is set to JSON (Hash) and
+click the Publish button. Choose the file name and location, and save the
+published files. You’ll end up with a PNG file and a JSON file. In
+this example my file names are `treasureHunter.json` and
+`treasureHunter.png`. To make
+your life easier, just keep both files in your project’s `images`
+folder. (Think of the JSON file as extra metadata for the image file.)
+
+##### loading the texture atlas
+
+To load the texture atlas into your game, just include the JSON file
+in Ga's assets array when you initialize the game.
+
+```
+var g = ga(
+  512, 512, setup,
+  [
+    "images/treasureHunter.json",
+    "sounds/chimes.wav"
+  ]
+);
+g.start();
+```
+That's all! You don't have to load the PNG file - Ga does that
+automatically in the background. The JSON file is all you need to tell
+Ga which tileset frame (sub-image) to display.
+
+Now if you want to use a frame from the texture atlas to make a
+sprite, you can do it like this:
+
+```
+anySprite = sprite("frameName.png");
+```
+Ga will create the sprite and display the correct image from the
+texture atlas's tileset.
+
+Here's how to you could create the sprites in Treasure Hunter using
+texture atlas frames:
+```
+//The dungeon background image
+dungeon = g.sprite("dungeon.png");
+
+//The exit door
+exit = g.sprite("door.png");
+exit.x = 32;
+
+//The player sprite
+player = g.sprite("explorer.png");
+player.x = 68;
+player.y = g.canvas.height / 2 - player.halfWidth;
+
+//The treasure
+treasure = g.sprite("treasure.png");
+```
+That's all! Ga knows that those are texture atlas frame names, not individual
+images, and it displays them directly from the tileset.
+
+If you ever need to access the texture atlas's JSON file in your game,
+you get it like this:
+```
+jsonFile = ga.json("jsonFileName.json");
+```
+Take a look at `treasureHunterAtlas.html` file in the `tutorials` folder
+to see a working example of how to load a texture atlas and use it to
+make sprites.
+
+### Alien Armada
+
+... Coming soon! 

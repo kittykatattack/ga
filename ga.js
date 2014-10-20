@@ -411,12 +411,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //### update
   //The things that should happen in the game loop.
   function update() {
-    //Run the current game `state` function if it's been defined and
-    //the game isn't `paused`.
-    if(ga.state && !ga.paused) {
-      ga.state();
-    }
-
     //Render the canvas.
     //ga.render(ga.canvas);
 
@@ -456,6 +450,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     if(ga.dragAndDrop) {
       ga.pointer.updateDragAndDrop();
     }
+
+    //Run the current game `state` function if it's been defined and
+    //the game isn't `paused`.
+    if(ga.state && !ga.paused) {
+      ga.state();
+    }
+
   }
 
   //### start
@@ -1901,6 +1902,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ) {
         //Save the current context state.
         ctx.save();
+        //ctx.setTransform(1,0,0,1,0,0);
         //Calculate the sprites' interpolated render positions if
         //`ga.interpolate` is `true` (It is true by default)
         if (ga.interpolate) {
@@ -1923,6 +1925,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           sprite.renderX + (sprite.width * sprite.pivotX),
           sprite.renderY + (sprite.height * sprite.pivotY)
         );
+      /* 
+        var cos = Math.cos(sprite.rotation),
+            sin = Math.sin(sprite.rotation),
+            scaleX = sprite.scaleX,
+            scaleY = sprite.scaleY,
+            translateX = sprite.renderX + (sprite.width * sprite.pivotX),
+            translateY = sprite.renderY + (sprite.height * sprite.pivotY);
+        
+        ctx.setTransform(
+          scaleX + cos,
+          sin, -sin,
+          scaleY - cos,
+          translateX,
+          translateY
+        );
+        */
+       //(scaleX+cos, skewX+sin, skewY-sin, scaleY-cos, translateX, translateY); 
+        
         //Set the alpha
         ctx.globalAlpha = sprite.alpha;
         //Rotate the sprite using its `rotation` value.
@@ -1949,6 +1969,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         if (sprite.children && sprite.children.length > 0) {
           //Reset the context back to the parent sprite's top left corner
           ctx.translate(-sprite.width * sprite.pivotX, -sprite.height * sprite.pivotY);
+          /*
+        ctx.setTransform(
+          -scaleX - cos,
+          -sin, sin,
+          -scaleY + cos,
+          -translateX,
+          -translateY
+        );
+        */
           for (var j = 0; j < sprite.children.length; j++) {
             //Find the sprite's child
             var child = sprite.children[j];
@@ -1960,6 +1989,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents.
         ctx.restore();
+        //ctx.setTransform(1,0,0,1,0,0);
       }
     }
   }
