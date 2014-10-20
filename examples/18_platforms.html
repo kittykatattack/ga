@@ -147,28 +147,30 @@ function play() {
     function(collision, platform) {
       //Use the collision variable to figure out what side of the player
       //is hitting the platform
-      if(collision === "bottom" && player.vy >= 0) {
-        //Tell the game that the player is on the ground if 
-        //it's standing on top of a platform
-        player.isOnGround = true;
-        //Neutralize gravity by applying its
-        //exact opposite force to the character's vy
-        //player.vy = -player.gravity;
-        player.vy = -player.gravity;
-      }
-      else if(collision === "top" && player.vy <= 0) {
-        player.vy = 0;
-      }
-      else if(collision === "right" && player.vx >= 0) {
-        player.vx = 0;
-      }
-      else if(collision === "left" && player.vx <= 0) {
-        player.vx = 0;
-      }
-      //Set `isOnGround` to `false` if the bottom of the player
-      //isn't touching the platform
-      if(collision !== "bottom" && player.vy > 0) {
-        player.isOnGround = false;
+      if (collision) {
+        if(collision === "bottom" && player.vy >= 0) {
+          //Tell the game that the player is on the ground if 
+          //it's standing on top of a platform
+          player.isOnGround = true;
+          //Neutralize gravity by applying its
+          //exact opposite force to the character's vy
+          //player.vy = -player.gravity;
+          player.vy = -player.gravity;
+        }
+        else if(collision === "top" && player.vy <= 0) {
+          player.vy = 0;
+        }
+        else if(collision === "right" && player.vx >= 0) {
+          player.vx = 0;
+        }
+        else if(collision === "left" && player.vx <= 0) {
+          player.vx = 0;
+        }
+        //Set `isOnGround` to `false` if the bottom of the player
+        //isn't touching the platform
+        if(collision !== "bottom" && player.vy > 0) {
+          player.isOnGround = false;
+        }
       }
     }
   );
@@ -268,12 +270,7 @@ function makeWorld(level) {
     //The `cellIsAlive` helper function.
     //Give each cell a 1 in 4 chance to live. If it's "alive", it will
     //be rock, if it's "dead" it will be sky
-    var cellIsAlive = function() {
-      var alive, chanceToLive;
-      chanceToLive = g.randomInt(0, 3);
-      (chanceToLive > 0) ? alive = false : alive = true;
-      return alive;
-    };
+    var cellIsAlive = function(){return g.randomInt(0, 3) === 0};
     
     //A loop creates a `cell` object for each 
     //grid cell on the map. Each `cell` has a name, and a `x` and `y` 
@@ -334,17 +331,19 @@ function makeWorld(level) {
         //1. Is the cell a rock?
         if (cell.terrain === "rock") {
           //2. Is there sky directly above it?
-          if (cellAbove.terrain === "sky") {
+          if (cellAbove && cellAbove.terrain === "sky") {
             //3. Yes there is, so change its name to "grass" 
             cell.terrain = "grass";
             //4. Make sure there are 2 sky cells above grass cells
             //so that it's easy to jump to higher platforms
             //without bumping your head. Change any rock cells that are
             //2 above the current grass cell to "sky"
-            if (cellTwoAbove.terrain === "rock"
-            || cellTwoAbove.terrain === "grass") {
-              cellTwoAbove.terrain = "sky";
-            } 
+            if (cellTwoAbove) {
+              if (cellTwoAbove.terrain === "rock"
+              || cellTwoAbove.terrain === "grass") {
+                cellTwoAbove.terrain = "sky";
+              } 
+            }
           }
         }
       }
