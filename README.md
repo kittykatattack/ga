@@ -1482,7 +1482,7 @@ images, and it displays them directly from the tileset.
 If you ever need to access the texture atlas's JSON file in your game,
 you can get it like this:
 ```
-jsonFile = ga.json("jsonFileName.json");
+jsonFile = g.json("jsonFileName.json");
 ```
 Take a look at `treasureHunterAtlas.html` file in the `tutorials` folder
 to see a working example of how to load a texture atlas and use it to
