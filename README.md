@@ -1388,7 +1388,7 @@ related:
   in the tileset.
 
 Using a texture atlas is a big time saver. You can arrange the
-tileset’s sub-images in any order and, and the JSON file will keep
+tileset’s sub-images in any order and the JSON file will keep
 track of their sizes and positions for you. This is really convenient
 because it means the sizes and positions of the sub-images aren’t
 hard-coded into your game program. If you make changes to the tileset,
@@ -1453,7 +1453,7 @@ Now if you want to use a frame from the texture atlas to make a
 sprite, you can do it like this:
 
 ```
-anySprite = sprite("frameName.png");
+anySprite = g.sprite("frameName.png");
 ```
 Ga will create the sprite and display the correct image from the
 texture atlas's tileset.
@@ -1480,7 +1480,7 @@ That's all! Ga knows that those are texture atlas frame names, not individual
 images, and it displays them directly from the tileset.
 
 If you ever need to access the texture atlas's JSON file in your game,
-you get it like this:
+you can get it like this:
 ```
 jsonFile = ga.json("jsonFileName.json");
 ```
