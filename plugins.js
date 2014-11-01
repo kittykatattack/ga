@@ -939,7 +939,7 @@ GA.plugins = function(ga) {
       var length = columns * rows;
       for(var i = 0; i < length; i++) {
         var x = ((i % columns) * cellWidth),
-            y = (Math.floor(i / columns) * cellWidth);
+            y = (Math.floor(i / columns) * cellHeight);
 
         //Use the `makeSprite` method supplied in the constructor
         //to make a sprite for the grid cell
@@ -1124,8 +1124,8 @@ GA.plugins = function(ga) {
       //Create the particle using the supplied sprite function
       var particle = spriteFunction();
       //Set the x and y position
-      particle.x = x;
-      particle.y = y;
+      particle.x = x - particle.halfWidth;
+      particle.y = y - particle.halfHeight;
       //Set a random width and height
       var size = ga.randomFloat(minSize, maxSize);
       particle.width = size;
