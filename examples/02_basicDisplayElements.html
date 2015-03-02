@@ -7,6 +7,9 @@
 <script>
 
 /*
+Learn all the basics you need to know to get
+started quickly using Ga.
+
 This file requires these convenience functions from `plugins.js`:
 `ease`
 `angle`
@@ -29,7 +32,6 @@ g.start();
 
 //Declare global sprites, objects, and variables
 //that you want to access in all the game functions and states
-
 var box, ball, line, message, cat, 
     pathA, pathB, rocket, star,
     pointerDisplay;
@@ -41,33 +43,29 @@ function setup() {
   //Set an optional fps for the game.
   //The frame rate will default to 60 fps is you don't set it
   //g.fps = 12;
-
   //Optionally hide the mouse pointer
   //g.hidePointer();
-
   //Optionally change the background color
   //g.backgroundColor = "DarkGray";
-
-
   //`rectangle` arguments: 
   //width, height, fillColor, strokeColor, lineWidth, x, y
+
   box = g.rectangle(32, 32, "cyan", "white", 4, 32, 32);
   box.rotation = 0.5;
-
   //You can optionally set the `pivotX` and `pivotY` properties of any
   //sprite to set the point around which the sprite should rotate.
   //0.5 is the default center point. Assign any percentage between
   //0.01 and 0.99 to shift the center of rotation.
   //box.pivotX = 0.25;
   //box.pivotY = 0.25;
-
   //`circle` argumenets:
   //diameter, fillstyle, stroketyle, lineWidth, x, y 
-  ball = g.circle(42, "Plum", "PowderBlue", 8, 95, 45);
 
+  ball = g.circle(42, "Plum", "PowderBlue", 8, 95, 45);
   //`text` arguments:
   //content, font, fillStyle, x, y
   //The font family name will be the same as the font's file name
+
   message = g.text("Hello World!", "14px puzzler", "white");
   message.x = 80;
   message.y = 10;
@@ -104,14 +102,14 @@ function setup() {
   */
 
   tiger = g.sprite("tiger.png");
-
   //Use `setPosition` to set the sprite's `x` and `y` values 
   //with one line of code
-  tiger.setPosition(10, 190);
 
+  tiger.setPosition(10, 190);
   //Use `scaleX` and `scaleY` to scale a sprite proportionately.
   //tiger.scaleX = 0.5;
   //tiger.scaleY = 0.5;
+
   tiger.width = 42;
   tiger.height = 42;
 
@@ -123,7 +121,6 @@ function setup() {
   You can access the JSON data file like this:
   
       var json = g.json("images/animals.json");
-
   You can access the specific JSON data for a tileset
   frame like this:
   
@@ -141,15 +138,14 @@ function setup() {
   //to a sprite by setting its `circular` property
   //to `true`.
   star.circular = true;
-  console.log("star.radius: " + star.radius)
-  console.log("star.diameter: " + star.diameter)
+  console.log("star.radius: " + star.radius);
+  console.log("star.diameter: " + star.diameter);
+
   //Set `circular` back to `false` if you want to remove
   //the `radius` and `diameter` properties.
-
   //The game has a `pointer` object with a `x` and `y` property
   //that tells you the position of the mouse or touch pointer.
   //Here's how to display the pointer position with a `text` sprite:
-
   pointerDisplay = g.text("", "8px PetMe64", "white");
   pointerDisplay.x = 10;
   pointerDisplay.y = 235;
@@ -164,8 +160,10 @@ function setup() {
   //access its `state` and `action` properties.
   ball.interactive = true;
   ball.press = function() {
+
     //An array of color names
     var colors = ["Gold", "Lavender", "Crimson", "DarkSeaGreen"];
+
     //Set the ball's `fillStyle` and `strokeStyle` to a random color
     //the `randomInt` method
     ball.fillStyle = colors[g.randomInt(0, 3)];
@@ -181,8 +179,6 @@ function setup() {
   //to help us do this. both are initialized to 0
   line.angleA = 0;
   line.angleB = 0;
-
-
 
   //Change the game state to `play`
   g.state = play;  
@@ -233,6 +229,5 @@ function play() {
   line.bx = rotatingB.x;
   line.by = rotatingB.y;
 }
-
 </script>
 </body>

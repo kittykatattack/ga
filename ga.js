@@ -357,31 +357,41 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   function gameLoop() {
     requestAnimationFrame(gameLoop, ga.canvas);
     if (ga._fps === undefined) {
+
       //Run the code for each frame.
       update();
     }
+
     //If `fps` has been set, clamp the frame rate to that upper limit.
     else {
+
       //Calcuate the time that has elapsed since the last frame
       var current = Date.now(),
           elapsed = current - ga._startTime;
       
       if (elapsed > 1000) elapsed = ga._frameDuration;
+
       //For interpolation:
       ga._startTime = current;
+
       //Add the elapsed time to the lag counter
       ga._lag += elapsed;
+
       //Update the frame if the lag counter is greater than or
       //equal to the frame duration
       while (ga._lag >= ga._frameDuration){  
+
         //Capture the sprites' previous positions for rendering
         //interpolation
         capturePreviousSpritePositions();
+
         //Update the logic
         update();
+
         //Reduce the lag counter by the frame duration
         ga._lag -= ga._frameDuration;
       }
+
       //Calculate the lag offset and use it to render the sprites
       var lagOffset = ga._lag / ga._frameDuration;
       ga.render(ga.canvas, lagOffset);
@@ -411,6 +421,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //### update
   //The things that should happen in the game loop.
   function update() {
+
     //Render the canvas.
     //ga.render(ga.canvas);
 
@@ -421,6 +432,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         var button = ga.buttons[i];
         button.update(ga.pointer, ga.canvas);
         if (button.state === "over" || button.state === "down") {
+
           //If the button (or interactive sprite) isn't the actual
           //stage itself, change the cursor to a pointer.
           if(!button.stage) {
@@ -465,16 +477,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //Ga is isntantiated.
   ga.start = function() {
     if (ga.assetFilePaths) {
+
       //Use the supplied file paths to load the assets then run
       //the user-defined `setup` function.
       ga.assets.whenLoaded = function() {
+
         //Clear the game `state` function for now to stop the loop.
         ga.state = undefined;
+
         //Call the `setup` function that was supplied by the user in
         //Ga's constructor.
         ga.setup();
       };
       ga.assets.load(ga.assetFilePaths);
+
       //While the assets are loading, set the user-defined `load`
       //function as the game state. That will make it run in a loop.
       //You can use the `load` state to create a loading progress bar.
@@ -482,11 +498,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         ga.state = ga.load;
       }
     }
+
     //If there aren't any assets to load,
     //just run the user-defined `setup` function.
     else {
       ga.setup();
     }
+
     //Start the game loop.
     gameLoop();
   };
@@ -501,6 +519,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga.resume = function() {
     ga.paused = false;
   };
+
   //### hidePointer and showPointer
   //Use `hidePointer` and `showPointer` to hide and display the
   //pointer.
@@ -513,6 +532,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //Getters and setters for various game engine properties.
   Object.defineProperties(ga, {
+
     //### fps
     //The `fps` getter/setter. Use it to set the frame rate.
     fps: {
@@ -526,6 +546,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       },
       enumerable: true, configurable: true
     },
+
     //### backgroundColor
     //Set the background color.
     backgroundColor: {
@@ -568,35 +589,43 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   each sprite type is customized but their own constructor methods.
   */
 
-
   //### makeDisplayObject
   //`makeDisplayObject` assigns properties that are common for all the sprite types.
   function makeDisplayObject (o) {
+
     //Initialize the position
     o.x = 0;
     o.y = 0;
+
     //Initialize the velocity.
     o.vx = 0;
     o.vy = 0;
+
     //Initialize the `width` and `height`.
     o.width = 0;
     o.height = 0;
+
     //The sprite's width and height scale factors.
     o.scaleX = 1;
     o.scaleY = 1;
+
     //The sprite's pivot point, which is its center of rotation.
     //This is a percentage between 0.01 and 0.99.
     o.pivotX = 0.5;
     o.pivotY = 0.5;
+
     //The sprite's rotation and visibility.
     o.rotation = 0;
     o.visible = true;
+
     //Leave the sprite's `parent` as `undefined` for now.
     //(Most will be added as children to the `stage` at a later step.)
     o.parent = undefined;
+
     //Is this the `stage` object? This will be `false` for every
     //sprite, except the `stage`.
     o.stage = false;
+
     //Optional drop shadow properties.
     //Set `shadow` to `true` if you want the sprite to display a
     //shadow.
@@ -605,20 +634,26 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.shadowOffsetX = 3;
     o.shadowOffsetY = 3;
     o.shadowBlur = 3;
+
     //Optional blend mode
     o.blendMode = undefined;
+
     //The sprite's private properties that are just used for internal
     //calculations. All these properties will be changed or accessed through a matching getter/setter
     o._alpha = 1;
     o._draggable = undefined;
+
     //The sprite's depth layer.
     o._layer = 0;
+
     //Is the sprite circular? If it is, it will be given a `radius`
     //and `diameter`.
     o._circular = false;
+
     //Is the sprite `interactive`? If it is, it can become clickable
     //or touchable.
     o._interactive = false;
+
     //properties to store the x and y positions from the previous
     //frame. Use for rendering interpolation
     o._previousX = undefined;
@@ -628,21 +663,26 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //a nested parent/child scene graph hierarchy.
     //Create a `children` array that contains all the
     //in this container.
+
     o.children = [];
     //The `addChild` method lets you add sprites to this container.
+
     o.addChild = function(sprite) {
       //Remove the sprite from its current parent, if it has one, and
       //the parent isn't already this object
+
       if (sprite.parent) {
         sprite.parent.removeChild(sprite);
       }
       //Make this object the sprite's parent and
       //add it to this object's `children` array.
+
       sprite.parent = o;
       o.children.push(sprite);
       //Calculate the sprite's new width and height
       //o.calculateSize();
     };
+
     //The `removeChild` method lets you remove a sprite from its
     //parent container.
     o.removeChild = function(sprite) {
@@ -654,6 +694,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Calculate the sprite's new width and height
       //o.calculateSize();
     };
+
     //Dynamically calculate the width and height of the sprite based
     //on the size and position of the children it contains
     /*
@@ -673,14 +714,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     };
     */
+
     //Swap the depth layer positions of two child sprites
     o.swapChildren = function(child1, child2) {
       var index1 = o.children.indexOf(child1),
           index2 = o.children.indexOf(child2);
       if (index1 !== -1 && index2 !== -1) {
+
         //Swap the indexes
         child1.childIndex = index2;
         child2.childIndex = index1;
+
         //Swap the array positions
         o.children[index1] = child2;
         o.children[index2] = child1;
@@ -688,6 +732,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         throw new Error(child + " Both objects must be a child of the caller " + o);
       }
     }
+
     //`add` and `remove` convenience methods let you add and remove
     //many sprites at the same time.
     o.add = function(spritesToAdd) {
@@ -710,6 +755,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.removeChild(sprites[0]);
       }
     };
+
     //A `setPosition` convenience function to let you set the
     //x any y position of a sprite with one line of code.
     o.setPosition = function(x, y) {
@@ -722,6 +768,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //First, get a short form reference to the sprite to make the code more
     //easier to read
     var a = o;
+
     //Center a sprite inside this sprite. `xOffset` and `yOffset`
     //arguments determine by how much the other sprite's position
     //should be offset from the center. These methods use the
@@ -735,6 +782,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.y + a.halfHeight - b.halfHeight) + yOffset;
     };
+
     //Position `b` above `a`.
     o.putTop = function(b, xOffset, yOffset) {
       xOffset = xOffset || 0;
@@ -742,6 +790,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.x - b.height) + yOffset;
     };
+
     //Position `b` to the right of `a`.
     o.putRight = function(b, xOffset, yOffset) {
       xOffset = xOffset || 0;
@@ -749,6 +798,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       b.x = (a.x + a.width) + xOffset;
       b.y = (a.y + a.halfHeight - b.halfHeight) + yOffset;
     };
+
     //Position `b` below `a`.
     o.putBottom = function(b, xOffset, yOffset) {
       xOffset = xOffset || 0;
@@ -756,6 +806,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.y + a.height) + yOffset;
     };
+
     //Position `b` to the left of `a`
     o.putLeft = function(b, xOffset, yOffset) {
       xOffset = xOffset || 0;
@@ -766,11 +817,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Getters and setters for the sprite's internal properties.
     Object.defineProperties(o, {
+
       //`gx` and `gy` getters and setters represent the sprite's
       //global coordinates.
       gx: {
         get: function() {
           if (this.parent) {
+
             //The sprite's global x position is a combination of
             //its local x value and its parent's global x value
             return this.x + this.parent.gx;
@@ -790,6 +843,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //A `position` getter. It's a convenience that lets you get and
       //set the sprite's position as an object with x and y values.
       position: {
@@ -798,10 +852,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //An `alpha` getter/setter. The sprite's `alpha` (transparency) should match its
       //parent's `alpha` value.
       alpha: {
         get: function() {
+
           //Find out the sprite's alpha relative to its parent's alpha
           var relativeAlpha = o.parent._alpha * o._alpha;
           return relativeAlpha;
@@ -811,6 +867,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //The sprite's `halfWidth` and `halfHeight`.
       halfWidth: {
         get: function() {
@@ -824,30 +881,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
-      //The width and height are calculated by multiplying
-      //the base width by the sprite's x and y scale factors.
-      /*
-      width: {
-        get: function() {
-          //Return the width, multiplied by the scale factor
-          return o._width; 
-        },
-        set: function(value){
-          o._width = value;
-        },
-        enumerable: true, configurable: true
-      },
-      height: {
-        get: function() {
-          //Return the height, multiplied by the scale factor
-          return o._height;
-        },
-        set: function(value){
-          o._height = value;
-        },
-        enumerable: true, configurable: true
-      },
-      */
+
       //The sprite's center point.
       centerX: {
         get: function() {
@@ -861,6 +895,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //The sprite's depth layer. All sprites and groups have their depth layer
       //set to `0` when their first created. If you want to force a
       //sprite to appear above another sprite, set its `layer` to a
@@ -875,6 +910,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //The `circular` property lets you define whether a sprite
       //should be interpreted as a circular object. If you set
       //`circular` to `true`, the sprite is sent to the `makeCircular`
@@ -884,12 +920,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           return o._circular;
         },
         set: function(value) {
+
           //Give the sprite `diameter` and `radius` properties
           //if `circular` is `true`.
           if (value === true && o._circular === false) {
             makeCircular(o);
             o._circular = true;
           }
+
           //Remove the sprite's `diameter` and `radius` properties
           //if `circular` is `false`.
           if (value === false && o._circular === true) {
@@ -900,6 +938,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //Is the sprite draggable by the pointer? If `draggable` is set
       //to `true`, the sprite is added to Ga's `draggableSprites`
       //array. All the sprites in `draggableSprites` are updated each
@@ -909,12 +948,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           return o._draggable;
         },
         set: function(value) {
+
           //If it's `true` push the sprite into the `draggableSprites`
           //array.
           if (value === true) {
             ga.draggableSprites.push(o);
             o._draggable = true;
           }
+
           //If it's `false`, remove it from the `draggableSprites` array.
           if (value === false) {
             ga.draggableSprites.splice(ga.draggableSprites.indexOf(o), 1);
@@ -922,6 +963,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //Is the sprite interactive? If `interactive` is set to `true`,
       //the sprite is run through the `makeInteractive` method.
       //`makeInteractive` makes the sprite sensitive to pointer
@@ -933,12 +975,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         set: function(value) {
           if (value === true) {
+
             //Add interactive properties to the sprite
             //so that it can act like a button.
             makeInteractive(o);
             o._interactive = true;
           }
           if (value === false) {
+
             //Remove the sprite's reference from the game engine's
             //`buttons` array so that it it's no longer affected
             //by mouse and touch interactivity.
@@ -948,6 +992,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //The `localBounds` and `globalBounds` methods return an object
       //with `x`, `y`, `width`, and `height` properties that define
       //the dimensions and position of the sprite. This is a convenience
@@ -977,6 +1022,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+
       //`empty` is a convenience property that will return `true` or
       //`false` depending on whether or not this sprite's `children`
       //array is empty.
@@ -1043,15 +1089,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   function makeStage() {
     var o = {};
     makeDisplayObject(o);
+
     //Flag this as being the `stage` object. There can
     //only be one stage
     o.stage = true;
+
     //Set the stage to the same height and width as the canvas
     //and position it at the top left corner
     o.width = ga.canvas.width;
     o.height = ga.canvas.height;
     o.x = 0;
     o.y = 0;
+
     //Make the stage its own parent
     o.parent = undefined;
     return o;
@@ -1066,6 +1115,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //the group later using `addChild`).
   ga.group = function(spritesToGroup) {
     var o = {};
+
     //Make the group a display object.
     makeDisplayObject(o);
 
@@ -1087,9 +1137,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
       o.calculateSize();
     };
+
     //Dynamically calculate the width and height of the sprite based
     //on the size and position of the children it contains
     o.calculateSize = function() {
+
       //Calculate the width based on the size of the largest child
       //that this sprite contains
       if (o.children.length > 0 && o.stage === false) {
@@ -1104,8 +1156,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
       }
     };
+
     //Add the group to the `stage`
     ga.stage.addChild(o);
+
     //Group any sprites that were passed to the group's arguments
     //(Important!: This bit of code needs to happen after adding the group to the stage)
     if (spritesToGroup) {
@@ -1114,6 +1168,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.addChild(sprite);
       });
     }
+
     //Return the group
     return o;
   };
@@ -1124,19 +1179,25 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //xPosition, yPosition.
   ga.rectangle = function (width, height, fillStyle, strokeStyle, lineWidth, x, y) {
     var o = {};
+
     //Make this a display object.
     makeDisplayObject(o);
+
+    //Add a mask property.
+    o.mask = false;
+
     //Set the defaults.
     o.width = width || 32;
     o.height = height || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || 0;
-    //Add the sprite to the stage.
-    ga.stage.addChild(o);
-    //Set the sprite's getters.
     o.x = x || 0;
     o.y = y || 0;
+
+    //Add the sprite to the stage.
+    ga.stage.addChild(o);
+
     //Add a `render` method that explains to the canvas how to draw
     //a rectangle.
     o.render = function(ctx) {
@@ -1144,6 +1205,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.lineWidth = o.lineWidth;
       ctx.fillStyle = o.fillStyle;
       ctx.beginPath();
+
       //Draw the rectangle around the context's center `0` point.
       ctx.rect(
         -o.width * o.pivotX, 
@@ -1151,10 +1213,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.width, 
         o.height
       );
-      ctx.closePath();
-      if (o.strokeStyle !== "none") ctx.stroke();
-      if (o.fillStyle !== "none") ctx.fill();
+      if (o.mask === true) {
+        ctx.clip();
+      } else {
+        if (o.strokeStyle !== "none") ctx.stroke();
+        if (o.fillStyle !== "none") ctx.fill();
+      }
     };
+
     //Return the rectangle.
     return o;
   };
@@ -1165,21 +1231,28 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //xPosition, yPosition
   ga.circle = function(diameter, fillStyle, strokeStyle, lineWidth, x, y) {
     var o = {};
+
     //Make this a display object.
     makeDisplayObject(o);
+
+    //Add a mask property
+    o.mask = false;
+
     //Set the defaults.
     o.width = diameter || 32;
     o.height = diameter || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || "none";
-    //Add the sprite to the stage.
-    ga.stage.addChild(o);
-    //Set the sprite's getters.
     o.x = x || 0;
     o.y = y || 0;
+
+    //Add the sprite to the stage.
+    ga.stage.addChild(o);
+
     //Add `diameter` and `radius` getters and setters.
     makeCircular(o);
+
     //Add a `render` method that explains to the canvas how to draw
     //a circle.
     o.render = function(ctx) {
@@ -1193,10 +1266,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.radius, 
         0, 2*Math.PI, false
       );
-      ctx.closePath();
-      if (o.strokeStyle !== "none") ctx.stroke();
-      if (o.fillStyle !== "none") ctx.fill();
+      if (o.mask === true) ctx.clip();
+      if (o.mask === false) {
+        if (o.strokeStyle !== "none") ctx.stroke();
+        if (o.fillStyle !== "none") ctx.fill();
+      }
     };
+
     //Return the circle sprite.
     return o;
   };
@@ -1207,8 +1283,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga.line = function(strokeStyle, lineWidth, ax, ay, bx, by) {
     var o = {};
     o.test = "line";
+
     //Add basic properties to the sprite.
     makeDisplayObject(o);
+
     //Set the defaults.
     if (!ax && ax !== 0) ax = 0;
     if (!ay && ay !== 0) ay = 0;
@@ -1220,80 +1298,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.by = by;
     o.strokeStyle = strokeStyle || "red";
     o.lineWidth = lineWidth || 1;
+
     //The `lineJoin` style.
     //Options are "round", "mitre" and "bevel".
     o.lineJoin = "round";
+
     //Add the sprite to the stage.
     ga.stage.addChild(o);
-    //Measure the width and height of the line, and its
-    //figure out its top left corner x y position.
-    /*
-    Object.defineProperties(o, {
-      //Calculate the `width` and `height` properties.
-      width: {
-        get: function() {
-          return Math.abs(o.bx - o.ax);
-        },
-        enumerable: true, configurable: true
-      },
-      height: {
-        get: function() {
-          return Math.abs(o.by - o.ay);
-        },
-        enumerable: true, configurable: true
-      },
-    
-      //Calculate the line's global `x` and `y` properties (the line's top left
-      //corner.) This will let you reposition the line using `x` and
-      //`y` without changing its length.
-      x: {
-        get: function() {
-          //return Math.min(o.ax, o.bx);
-        },
-        set: function(value) {
-          //Find the current x value (the x point closest to the
-          //left.)
-          var currentX = o.x;
-          //Figure out the difference between the current
-          //x value and the new x value.
-          var offset = value - currentX;
-          //Find the line's start and end x points. Assign the new
-          //value to the start point and the offset to the end point.
-          if (o.ax === currentX) {
-            o.ax = value;
-            o.bx += offset;
-          } else {
-            o.bx = value;
-            o.ax += offset;
-          }
-        },
-        enumerable: true, configurable: true
-      },
-    
-      y: {
-        get: function() {
-          //return Math.min(o.ay, o.by);
-        },
-        set: function(value) {
-          //Find the current y value (the y point closest to the top)
-          var currentY = o.y;
-          //Figure out the difference between the current
-          //y value and the new y value
-          var offset = value - currentY;
-          //Find the line's start and end y points. Assign the new
-          //value to the start point and the offset to the end point.
-          if (o.ay === currentY) {
-            o.ay = value;
-            o.by += offset;
-          } else {
-            o.by = value;
-            o.ay += offset;
-          }
-        },
-        enumerable: true, configurable: true
-      }
-    });
-    */
+
     //Add a `render` method that explains to the canvas how to draw
     //a line.
     o.render = function(ctx) {
@@ -1303,28 +1315,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.beginPath();
       ctx.moveTo(o.ax, o.ay);
       ctx.lineTo(o.bx, o.by);
-      /*
-      //Draw the line correctly depending on its orientation
-      //around the 4 quadrants of the origin point.
-      if (o.ax >= o.bx) {
-        if(o.ay >= o.by) {
-          ctx.moveTo(-o.halfWidth, -o.halfHeight);
-          ctx.lineTo(o.halfWidth, o.halfHeight);
-        } else {
-          ctx.moveTo(-o.halfWidth, o.halfHeight);
-          ctx.lineTo(o.halfWidth, -o.halfHeight);
-        }
-      } else {
-        if(o.ay >= o.by) {
-          ctx.moveTo(-o.halfWidth, o.halfHeight);
-          ctx.lineTo(o.halfWidth, -o.halfHeight);
-        } else {
-          ctx.moveTo(-o.halfWidth, -o.halfHeight);
-          ctx.lineTo(o.halfWidth, o.halfHeight);
-        }
-      }
-      */
-      ctx.closePath();
+      //ctx.closePath();
       if (o.strokeStyle !== "none") ctx.stroke();
       if (o.fillStyle !== "none") ctx.fill();
     };
@@ -1337,13 +1328,16 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //arguments: stringContent, font, fontColor, xPosition, yPosition.
   ga.text = function(content, font, fillStyle, x, y) {
     var o = {};
+
     //Add the basic sprite properties.
     makeDisplayObject(o);
+
     //Set the defaults.
     o.content = content || "Hello!";
     o.font = font || "12px sans-serif";
     o.fillStyle = fillStyle || "red";
     o.textBaseline = "top";
+
     //Measure the width and height of the text
     Object.defineProperties(o, {
       width: {
@@ -1359,11 +1353,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         enumerable: true, configurable: true
       }
     });
+
     //Add the sprite to the stage.
     ga.stage.addChild(o);
+
     //Set the object's x and y setters.
     o.x = x || 0;
     o.y = y || 0;
+
     //Add a `render` method that explains to the canvas how to draw text.
     o.render = function(ctx) {
       ctx.strokeStyle = o.strokeStyle;
@@ -1881,13 +1878,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   */
 
   ga.render = function(canvas, lagOffset) {
+
     //Get a reference to the context.
     var ctx = canvas.ctx;
+
     //Clear the canvas.
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     //Display the all the sprites.
     for (var i = 0; i < ga.stage.children.length; i++) {
       var sprite = ga.stage.children[i];
+
       //Only draw sprites if they're visible and inside the
       //area of the canvas.
       displaySprite(sprite);
@@ -1900,8 +1901,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         && sprite.gy < canvas.height + sprite.height
         && sprite.gy + sprite.height >= -sprite.height
       ) {
+
         //Save the current context state.
         ctx.save();
+
         //ctx.setTransform(1,0,0,1,0,0);
         //Calculate the sprites' interpolated render positions if
         //`ga.interpolate` is `true` (It is true by default)
@@ -1920,6 +1923,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           sprite.renderX = sprite.x;
           sprite.renderY = sprite.y;
         }
+
         //Draw the sprite
         ctx.translate(
           sprite.renderX + (sprite.width * sprite.pivotX),
@@ -1941,14 +1945,17 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           translateY
         );
         */
-       //(scaleX+cos, skewX+sin, skewY-sin, scaleY-cos, translateX, translateY); 
+        //(scaleX+cos, skewX+sin, skewY-sin, scaleY-cos, translateX, translateY); 
         
         //Set the alpha
         ctx.globalAlpha = sprite.alpha;
+
         //Rotate the sprite using its `rotation` value.
         ctx.rotate(sprite.rotation);
+
         //Scale the sprite using its `scaleX` and scaleY` properties.
         ctx.scale(sprite.scaleX, sprite.scaleY);
+
         //Add a shadow if the sprite's `shadow` property is `true`.
         if(sprite.shadow) {
           ctx.shadowColor = sprite.shadowColor;
@@ -1956,17 +1963,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
         } 
+
         //Add an optional blend mode
         if (sprite.blendMode) ctx.globalCompositeOperation = sprite.blendMode;
+
         //Use the sprite's custom `render` method to figure out how to
         //draw the sprite. This is only run if the sprite actually has
         //a `render` method. Most do, but `group` sprites don't and
         //neither does the `stage` object.
         if (sprite.render) sprite.render(ctx);
+
         //If the sprite contains child sprites in its
         //`children` array, display them by calling this very same
         //`displaySprite` function again.
         if (sprite.children && sprite.children.length > 0) {
+
           //Reset the context back to the parent sprite's top left corner
           ctx.translate(-sprite.width * sprite.pivotX, -sprite.height * sprite.pivotY);
           /*
@@ -1979,12 +1990,15 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         );
         */
           for (var j = 0; j < sprite.children.length; j++) {
+
             //Find the sprite's child
             var child = sprite.children[j];
+
             //display the child
             displaySprite(child);
           }
         }
+
         //The context's original position will only be restored after
         //the child sprites have been rendered. This is why the children have
         //the same rotation and alpha as the parents.
