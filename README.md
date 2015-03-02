@@ -4,35 +4,19 @@ Ga
 *"Ga!"*
 *- A baby's exclamation of surprise.*
 
-Ga is a minimalist game engine for making HTML5 games or any other
-kind interactive media. Its design was inspired by the [js13k game
-competition](http://js13kgames.com) where contestants are required to make a
-game with a total file of size no more than 13k. 
-
-How can you make a game with such a small file size?
-
-It's a useful to use a game engine, because starting any game first
-requires writing a lot of tedious boilerplate code. You don't' want to
-have to re-write all that stuff for every game you make. But most full-featured HTML5
-game engines, even small and fast ones like
-[Phaser](https://github.com/photonstorm/phaser), are still at least 1
-Megabyte-ish in size. The goal for Ga was to design a full-featured,
-fun-to-use 2D game engine with a
-compressed file size of no more than 6.5k. 
-
-6.5k?
-
-Yes, it can be done!
+*Ga* is a tiny, cute and friendly system for making HTML5 games or any other
+kind interactive media. You can use it to make any kind of 2D action
+game you can imagine.
 
 Take a look at the feature list and the `examples` folder to get
-started. Keep scrolling and you'll find a complete beginner's
+started. Keep scrolling, and you'll find a complete beginner's
 turtorial ahead. If you've never made a game before, the tutorials are
 the best place to start.
 
 Features
 --------
 
-Here's Ga's full feature list:
+Here's Ga's core feature list:
 
 - All the most important sprites you need: rectangles, circles, lines,
   text, image sprites and animated "MovieClip" style sprites. You can make any of these
@@ -85,13 +69,15 @@ Here's Ga's full feature list:
   with your own at compile or run time.
 - Yes, Ga is mobile friendly!
 - Yes, the core `ga.js` engine is less than 6.5k minified and zipped!
+  That makes Ga the world's smallest, most light-weight full featured game engine.
   It's all you need to start making any any 2D action, puzzle or
   strategy game. 
 
 And the coolest part? If you were alone on a desert island with only
-a saltwater powered laptop, an unlimited supply of
+a solar powered laptop, an unlimited supply of
 coconuts, and a copy of `ga.js` you could recreate the entire history of 2D video games,
-from SpaceWar! to Flappy Bird.
+from SpaceWar! to Flappy Bird. And all of it would fit on a 3.5 inch
+floppy disk.
 
 ### The plugins
 

@@ -1,0 +1,147 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Bouncing ball</title>
+<body>
+<script src="../ga.js"></script>
+<script src="../plugins.js"></script>
+<script>
+
+/*
+Learn how to make a ball bounce around the canvas
+with gravitym, friction and mass.
+
+This file requires these convenience functions from `plugins.js`:
+`randomInt`
+`contain``
+*/
+
+//Create a new GA instance, and start it.
+//Pre-load a texture atlas called `animals.json` from the `images`
+//folder.
+var g = ga(256, 256, setup);
+g.start();
+
+//Declare global sprites, objects, and variables
+//that you want to access in all the game functions and states.
+//In this example there's just one: `ball`.
+
+var ball;
+
+//A `setup` function that will run only once.
+//Use it for initialization tasks.
+function setup() {
+
+  //Make a ball sprite.
+  //circle arguments: diameter, fillStyle, strokeStyle, lineWidth, x, y
+  ball = g.circle(32, "white", "none", 2, 96, 128); 
+
+  //Set the ball's velocity to 0
+  ball.vx = g.randomInt(5, 15);
+  ball.vy = g.randomInt(5, 15);
+
+  //Physics properties
+  ball.gravity = 0.3;
+  ball.frictionX = 1; 
+  ball.frictionY = 0;
+  ball.mass = 1.3;
+
+  //Acceleration and friction properties
+  ball.accelerationX = 0.2;
+  ball.accelerationY = -0.2;
+  ball.frictionX = 1;
+  ball.frictionY = 1;
+
+  //Change the game state to `play`.
+  g.state = play;  
+}
+
+//The `play` function will run in a loop
+function play() {
+
+  //Apply gravity to the vertical velocity
+  ball.vy += ball.gravity;
+  
+  //Apply friction. ball.frictionX will be 0.96 if the ball is
+  //on the ground, and 1 if it's in the air
+  ball.vx *= ball.frictionX;
+  
+  //Move the ball by applying the new calculated velocity
+  //to the ball's x and y position
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+  
+  //Use Ga's custom `contain` method to bounce the ball 
+  //off the canvas edges and slow it to a stop:
+
+  //1. Use the `contain` method to create a `collision` object 
+  //that checks for a collision between the ball and the
+  //rectangular area of the stage. Setting `contain`'s 3rd
+  //argument to `true` will make the ball bounce off the 
+  //stage's edges.
+  var collision = g.contain(ball, g.stage.localBounds, true);
+
+  //2. If the collision object has a value of "bottom", it means
+  //the ball has hit the bottom of the stage. In that case, use
+  //friction to slow it down.
+  if (collision === "bottom") {
+
+    //Slow the ball down if it hits the bottom of the stage.
+    ball.frictionX = 0.96;
+  } else {
+
+    //If the ball isn't touching the bottom of the stage, it must
+    //still be in the air. In that case,
+    //give the ball a `frictionX` value of `1`, which essentially
+    //means "don't apply friction" so that it moves freely.
+    ball.frictionX = 1;
+  }
+
+  //You can optionally write the bounce code manually using the following 4 if
+  //statements.
+  //These if statements all work in the same way:
+  //If the ball crosses the canvas boundaries:
+  //1. It's repositioned inside the canvas.
+  //2. Its velocity is reversed to make it bounce, with
+  //the mass subtracted so that it looses force over time.
+  //3. If it's on the ground, friction is added to slow it down
+  /*
+  //Left
+  if (ball.x < 0) {
+    ball.x = 0;
+    ball.vx = -ball.vx / ball.mass;
+  }
+  //Right
+  if (ball.x + ball.diameter > canvas.width) {
+    ball.x = canvas.width - ball.diameter;
+    ball.vx = -ball.vx / ball.mass;
+  }
+  //Top
+  if (ball.y < 0) {
+    ball.y = 0;
+    ball.vy = -ball.vy / ball.mass;
+  }
+  //Bottom
+  if(ball.y + ball.diameter > canvas.height) {
+
+    //Position the ball inside the canvas
+    ball.y = canvas.height - ball.diameter;
+
+    //Reverse its velocity to make it bounce, and dampen the effect with mass
+    ball.vy = -ball.vy / ball.mass;
+
+    //Add some friction if it's on the ground
+    ball.frictionX = 0.96;
+  } else {
+
+    //Remove friction if it's not on the ground
+    ball.frictionX = 1;
+  }
+  */
+
+  //Add any extra optional game loop code here.
+}
+
+</script>
+</body>
+
+
