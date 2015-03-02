@@ -2357,6 +2357,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.downTime = 0;
     o.elapsedTime = 0;
 
+    //Optional, user-definable `press`, `release`, and `tap` methods
+    o.press = undefined;
+    o.release = undefined;
+    o.tap = undefined;
+    
     //A `dragSprite` property to help with drag and drop.
     o.dragSprite = null;
 
@@ -2397,6 +2402,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Capture the current time.
       o.downTime = Date.now();
+
+      //Call the `press` method if it's been assigned by the user
+      if (o.press) o.press();
+      
+      //Prevent the canvas from being selected.
+      event.preventDefault();
     };
 
     //The pointer's `touchstartHandler`.
@@ -2406,9 +2417,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o._x = event.targetTouches[0].pageX - ga.canvas.offsetLeft;
       o._y = event.targetTouches[0].pageY - ga.canvas.offsetTop;
 
-      //Prevent the canvas from being selected.
-      event.preventDefault();
-
       //Set the down states.
       o.isDown = true;
       o.isUp = false;
@@ -2416,6 +2424,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Capture the current time.
       o.downTime = Date.now();
+      
+      //Call the `press` method if it's been assigned by the user.
+      if (o.press) o.press();
+      
+      //Prevent the canvas from being selected.
+      event.preventDefault();
     };
 
     //The pointer's `upHandler`.
@@ -2427,9 +2441,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //If it's less than 200 milliseconds, it must be a tap or click.
       if (o.elapsedTime <= 200) {
         o.tapped = true;
+
+        //Call the `tapped` method if it's been assigned by the user.
+        if (o.tap) o.tap();
       }
       o.isUp = true;
       o.isDown = false;
+      
+      //Call the `release` method if it's been assigned by the user.
+      if (o.release) o.release();
+      
+      //Prevent the canvas from being selected.
+      event.preventDefault();
     };
 
     //The pointer's `touchendHandler`.
@@ -2441,9 +2464,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //If it's less than 200 milliseconds, it must be a tap or click.
       if (o.elapsedTime <= 200) {
         o.tapped = true;
+        
+        //Call the `tapped` method if it's been assigned by the user.
+        if (o.tap) o.tap();
       }
       o.isUp = true;
       o.isDown = false;
+      
+      //Call the `release` method if it's been assigned by the user.
+      if (o.release) o.release();
+      
+      //Prevent the canvas from being selected.
+      event.preventDefault();
     };
 
     //Bind the events to the handlers.
@@ -2453,9 +2485,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     );
     ga.canvas.addEventListener(
       "mousedown", o.downHandler.bind(o), false
-    );
-    ga.canvas.addEventListener(
-      "mouseup", o.upHandler.bind(o), false
     );
 
     //Add a `mouseup` event to the `window` object as well to
@@ -2470,9 +2499,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     );
     ga.canvas.addEventListener(
       "touchstart", o.touchstartHandler.bind(o), false
-    );
-    ga.canvas.addEventListener(
-      "touchend", o.touchendHandler.bind(o), false
     );
 
     //Add a `touchend` event to the `window` object as well to
