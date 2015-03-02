@@ -47,7 +47,9 @@ Here's Ga's core feature list:
   built-in, and you can easily define your own with the `keyboard`
   method.
 - A built-in universal `pointer` that works with both the mouse and
-  touch. Define as many pointers as you need for multi-touch.
+  touch. Assign your own custom `press`, `release` and `tap` methods
+  or use any of the pointer's built-in properties: `isUp`, `isDown`,
+  `tapped`, `x` and `y`. Define as many pointers as you need for multi-touch.
 - Import and play sounds using a built-in WebAudio API sound manager.
   Control sounds with `play`, `pause`, `stop`, `restart`, and
   `playFrom` methods. Change a sound's `volume` and `pan`.
