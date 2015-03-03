@@ -10,7 +10,7 @@
 This file requires these convenience functions from `plugins.js`:
 `move`
 `contain`
-`rotateAround`
+`rotateSprite`
 */
 
 //Create a new GA instance, and start it.
@@ -163,7 +163,7 @@ function play() {
 
   //Update the star's angle and make it rotate around the cat
   star.angle += 0.05;
-  g.rotateAround(star, cat, 32, star.angle);
+  g.rotateSprite(star, cat, 32, star.angle);
 }
 
 

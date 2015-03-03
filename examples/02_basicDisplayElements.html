@@ -11,7 +11,8 @@ Learn all the basics you need to know to get
 started quickly using Ga.
 
 This file requires these convenience functions from `plugins.js`:
-`ease`
+`followEase`
+`followConstant`
 `angle`
 `rotatePoint`
 */
@@ -190,8 +191,14 @@ function play() {
   box.rotation += 0.01;
 
   //Make the star ease towards the pointer.
-  //`ease` arguments: follower, leader, speed
-  g.ease(star, g.pointer, 0.1);
+  //`followEase` arguments: follower, leader, speed
+  g.followEase(star, g.pointer, 0.1);
+
+  //Alternatively, use the `followConstant` method if you want to 
+  //make a sprite follow at a constant speed. The third argument
+  //is the speed, which is the pixels/frame that the follower
+  //will move
+  //g.followConstant(star, g.pointer, 3);
 
   //Make the rocket rotate towards the star
   //`angle` returns the angle between two sprites, in radians.

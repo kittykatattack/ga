@@ -92,8 +92,9 @@ you'll find in `plugins.js`:
 - Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
-- A handful of useful convenience functions: `ease`, `follow`,
-  `angle`, `distance`, `rotateAround`, `rotatePoint`, `wait`,
+- A handful of useful convenience functions: `followEase`,
+  `followConstant`,
+  `angle`, `distance`, `rotateSprite`, `rotatePoint`, `wait`,
   `randomInt`, `randomFloat`, `contain` and `outsideBounds`.
 - A fast, universal `hit` method that handles collision testing and
   reactions for all types of sprites. Use one collision method for

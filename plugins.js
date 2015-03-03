@@ -61,7 +61,7 @@ Here's the table of contents to get you started:
 
 `move`: Make a sprite or group move (or an array of them) by updating its velocity.
 `distance`: The distance in pixels between the center point of two sprites.
-`ease`: Make a sprite ease to the position of another sprite.
+`followEase`: Make a sprite ease to the position of another sprite.
 `easeProperty`: Ease a single sprite property to another value.
 `slide`: Ease a sprite to a specific position.
 `fadeIn`: Fade in a sprite.
@@ -69,7 +69,7 @@ Here's the table of contents to get you started:
 `fade`: Fades in or out.
 `pulse`: Uses the `fade` method to make a sprite's alpha ocillate.
 `follow`: Make a sprite follow another sprite at a fixed speed.
-`rotateAround`: Make a sprite rotate around the center of another sprite.
+`rotateSprite`: Make a sprite rotate around the center of another sprite.
 `rotatePoint`: Make any x/y point rotate around any other point.
 `angle`: Get the angle between the center points of two sprites
 `randomInt`: Generate a random integer within a range.
@@ -172,13 +172,13 @@ GA.plugins = function(ga) {
   */
 
   ga.distance = function (s1, s2) {
-    var vx = s2.centerX - s1.centerX;
-    var vy = s2.centerY - s1.centerY;
+    var vx = s2.centerX - s1.centerX,
+        vy = s2.centerY - s1.centerY;
     return Math.sqrt(vx * vx + vy * vy);
   };
 
   /*
-  ### ease
+  ### followEase
 
   Make a sprite ease to the position of another sprite.
   Parameters:
@@ -189,11 +189,12 @@ GA.plugins = function(ga) {
   c. The easing value, such as 0.3. A higher number makes the follower move faster
 
   */
-  ga.ease = function(follower, leader, speed) {
+  ga.followEase = function(follower, leader, speed) {
+
     //Figure out the distance between the sprites
-    var vx = leader.centerX - follower.centerX;
-    var vy = leader.centerY - follower.centerY;
-    var distance = Math.sqrt(vx * vx + vy * vy);
+    var vx = leader.centerX - follower.centerX,
+        vy = leader.centerY - follower.centerY,
+        distance = Math.sqrt(vx * vx + vy * vy);
 
     //Move the follower if it's more than 1 pixel
     //away from the leader
@@ -204,7 +205,7 @@ GA.plugins = function(ga) {
   };
 
   /*
-  ### follow
+  ### followConstant
 
   Make a sprite move towards another sprite at a regular speed.
   Parameters:
@@ -216,11 +217,12 @@ GA.plugins = function(ga) {
 
   */
 
-  ga.follow = function(follower, leader, speed) {
+  ga.followConstant = function(follower, leader, speed) {
+
     //Figure out the distance between the sprites
-    var vx = leader.centerX - follower.centerX;
-    var vy = leader.centerY - follower.centerY;
-    var distance = Math.sqrt(vx * vx + vy * vy);
+    var vx = leader.centerX - follower.centerX,
+        vy = leader.centerY - follower.centerY,
+        distance = Math.sqrt(vx * vx + vy * vy);
 
     //Move the follower if it's more than 1 move
     //away from the leader
@@ -230,12 +232,12 @@ GA.plugins = function(ga) {
     }
   };
 
-  //### rotateAround
+  //### rotateSprite
   //Make a sprite rotate around another sprite
 
-  ga.rotateAround = function(rotatingSprite, centerSprite, distance, angle) {
+  ga.rotateSprite = function(rotatingSprite, centerSprite, distance, angle) {
     rotatingSprite.x
-      = centerSprite.centerX - rotatingSprite.parent.x//centerSprite.x
+      = centerSprite.centerX - rotatingSprite.parent.x
       + (distance * Math.cos(angle))
       - rotatingSprite.halfWidth;
 
