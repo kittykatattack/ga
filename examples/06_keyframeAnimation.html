@@ -8,7 +8,7 @@
 
 /*
 This file requires these convenience functions from `plugins.js`:
-`ease`
+`followEase`
 */
 
 //Create a new GA instance, and start it.
@@ -94,8 +94,8 @@ function setup() {
 function play() {
  
   //Make the fairy ease towards the pointer.
-  //`ease` arguments: follower, leader, speed
-  g.ease(fairy, g.pointer, 0.1);
+  //`followEase` arguments: follower, leader, speed
+  g.followEase(fairy, g.pointer, 0.1);
 
 }
 
