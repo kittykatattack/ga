@@ -6,11 +6,11 @@ Ga
 
 *Ga* is a tiny, cute and friendly system for making HTML5 games or any other
 kind interactive media. You can use it to make any kind of 2D action
-game you can imagine.
+game you can imagine, with unbelievably tiny file sizes.
 
 Take a look at the feature list and the `examples` folder to get
 started. Keep scrolling, and you'll find a complete beginner's
-turtorial ahead. If you've never made a game before, the tutorials are
+tutorial ahead. If you've never made a game before, the tutorials are
 the best place to start.
 
 Features
@@ -41,7 +41,7 @@ Here's Ga's core feature list:
 - Interactive `button` sprites with `up`, `over` and `down` states.
 - Any sprite can be set as `interactive` to receive mouse and touch
   actions.
-  Intuitive `press` and `release` methods for buttons and interactive
+  Intuitive `press`, `release`, `over`, `out` and `tap` methods for buttons and interactive
   sprites.
 - Easy-to-use keyboard key bindings. The arrow and space keys are
   built-in, and you can easily define your own with the `keyboard`
