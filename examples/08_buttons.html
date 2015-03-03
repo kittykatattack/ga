@@ -5,6 +5,11 @@
 <script src="../ga.js"></script>
 <script>
 
+/*
+Learn how to make an interactive button with three
+states: up, over and down.
+*/
+
 //Create a new GA instance, and start it.
 //Pre-load images in the array.
 var g = ga(
@@ -38,12 +43,22 @@ function setup() {
   //Make a `button` using the frames.
   button = g.button(buttonFrames);
 
-  //Assign the button's `press` and `release` actions
+  //Assign the button's optional and customizable `press`, `release`, 
+  //`over`, `out` and `tap` actions
   button.press = function() {
     console.log("pressed");
   };
   button.release = function() {
     console.log("released");
+  };
+  button.over = function() {
+    console.log("over");
+  };
+  button.out = function() {
+    console.log("out");
+  };
+  button.tap = function() {
+    console.log("tapped");
   };
 
   //Position the button

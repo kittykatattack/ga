@@ -129,7 +129,6 @@ Here's the table of contents to get you started:
 `makeTiledWorld`: Creates a game world using Tiled Editor's JSON export data.
 
 ### Chapter 7: Resources
-`colors`: A 2D array containing 1000 colors. 100 color palettes of 5 colors each.
 
 */
 
@@ -323,6 +322,7 @@ GA.plugins = function(ga) {
       height: canvas.height,
       _x: 0,
       _y: 0,
+
       //`x` and `y` getters/setters
       //When you change the camera's position,
       //they acutally reposition the world
@@ -361,6 +361,7 @@ GA.plugins = function(ga) {
         return this.y + (this.height / 2) + (this.height / 4);
       },
       follow: function(sprite) {
+
         //Check the sprites position in relation to the inner boundary
         if(sprite.x < this.leftInnerBoundary) {
           //Move the camera to follow the sprite if the sprite strays outside
@@ -368,14 +369,17 @@ GA.plugins = function(ga) {
           this.x = sprite.x - (this.width / 4);
         }
         if(sprite.y < this.topInnerBoundary) {
+
           //this.y = Math.floor(sprite.y - (this.height / 4));
           this.y = sprite.y - (this.height / 4);
         }
         if(sprite.x + sprite.width > this.rightInnerBoundary) {
+
           //this.x = Math.floor(sprite.x + sprite.width - (this.width / 4 * 3));
           this.x = sprite.x + sprite.width - (this.width / 4 * 3);
         }
         if(sprite.y + sprite.height > this.bottomInnerBoundary) {
+
           //this.y = Math.floor(sprite.y + sprite.height - (this.height / 4 * 3));
           this.y = sprite.y + sprite.height - (this.height / 4 * 3);
         }
@@ -394,6 +398,7 @@ GA.plugins = function(ga) {
         }
       },
       centerOver: function(sprite) {
+
         //Center the camera over a sprite
         this.x = (sprite.x + sprite.halfWidth) - (this.width / 2);
         this.y = (sprite.y + sprite.halfHeight) - (this.height / 2);
@@ -936,6 +941,7 @@ GA.plugins = function(ga) {
 
     //Create an empty DisplayObjectContainer
     var container = ga.group();
+
     //The `create` method
     container.createGrid = function() {
       var length = columns * rows;
@@ -957,6 +963,7 @@ GA.plugins = function(ga) {
           sprite.x = x + (cellWidth / 2 ) - sprite.halfWidth + xOffset;
           sprite.y = y + (cellHeight / 2) - sprite.halfHeight + yOffset;
         }
+
         //Run any optional extra code. This calls the
         //`extra` method supplied by the constructor
         if (extra) extra(sprite);
@@ -1021,8 +1028,10 @@ GA.plugins = function(ga) {
     initialized: false,
     create: function(canvas, assets) {
       if (!this.initialized) {
+
         //Store a reference to the `assets` object
         this.assets = assets;
+
         //Set the maximum width to half the width of the canvas
         this.maxWidth = ga.canvas.width / 2;
 
@@ -1050,6 +1059,7 @@ GA.plugins = function(ga) {
       }
     },
     update: function() {
+
       //Change the width of the blue `frontBar` to match the
       //ratio of assets that have loaded. Adding `+ 1` to
       //`assets.loaded` means that the loading bar will appear at 100%
@@ -1057,10 +1067,12 @@ GA.plugins = function(ga) {
       //player.
       var ratio = (this.assets.loaded + 1) / this.assets.toLoad;
       this.frontBar.scaleX = ratio;
+
       //Display the percentage
       this.percentage.content = Math.floor((ratio) * 100) + "%";
     },
     remove: function() {
+
       //Remove the progress bar
       g.remove(this.frontBar);
       g.remove(this.backBar);
@@ -1123,19 +1135,24 @@ GA.plugins = function(ga) {
 
     //Make the particle
     function makeParticle() {
+
       //Create the particle using the supplied sprite function
       var particle = spriteFunction();
+
       //Set the x and y position
       particle.x = x - particle.halfWidth;
       particle.y = y - particle.halfHeight;
+
       //Set a random width and height
       var size = ga.randomFloat(minSize, maxSize);
       particle.width = size;
       particle.height = size;
+
       //Set a random speed to change the scale, alpha and rotation
       particle.scaleSpeed = ga.randomFloat(minScaleSpeed, maxScaleSpeed);
       particle.alphaSpeed = ga.randomFloat(minAlphaSpeed, maxAlphaSpeed);
       particle.rotationSpeed = ga.randomFloat(minRotationSpeed, maxRotationSpeed);
+
       //Set a random velocity at which the particle should move
       var speed = ga.randomFloat(minSpeed, maxSpeed);
       particle.vx = speed * Math.cos(angle * Math.PI / 180);
@@ -1144,9 +1161,11 @@ GA.plugins = function(ga) {
       //The particle's `update` method is called on each frame of the
       //game loop
       particle.update = function(){
+
         //Move the particle
         particle.x += particle.vx;
         particle.y += particle.vy;
+
         //Change the particle's `scale`
         if (particle.scaleX - particle.scaleSpeed > 0) {
           particle.scaleX -= particle.scaleSpeed;
@@ -1154,16 +1173,20 @@ GA.plugins = function(ga) {
         if (particle.scaleY - particle.scaleSpeed > 0) {
           particle.scaleY -= particle.scaleSpeed;
         }
+
         //Change the particle's rotation
         particle.rotation += particle.rotationSpeed;
+
         //Change the particle's `alpha`
         particle.alpha -= particle.alphaSpeed;
+
         //Remove the particle if its `alpha` reaches zero
         if (particle.alpha <= 0) {
           ga.remove(particle);
           ga.particles.splice(ga.particles.indexOf(particle), 1);
         }
       };
+
       //Push the particles into ga's `particles` array
       //The `ga.particles` array is updated by the game loop each
       //frame
@@ -1235,14 +1258,17 @@ GA.plugins = function(ga) {
 
     //Left
     if (s.x < x) {
+
       //Bounce the sprite if `bounce` is true
       if (bounce) s.vx *= -1;
+
       //If the sprite has `mass`, let the mass
       //affect the sprite's velocity
       if(s.mass) s.vx /= s.mass;
       s.x = x;
       collision = "left";
     }
+
     //Top
     if (s.y < y) {
       if (bounce) s.vy *= -1;
@@ -1250,6 +1276,7 @@ GA.plugins = function(ga) {
       s.y = y;
       collision = "top";
     }
+
     //Right
     if (s.x + s.width > width) {
       if (bounce) s.vx *= -1;
@@ -1257,6 +1284,7 @@ GA.plugins = function(ga) {
       s.x = width - s.width;
       collision = "right";
     }
+
     //Bottom
     if (s.y + s.height > height) {
       if (bounce) s.vy *= -1;
@@ -1303,6 +1331,7 @@ GA.plugins = function(ga) {
 
     //Rectangle
     if (shape === "rectangle") {
+
       //Get the position of the sprite's edges
       left = sprite.x;
       right = sprite.x + sprite.width;
@@ -1315,6 +1344,7 @@ GA.plugins = function(ga) {
 
     //Circle
     if (shape === "circle") {
+
       //Find the distance between the point and the
       //center of the circle
       vx = point.x - sprite.centerX,
@@ -1347,10 +1377,12 @@ GA.plugins = function(ga) {
 
     //Calculate the vector between the circles’ center points
     if(global) {
+
       //Use global coordinates
       vx = (c2.gx + c2.radius) - (c1.gx + c1.radius);
       vy = (c2.gy + c2.radius) - (c1.gy + c1.radius);
     } else {
+
       //Use local coordinates
       vx = c2.centerX - c1.centerX;
       vy = c2.centerY - c1.centerY;
@@ -1405,15 +1437,19 @@ GA.plugins = function(ga) {
 
     //Check for a collision on the x axis
     if (Math.abs(vx) < combinedHalfWidths) {
+
       //A collision might be occuring. Check for a collision on the y axis
       if (Math.abs(vy) < combinedHalfHeights) {
+
         //There's definitely a collision happening
         hit = true;
       } else {
+
         //There's no collision on the y axis
         hit = false;
       }
     } else {
+
       //There's no collision on the x axis
       hit = false;
     }
@@ -1459,9 +1495,11 @@ GA.plugins = function(ga) {
 
     //Check whether vx is less than the combined half widths
     if (Math.abs(vx) < combinedHalfWidths) {
+
       //A collision might be occurring!
       //Check whether vy is less than the combined half heights
       if (Math.abs(vy) < combinedHalfHeights) {
+
         //A collision has occurred! This is good!
         //Find out the size of the overlap on both the X and Y axes
         overlapX = combinedHalfWidths - Math.abs(vx);
@@ -1472,14 +1510,17 @@ GA.plugins = function(ga) {
         //axis that is
 
         if (overlapX >= overlapY) {
+
           //The collision is happening on the X axis
           //But on which side? vy can tell us
           if (vy > 0) {
             collision = "top";
+
             //Move the rectangle out of the collision
             r1.y = r1.y + overlapY;
           } else {
             collision = "bottom";
+
             //Move the rectangle out of the collision
             r1.y = r1.y - overlapY;
           }
@@ -1498,17 +1539,21 @@ GA.plugins = function(ga) {
             */
           }
         } else {
+
           //The collision is happening on the Y axis
           //But on which side? vx can tell us
           if (vx > 0) {
             collision = "left";
+
             //Move the rectangle out of the collision
             r1.x = r1.x + overlapX;
           } else {
             collision = "right";
+
             //Move the rectangle out of the collision
             r1.x = r1.x - overlapX;
           }
+
           //Bounce
           if (bounce) {
             r1.vx *= -1;
@@ -1525,11 +1570,14 @@ GA.plugins = function(ga) {
           }
         }
       } else {
+
         //No collision
       }
     } else {
+
       //No collision
     }
+
     //Return the collision string. it will be either "top", "right",
     //"bottom", or "left" depening on which side of r1 is touching r2.
     return collision;
@@ -1565,10 +1613,12 @@ GA.plugins = function(ga) {
     //Calculate the vector between the circles’ center points
 
     if(global) {
+
       //Use global coordinates
       vx = (c2.gx + c2.radius) - (c1.gx + c1.radius);
       vy = (c2.gy + c2.radius) - (c1.gy + c1.radius);
     } else {
+
       //Use local coordinates
       vx = c2.centerX - c1.centerX;
       vy = c2.centerY - c1.centerY;
@@ -1660,10 +1710,12 @@ GA.plugins = function(ga) {
 
     //Calculate the vector between the circles’ center points
     if(global) {
+
       //Use global coordinates
       s.vx = (c2.gx + c2.radius) - (c1.gx + c1.radius);
       s.vy = (c2.gy + c2.radius) - (c1.gy + c1.radius);
     } else {
+
       //Use local coordinates
       s.vx = c2.centerX - c1.centerX;
       s.vy = c2.centerY - c1.centerY;
@@ -1780,15 +1832,20 @@ GA.plugins = function(ga) {
   */
 
   ga.multipleCircleCollision = function(arrayOfCircles, global) {
+
     //Set `global` to a default value of `true`
     if(global === undefined) global = true;
+
     //marble collisions
     for (var i = 0; i < arrayOfCircles.length; i++) {
+
       //The first marble to use in the collision check
       var c1 = arrayOfCircles[i];
       for (var j = i + 1; j < arrayOfCircles.length; j++) {
+
         //The second marble to use in the collision check
         var c2 = arrayOfCircles[j];
+
         //Check for a collision and bounce the marbles apart if
         //they collide. Use an optional mass property on the sprite
         //to affect the bounciness of each marble
@@ -1877,14 +1934,17 @@ GA.plugins = function(ga) {
 
     //Check to make sure one of the arguments isn't an array
     if (b instanceof Array || a instanceof Array) {
+
       //If it is, check for a collision between a sprite and an array
       spriteVsArray();
     } else {
+
       //If one of the arguments isn't an array, find out what type of
       //collision check to run
       collision = findCollisionType(a, b);
       if (collision && extra) extra(collision);
     }
+
     //Return the result of the collision.
     //It will be `undefined` if there's no collision and `true` if
     //there is a collision. `rectangleCollision` sets `collsision` to
@@ -1893,36 +1953,45 @@ GA.plugins = function(ga) {
     return collision;
 
     function findCollisionType (a, b) {
+
       //Are `a` and `b` both shapes?
       if (a.width && b.width) {
+
         //Yes, but what kind of shapes?
         if(a.diameter && b.diameter) {
+
           //They're cicles
           return circleVsCircle(a, b);
         } else {
+
           //They're rectangles
           return rectangleVsRectangle(a, b);
         }
       }
+
       //They're not both shapes, so what are they?
       //Does `a` not have a width and `b` has a width?
       else if (!a.width && b.width) {
+
         //Yes, so this is a point vs. sprite collision test
         return ga.hitTestPoint(a, b);
       }
       else {
+
         //The user is trying to test some incompatible objects
         throw new Error("I'm sorry, " + a + " and " + b + " cannot be use together in a collision test.");
       }
     }
 
     function spriteVsArray() {
+
       //If `a` happens to be the array, flip it around so that it becomes `b`
       if (a instanceof Array) {
         var temp = a;
         b = a;
         a = temp;
       }
+
       //Loop through the array in reverse
       for (var i = b.length - 1; i >= 0; i--) {
         var sprite = b[i];
@@ -1932,21 +2001,26 @@ GA.plugins = function(ga) {
     }
 
     function circleVsCircle(a, b) {
+
       //If the circles shouldn't react to the collision,
       //just test to see if they're touching
       if(!react) {
         return ga.hitTestCircle(a, b, global);
       }
+
       //Yes, the circles should react to the collision
       else {
+
         //Are they both moving?
         if (a.vx + a.vy !== 0 && b.vx + b.vy !== 0) {
+
           //Yes, they are both moving
           //(moving circle collisions always bounce apart so there's
           //no need for the third, `bounce`, argument)
           return ga.movingCircleCollision(a, b, global);
         }
         else {
+
           //No, they're not both moving
           return ga.circleCollision(a, b, bounce, global);
         }
@@ -1954,6 +2028,7 @@ GA.plugins = function(ga) {
     }
 
     function rectangleVsRectangle(a, b) {
+
       //If the rectangles shouldn't react to the collision, just
       //test to see if they're touching
       if(!react) {
@@ -1961,6 +2036,7 @@ GA.plugins = function(ga) {
       }
       //Yes
       else {
+
         //Should they bounce apart?
         //Yes
         if(bounce) {
@@ -1983,9 +2059,11 @@ GA.plugins = function(ga) {
   //index number that the sprite is in
   ga.getIndex = function(x, y, tilewidth, tileheight, mapWidthInTiles) {
     var index = {};
+
     //Convert pixel coordinates to map index coordinates
     index.x = Math.floor(x / tilewidth);
     index.y = Math.floor(y / tileheight);
+
     //Return the index number
     return index.x + (index.y * mapWidthInTiles);
   };
@@ -2094,6 +2172,7 @@ GA.plugins = function(ga) {
   */
 
   ga.hitTestTile = function(sprite, mapArray, gidToCheck, world, pointsToCheck) {
+
     //Assign "some" as the default value for `pointsToCheck`
     pointsToCheck = pointsToCheck || "some";
 
@@ -2125,6 +2204,7 @@ GA.plugins = function(ga) {
     //an array cell that you're interested in. Return `true` if they are
 
     function checkPoints(key) {
+
       //Get a reference to the current point to check.
       //(`topLeft`, `topRight`, `bottomLeft` or `bottomRight` )
       var point = sprite.collisionPoints[key];
@@ -2175,6 +2255,7 @@ GA.plugins = function(ga) {
   */
 
   ga.updateMap = function(mapArray, spritesToUpdate, world) {
+
     //First create a map a new array filled with zeros.
     //The new map array will be exactly the same size as the original
     var newMapArray = mapArray.map(function(gid) {
@@ -2184,14 +2265,17 @@ GA.plugins = function(ga) {
 
     //Is `spriteToUpdate` an array of sprites?
     if(spritesToUpdate instanceof Array) {
+
       //Get the index number of each sprite in the `spritesToUpdate` array
       //and add the sprite's `gid` to the matching index on the map
       spritesToUpdate.forEach(function(sprite) {
+
         //Find the new index number
         sprite.index = ga.getIndex(
           sprite.centerX, sprite.centerY,
           world.tilewidth, world.tileheight, world.widthInTiles
         );
+
         //Add the sprite's `gid` number to the correct index on the map
         newMapArray[sprite.index] = sprite.gid;
       });
@@ -2205,6 +2289,7 @@ GA.plugins = function(ga) {
         sprite.centerX, sprite.centerY,
         world.tilewidth, world.tileheight, world.widthInTiles
       );
+
       //Add the sprite's `gid` number to the correct index on the map
       newMapArray[sprite.index] = sprite.gid;
     }
@@ -2221,6 +2306,7 @@ GA.plugins = function(ga) {
   //### fourKeyController
 
   ga.fourKeyController = function(s, speed, up, right, down, left) {
+
     //Create a `direction` property on the sprite
     s.direction = "";
 
@@ -2296,6 +2382,7 @@ GA.plugins = function(ga) {
   */
 
   ga.makeTiledWorld = function(tiledMap, tileset) {
+
     //Create a group called `world` to contain all the layers, sprites
     //and objects from the `tiledMap`. The `world` object is going to be
     //returned to the main game program
@@ -2303,9 +2390,11 @@ GA.plugins = function(ga) {
     var world = ga.group();
     world.tileheight = tiledMap.tileheight;
     world.tilewidth = tiledMap.tilewidth;
+
     //Calculate the `width` and `height` of the world, in pixels
     world.width = tiledMap.width * tiledMap.tilewidth;
     world.height = tiledMap.height * tiledMap.tileheight;
+
     //Get a reference to the world's height and width in
     //tiles, in case you need to know this later (you will!)
     world.widthInTiles = tiledMap.width;
@@ -2416,12 +2505,14 @@ GA.plugins = function(ga) {
             //then create a sprite and assign the tile properties onto
             //the sprite
             if (tileproperties[key] && tileproperties[key].name) {
+
               //Make a sprite
               tileSprite = ga.sprite(texture);
 
               //Copy all of the tile's properties onto the sprite
               //(This includes the `name` property)
               Object.keys(tileproperties[key]).forEach(function(property) {
+
                 //console.log(tileproperties[key][property])
                 tileSprite[property] = tileproperties[key][property];
               });
@@ -2504,6 +2595,7 @@ GA.plugins = function(ga) {
           console.log("There is no object with the property name: " + objectName);
         }
       };
+
       //Return the search function
       return this.searchForObject();
     };
@@ -2534,122 +2626,6 @@ GA.plugins = function(ga) {
   ---------------------------------
   */
 
-  /*
-  ### colors
-  A 2D array containing 1000 colors. Each sub-array is a color palette made up of 
-  5 colors that look good together
-  */
-ga.colors = [
-    ["#FFABAB", "#FFDAAB", "#DDFFAB", "#ABE4FF", "#D9ABFF"],
-    ["#BCB968", "#ECB3BA", "#CCD4BD", "#9E3B36", "#FCA055"],
-    ["#CC353A", "#ADCC6B", "#F1F690", "#6A9674", "#FFA825"],
-    ["#FFF381", "#C87CFF", "#B89CFF", "#EBD7FF", "#D05D7E"],
-    ["#B2FFA9", "#F5A9FF", "#FFF8D3", "#FFE38F", "#F30303"],
-    ["#FFD4DF", "#FDF7DF", "#C7C572", "#7A69F6", "#EE7A7A"],
-    ["#E3B0A6", "#E3C4A6", "#E8E3B3", "#A8B8A3", "#AEA3B8"],
-    ["#FDDE37", "#CADBF1", "#EE0BAB", "#EEB8E7", "#9233DA"],
-    ["#D8D79C", "#8978F2", "#D986E5", "#EFB3C0", "#E54773"],
-    ["#5779FF", "#FEFF69", "#C035FF", "#FF2EC3", "#5AFFC2"],
-    //10-19
-    ["#69D2E7", "#A7DBD8", "#E0E4CC", "#F38630", "#FA6900"],
-    ["#ECD078", "#D95B43", "#C02942", "#542437", "#53777A"],
-    ["#556270", "#4ECDC4", "#C7F464", "#FF6B6B", "#C44D58"],
-    ["#CFF09E", "#A8DBA8", "#79BD9A", "#3B8686", "#0B486B"],
-    ["#774F38", "#E08E79", "#F1D4AF", "#ECE5CE", "#C5E0DC"],
-    ["#E8DDCB", "#CDB380", "#036564", "#033649", "#031634"],
-    ["#D1F2A5", "#EFFAB4", "#FFC48C", "#FF9F80", "#F56991"],
-    ["#490A3D", "#BD1550", "#E97F02", "#F8CA00", "#8A9B0F"],
-    ["#D9CEB2", "#948C75", "#D5DED9", "#7A6A53", "#99B2B7"],
-    ["#594F4F", "#547980", "#45ADA8", "#9DE0AD", "#E5FCC2"],      
-    //20-29
-    ["#E94E77", "#D68189", "#C6A49A", "#C6E5D9", "#F4EAD5"],
-    ["#3FB8AF", "#7FC7AF", "#DAD8A7", "#FF9E9D", "#FF3D7F"],
-    ["#413E4A", "#73626E", "#B38184", "#F0B49E", "#F7E4BE"],
-    ["#343838", "#005F6B", "#008C9E", "#00B4CC", "#00DFFC"],
-    ["#A79C8E", "#F8ECC9", "#F1BBBA", "#EB9F9F", "#6B5344"],
-    ["#00A8C6", "#40C0CB", "#F9F2E7", "#AEE239", "#8FBE00"],
-    ["#8C2318", "#5E8C6A", "#88A65E", "#BFB35A", "#F2C45A"],
-    ["#BCBDAC", "#CFBE27", "#F27435", "#F02475", "#3B2D38"],
-    ["#5D4157", "#838689", "#A8CABA", "#CAD7B2", "#EBE3AA"],
-    ["#F8F4D7", "#F4DEC2", "#F4B36C", "#E98977", "#F2B4A8"],
-    //30-39
-    ["#5E412F", "#FCEBB6", "#78C0A8", "#F07818", "#F0A830"],
-    ["#EEE6AB", "#C5BC8E", "#696758", "#45484B", "#36393B"],
-    ["#1B676B", "#519548", "#88C425", "#BEF202", "#EAFDE6"],
-    ["#F8B195", "#F67280", "#C06C84", "#6C5B7B", "#355C7D"],
-    ["#452632", "#91204D", "#E4844A", "#E8BF56", "#E2F7CE"],
-    ["#2A044A", "#0B2E59", "#0D6759", "#7AB317", "#A0C55F"],
-    ["#300018", "#5A3D31", "#837B47", "#ADB85F", "#E5EDB8"],
-    ["#B9D7D9", "#668284", "#2A2829", "#493736", "#7B3B3B"],
-    ["#67917A", "#170409", "#B8AF03", "#CCBF82", "#E33258"],
-    ["#BBBB88", "#CCC68D", "#EEDD99", "#EEC290", "#EEAA88"],
-    //40-49
-    ["#B3CC57", "#ECF081", "#FFBE40", "#EF746F", "#AB3E5B"],
-    ["#FFED90", "#A8D46F", "#359668", "#3C3251", "#341139"],
-    ["#AB526B", "#BCA297", "#C5CEAE", "#F0E2A4", "#F4EBC3"],
-    ["#755C3B", "#FCFBE3", "#FBCFCF", "#CDBB99", "#A37E58"],
-    ["#607848", "#789048", "#C0D860", "#F0F0D8", "#604848"],
-    ["#F7F9FE", "#ECF1F2", "#DCE8EB", "#CBDBE0", "#BED2D9"],
-    ["#EDEBE6", "#D6E1C7", "#94C7B6", "#403B33", "#D3643B"],
-    ["#A8E6CE", "#DCEDC2", "#FFD3B5", "#FFAAA6", "#FF8C94"],
-    ["#300030", "#480048", "#601848", "#C04848", "#F07241"],
-    ["#FDF1CC", "#C6D6B8", "#987F69", "#E3AD40", "#FCD036"],
-    //50-59
-    ["#AAB3AB", "#C4CBB7", "#EBEFC9", "#EEE0B7", "#E8CAAF"],
-    ["#3A111C", "#574951", "#83988E", "#BCDEA5", "#E6F9BC"],
-    ["#E8F3F8", "#DBE6EC", "#C2CBCE", "#A4BCC2", "#81A8B8"],
-    ["#5E3929", "#CD8C52", "#B7D1A3", "#DEE8BE", "#FCF7D3"],
-    ["#B9D3B0", "#81BDA4", "#B28774", "#F88F79", "#F6AA93"],
-    ["#1693A5", "#02AAB0", "#00CDAC", "#7FFF24", "#C3FF68"],
-    ["#4E395D", "#827085", "#8EBE94", "#CCFC8E", "#DC5B3E"],
-    ["#5C323E", "#A82743", "#E15E32", "#C0D23E", "#E5F04C"],
-    ["#C2412D", "#D1AA34", "#A7A844", "#A46583", "#5A1E4A"],
-    ["#9D7E79", "#CCAC95", "#9A947C", "#748B83", "#5B756C"],
-    //60-69
-    ["#DAD6CA", "#1BB0CE", "#4F8699", "#6A5E72", "#563444"],
-    ["#382F32", "#FFEAF2", "#FCD9E5", "#FBC5D8", "#F1396D"],
-    ["#8DCCAD", "#988864", "#FEA6A2", "#F9D6AC", "#FFE9AF"],
-    ["#A7C5BD", "#E5DDCB", "#EB7B59", "#51D26B", "#524656"],
-    ["#5E9FA3", "#DCD1B4", "#FAB87F", "#F87E7B", "#B05574"],
-    ["#951F2B", "#F5F4D7", "#E0DFB1", "#A5A36C", "#535233"],
-    ["#AAFF00", "#FFAA00", "#FF00AA", "#AA00FF", "#00AAFF"],
-    ["#3B1C4A", "#6B3162", "#B0587B", "#F6B076", "#F8E192"],
-    ["#7D9E3C", "#73581D", "#FFFEC0", "#FFE2A6", "#FE9F8C"],
-    ["#BED6C7", "#ADC0B4", "#8A7E66", "#A79B83", "#BBB2A1"],
-    //70-79
-    ["#F5F2C4", "#BCCF9F", "#3FB094", "#87244C", "#30162B"],
-    ["#107FC9", "#0E4EAD", "#0B108C", "#0C0F66", "#07093D"],
-    ["#C7FCD7", "#D9D5A7", "#D9AB91", "#E6867A", "#ED4A6A"],
-    ["#BF496A", "#B39C82", "#B8C99D", "#F0D399", "#595151"],
-    ["#1B325F", "#9CC4E4", "#E9F2F9", "#3A89C9", "#F26C4F"],
-    ["#2B222C", "#5E4352", "#965D62", "#C7956D", "#F2D974"],
-    ["#F5DD9D", "#BCC499", "#92A68A", "#7B8F8A", "#506266"],
-    ["#D3D5B0", "#B5CEA4", "#9DC19D", "#8C7C62", "#71443F"],
-    ["#69D2E7", "#15A8C2", "#CB07D1", "#FA00D3", "#EF99E4"],
-    ["#E7DD96", "#E16639", "#AD860A", "#B7023F", "#55024A"],
-    //80-89
-    ["#FDCFBF", "#FEB89F", "#E23D75", "#5F0D3B", "#742365"],
-    ["#FD8603", "#F4F328", "#00DA3C", "#00CBE7", "#FA6A64"],
-    ["#8E9E82", "#CACCB6", "#F2F0DF", "#A9C1D9", "#607890"],
-    ["#91CFCA", "#A6D1C8", "#C7D5C8", "#E7D6CF", "#EFBDC0"],
-    ["#F0C27B", "#D38157", "#7F2B51", "#4B1248", "#1D0B38"],
-    ["#F8DAFB", "#E8DAFB", "#DADDFB", "#DAEDFB", "#DAFBF8"],
-    ["#D1026C", "#F2D43F", "#61C155", "#048091", "#492D61"],
-    ["#FDF0CC", "#FDCBB1", "#E8A0A2", "#C2768E", "#4A536B"],
-    ["#FFFF99", "#D9CC8C", "#B39980", "#8C6673", "#663366"],
-    ["#ACDEB2", "#E1EAB5", "#EDAD9E", "#FE4B74", "#390D2D"],
-    //90-99
-    ["#001449", "#012677", "#005BC5", "#00B4FC", "#17F9FF"],
-    ["#F9BA15", "#900402", "#8EAC00", "#127A97", "#452B72"],
-    ["#899AA1", "#BDA2A2", "#FBBE9A", "#FAD889", "#FAF5C8"],
-    ["#2F2BAD", "#AD2BAD", "#E42692", "#F7DB15", "#58B5A8"],
-    ["#434367", "#0A8690", "#86BD55", "#FBEC5F", "#F9A600"],
-    ["#EB9D8D", "#93865A", "#A8BB9A", "#C5CBA6", "#EFD8A9"],
-    ["#67484D", "#C5AB70", "#F7DFB9", "#DA9B97", "#C95074"],
-    ["#AB505E", "#D9A071", "#CFC88F", "#A5B090", "#607873"],
-    ["#B877A8", "#B8008A", "#FF3366", "#FFCC33", "#CCFF33"],
-    ["#FF0092", "#FFCA1B", "#B6FF00", "#228DFF", "#BA01FF"]
-];
 
 //plugins ends
 };
