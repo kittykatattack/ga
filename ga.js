@@ -955,6 +955,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           if (value === true) {
             ga.draggableSprites.push(o);
             o._draggable = true;
+
+            //If Ga's `dragAndDrop` property is `false`, set it to
+            //`true`
+            if (ga.dragAndDrop === false) ga.dragAndDrop = true;
           }
 
           //If it's `false`, remove it from the `draggableSprites` array.
@@ -1685,6 +1689,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //for now, but they'll be defined in the game program.
     o.press = o.press || undefined;
     o.release = o.release || undefined;
+    o.over = o.over || undefined;
+    o.out = o.out || undefined;
+    o.tap = o.tap || undefined;
 
     //The `state` property tells you button's
     //current state. Set its initial state to "up".

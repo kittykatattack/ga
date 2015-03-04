@@ -97,7 +97,7 @@ you'll find in `plugins.js`:
   `angle`, `distance`, `rotateSprite`, `rotatePoint`, `wait`,
   `randomInt`, `randomFloat`, `contain` and `outsideBounds`.
 - A fast, universal `hit` method that handles collision testing and
-  reactions for all types of sprites. Use one collision method for
+  reactions (blocking and bounce) for all types of sprites. Use one collision method for
   everything: rectangles, circles, points, and arrays of sprites.
   Easy!
 - A companion suite of lightweight, low-level 2D geometric collision methods.

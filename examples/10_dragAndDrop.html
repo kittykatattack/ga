@@ -29,9 +29,6 @@ function setup() {
   g.backgroundColor = "white";
   g.canvas.style.border = "1px black dashed";
 
-  //Important! Set the game's `dragAndDrop` property to `true` to enable it.
-  g.dragAndDrop = true;
-
   //Create three sprites from images and set their `draggable` property to `true`
   cat = g.sprite("images/cat.png");
   cat.draggable = true;
@@ -43,6 +40,12 @@ function setup() {
   hedgehog = g.sprite("images/hedgehog.png");
   hedgehog.draggable = true;
   hedgehog.setPosition(128, 128);
+
+  //If you ever need to disable drag and drop, set Ga's 
+  //`dragAndDrop` property to `false`, like this:
+  //g.dragAndDrop = false;
+  //`dragAndDrop` is set to `true` automatically whenever set a
+  //sprite's `draggable` property to `true`
   
   //Buttons remain interactive even if there's no game loop running.
   //g.state = play;    

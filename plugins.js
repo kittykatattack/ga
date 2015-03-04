@@ -105,6 +105,8 @@ Here's the table of contents to get you started:
 `hitTestPoint`: Returns `true` or `false` if an x/y point is intersecting a rectangle or circle.
 `hitTestCircle`: Returns `true` if any two circular sprites overlap.
 `hitTestRectangle`: Returns `true` if any two rectangular sprites overlap.
+`hitTestCircleRectangle`: Returns `true` if rectangular and circular sprites overlap.
+`hitTestCirclePoint`: Returns `true` if a point intersects a circle.
 `rectangleCollision`: Prevents two colliding rectangles from overlapping and tells you the collision side
 `circleCollision`: Makes a moving circle bounce away from a stationary circle.
 `movingCircleCollision`: Makes two moving circles bounce apart.
@@ -1372,8 +1374,8 @@ GA.plugins = function(ga) {
   ga.hitTestCircle = function(c1, c2, global) {
     var vx, vy, magnitude, totalRadii, hit;
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //Calculate the vector between the circles’ center points
     if(global) {
@@ -1416,8 +1418,8 @@ GA.plugins = function(ga) {
   ga.hitTestRectangle = function(r1, r2, global) {
     var hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //A variable to determine whether there's a collision
     hit = false;
@@ -1458,6 +1460,164 @@ GA.plugins = function(ga) {
     return hit;
   };
 
+ /*
+  hitTestCircleRectangle
+  ----------------
+
+  Use it to find out if a circular shape is touching a rectangular shape
+  Parameters: 
+  a. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
+  b. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
+
+  */
+
+  ga.hitTestCircleRectangle = function(c1, r1, global) {
+
+    var region, collision, c1x, c1y, r1x, r1y;
+    
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
+
+    //Use either global or local coordinates
+    if (global) {
+      c1x = c1.gx;
+      c1y = c1.gy
+      r1x = r1.gx;
+      r1y = r1.gy;
+    } else {
+      c1x = c1.x;
+      c1y = c1.y
+      r1x = r1.x;
+      r1y = r1.y;
+    }
+
+    //Is the circle above the rectangle's top edge?
+    if (c1y < r1y - r1.halfHeight) {
+
+      //If it is, we need to check whether it's in the 
+      //top left, top center or top right
+      //(Increasing the size of the region by 2 pixels slightly weights
+      //the text in favor of a rectangle vs. rectangle collision test.
+      //This gives a more natural looking result with corner collisions
+      //when physics is added)
+      if(c1x < r1x - 1 - r1.halfWidth) {
+        region = "topLeft";
+      }
+      else if (c1x > r1x + 1 + r1.halfWidth) {
+        region = "topRight";
+      }
+      else {
+        region = "topMiddle";
+      }
+    }
+
+    //The circle isn't above the top edge, so it might be
+    //below the bottom edge
+    else if (c1y > r1y + r1.halfHeight) {
+
+      //If it is, we need to check whether it's in the bottom left,
+      //bottom center, or bottom right
+      if (c1x < r1x - 1 - r1.halfWidth) {
+        region = "bottomLeft";
+      }
+      else if (c1x > r1x + 1 + r1.halfWidth) {
+        region = "bottomRight";
+      }
+      else {
+        region = "bottomMiddle";
+      }
+    }
+
+    //The circle isn't above the top edge or below the bottom edge,
+    //so it must be on the left or right side
+    else {
+      if (c1x < r1x - r1.halfWidth) {
+        region = "leftMiddle";
+      }
+      else {
+        region = "rightMiddle";
+      }
+    }
+
+    //Is this the circle touching the flat sides
+    //of the rectangle?
+    if (region === "topMiddle"
+    || region === "bottomMiddle"
+    || region === "leftMiddle"
+    || region === "rightMiddle") {
+
+      //Yes, it is, so do a standard rectangle vs. rectangle collision test
+      collision = ga.hitTestRectangle(c1, r1, global);  
+    } 
+
+    //The circle is touching one of the corners, so do a
+    //circle vs. point collision test
+    else {
+      var point = {};
+
+      switch (region) {
+        case "topLeft": 
+          point.x = r1x;
+          point.y = r1y;
+          break;
+        
+        case "topRight":
+          point.x = r1x + r1.width;
+          point.y = r1y;
+          break;
+
+        case "bottomLeft":
+          point.x = r1x;
+          point.y = r1y + r1.height;
+          break;
+
+        case "bottomRight":
+          point.x = r1x + r1.width;
+          point.y = r1y + r1.height;
+      }
+      
+      //Check for a collision between the circle and the point
+      collision = ga.hitTestCirclePoint(c1, point, global);
+    }
+
+    //Return the result of the collision.
+    //The return value will be `undefined` if there's no collision
+    if (collision) {
+      return region;
+    } else {
+      return collision;
+    }
+  }; 
+
+  /*
+  hitTestCirclePoint
+  ------------------
+
+  Use it to find out if a circular shape is touching a point
+  Parameters: 
+  a. A sprite object with `centerX`, `centerY`, and `radius` properties.
+  b. A point object with `x` and `y` properties.
+
+  */
+
+  ga.hitTestCirclePoint = function(c1, point, global) {
+    
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
+
+    //A point is just a circle with a diameter of
+    //1 pixel, so we can cheat. All we need to do is an ordinary circle vs. circle
+    //Collision test. Just supply the point with the properties
+    //it needs
+    point.diameter = 1;
+    point.radius = 0.5;
+    point.centerX = point.x;
+    point.centerY = point.y;
+    point.gx = point.x;
+    point.gy = point.y;
+    return ga.hitTestCircle(c1, point, global); 
+  };
+
   /*
   #### rectangleCollision
 
@@ -1477,8 +1637,8 @@ GA.plugins = function(ga) {
     //Set `bounce` to a default value of `true`
     if(bounce === undefined) bounce = false;
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //Calculate the distance vector
     if(global) {
@@ -1607,8 +1767,8 @@ GA.plugins = function(ga) {
     //Set `bounce` to a default value of `true`
     if(bounce === undefined) bounce = true;
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //Calculate the vector between the circles’ center points
 
@@ -1705,8 +1865,8 @@ GA.plugins = function(ga) {
     c1.mass = c1.mass || 1;
     c2.mass = c2.mass || 1;
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //Calculate the vector between the circles’ center points
     if(global) {
@@ -1833,8 +1993,8 @@ GA.plugins = function(ga) {
 
   ga.multipleCircleCollision = function(arrayOfCircles, global) {
 
-    //Set `global` to a default value of `true`
-    if(global === undefined) global = true;
+    //Set `global` to a default value of `false`
+    if(global === undefined) global = false;
 
     //marble collisions
     for (var i = 0; i < arrayOfCircles.length; i++) {
@@ -1853,6 +2013,160 @@ GA.plugins = function(ga) {
       }
     }
   };
+
+  /*
+  circlePointCollision
+  --------------------
+
+  Use it to bounce a circular sprite off a point.
+  Parameters: 
+  a. A sprite object with `centerX`, `centerY`, and `radius` properties.
+  b. A point object with `x` and `y` properties.
+
+  */
+
+  ga.circlePointCollision = function(c1, point, bounce, global) {
+    
+    //Set `global` and `bounce` to a default values of `false`
+    if(global === undefined) global = false;
+    if(bounce === undefined) bounce = false;
+
+    //A point is just a circle with a diameter of
+    //1 pixel, so we can cheat. All we need to do is an ordinary circle vs. circle
+    //Collision test. Just supply the point with the properties
+    //it needs
+    point.diameter = 1;
+    point.radius = 0.5;
+    point.centerX = point.x;
+    point.centerY = point.y;
+    point.gx = point.x;
+    point.gy = point.y;
+    return ga.circleCollision(c1, point, bounce, global); 
+  }
+
+  /*
+  circleRectangleCollision
+  ------------------------
+
+  Use it to bounce a circular shape off a rectangular shape
+  Parameters: 
+  a. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
+  b. A sprite object with `centerX`, `centerY`, `halfWidth` and `halfHeight` properties.
+
+  */
+
+  ga.circleRectangleCollision = function(c1, r1, bounce, global) {
+
+    var region, collision, c1x, c1y, r1x, r1y;
+    
+    //Set `global` and `bounce` to a default values of `false`
+    if(global === undefined) global = false;
+    if(bounce === undefined) bounce = false;
+
+    //Use either the global or local coordinates
+    if (global) {
+      c1x = c1.gx;
+      c1y = c1.gy
+      r1x = r1.gx;
+      r1y = r1.gy;
+    } else {
+      c1x = c1.x;
+      c1y = c1.y
+      r1x = r1.x;
+      r1y = r1.y;
+    }
+
+    //Is the circle above the rectangle's top edge?
+    if(c1y < r1y - r1.halfHeight) {
+
+      //If it is, we need to check whether it's in the 
+      //top left, top center or top right
+      if(c1x < r1x - 1 - r1.halfWidth) {
+        region = "topLeft";
+      }
+      else if (c1x > r1x + 1 + r1.halfWidth) {
+        region = "topRight";
+      }
+      else {
+        region = "topMiddle";
+      }
+    }
+
+    //The circle isn't above the top edge, so it might be
+    //below the bottom edge
+    else if (c1y > r1y + r1.halfHeight) {
+
+      //If it is, we need to check whether it's in the bottom left,
+      //bottom center, or bottom right
+      if (c1x < r1x - 1 - r1.halfWidth) {
+        region = "bottomLeft";
+      }
+      else if (c1x > r1x + 1 + r1.halfWidth) {
+        region = "bottomRight";
+      }
+      else {
+        region = "bottomMiddle";
+      }
+    }
+
+    //The circle isn't above the top edge or below the bottom edge,
+    //so it must be on the left or right side
+    else {
+      if (c1x < r1x - r1.halfWidth) {
+        region = "leftMiddle";
+      }
+      else {
+        region = "rightMiddle";
+      }
+    }
+
+    //Is this the circle touching the flat sides
+    //of the rectangle?
+    if (region === "topMiddle"
+    || region === "bottomMiddle"
+    || region === "leftMiddle"
+    || region === "rightMiddle") {
+
+      //Yes, it is, so do a standard rectangle vs. rectangle collision test
+      collision = ga.rectangleCollision(c1, r1, bounce, global);  
+    } 
+
+    //The circle is touching one of the corners, so do a
+    //circle vs. point collision test
+    else {
+      var point = {};
+
+      switch (region) {
+        case "topLeft": 
+          point.x = r1x;
+          point.y = r1y;
+          break;
+        
+        case "topRight":
+          point.x = r1x + r1.width;
+          point.y = r1y;
+          break;
+
+        case "bottomLeft":
+          point.x = r1x;
+          point.y = r1y + r1.height;
+          break;
+
+        case "bottomRight":
+          point.x = r1x + r1.width;
+          point.y = r1y + r1.height;
+      }
+      
+      //Check for a collision between the circle and the point
+      collision = ga.circlePointCollision(c1, point, bounce, global);
+    }
+
+    if (collision) {
+      return region;
+    } else {
+      return collision;
+    }
+  }
 
   /*
   #### bounceOffSurface
@@ -1930,7 +2244,7 @@ GA.plugins = function(ga) {
     //Set the defaults
     react = react || false;
     bounce = bounce || false;
-    global = global || true;
+    global = global || false;
 
     //Check to make sure one of the arguments isn't an array
     if (b instanceof Array || a instanceof Array) {
@@ -1952,32 +2266,42 @@ GA.plugins = function(ga) {
     //collision is occuring on
     return collision;
 
-    function findCollisionType (a, b) {
+    function findCollisionType(a, b) {
 
-      //Are `a` and `b` both shapes?
-      if (a.width && b.width) {
+      //Are `a` and `b` both sprites?
+      //(We have to check again if this function was called from
+      //`spriteVsArray`)
+      var aIsASprite = a.parent !== undefined,
+          bIsASprite = b.parent !== undefined;
 
-        //Yes, but what kind of shapes?
+      if (aIsASprite && bIsASprite) {
+
+        //Yes, but what kind of sprites?
         if(a.diameter && b.diameter) {
 
-          //They're cicles
+          //They're circles
           return circleVsCircle(a, b);
-        } else {
+        } 
+        else if (a.diameter && !b.diameter) {
+
+          //The first one is a circle and the second is a rectangle
+          return circleVsRectangle(a, b);
+        } 
+        else {
 
           //They're rectangles
           return rectangleVsRectangle(a, b);
         }
       }
 
-      //They're not both shapes, so what are they?
-      //Does `a` not have a width and `b` has a width?
-      else if (!a.width && b.width) {
+      //They're not both sprites, so what are they?
+      //Is `a` not a sprite and does it have x and y properties?
+      else if (bIsASprite && !(a.x === undefined) && !(a.y === undefined)) {
 
         //Yes, so this is a point vs. sprite collision test
         return ga.hitTestPoint(a, b);
       }
       else {
-
         //The user is trying to test some incompatible objects
         throw new Error("I'm sorry, " + a + " and " + b + " cannot be use together in a collision test.");
       }
@@ -2046,6 +2370,18 @@ GA.plugins = function(ga) {
         else {
           return ga.rectangleCollision(a, b, false, global);
         }
+      }
+    }
+
+    function circleVsRectangle(a, b) {
+
+      //If the rectangles shouldn't react to the collision, just
+      //test to see if they're touching
+      if(!react) {
+        return ga.hitTestCircleRectangle(a, b, global);
+      } 
+      else {
+        return ga.circleRectangleCollision(a, b, bounce, global);
       }
     }
   };
