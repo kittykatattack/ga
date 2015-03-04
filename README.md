@@ -228,7 +228,8 @@ enemy avoidance game called Treasure Hunter. Open the file
 Use the keyboard to move the explorer (the blue square), collect the
 treasure (the yellow square), avoid the monsters (the red squares) and
 reach the exit (the green square.) Yes, you have to use your
-imagination - for now.
+imagination - for now. [You can play Treasure Hunter
+here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/01_treasureHunter.html)
 
 Don't be fooled by it's apparent simplicity. Treasure Hunter contains
 everything a video game needs:
@@ -1215,6 +1216,9 @@ folder.) It plays exactly the same as the first version, but all the
 colored squares have been replaced by images.
 
 ![Treasure Hunter](/tutorials/screenshots/09.png)
+
+[You can play it
+here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/02_treasureHunterImages.html)
 
 Take a look at the source code, and you'll notice that the game logic
 and structure is exactly the same as the first version of the game.
