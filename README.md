@@ -1217,8 +1217,7 @@ colored squares have been replaced by images.
 
 ![Treasure Hunter](/tutorials/screenshots/09.png)
 
-[You can play it
-here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/02_treasureHunterImages.html)
+[You can play this new version of Treasure Hunter here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/02_treasureHunterImages.html)
 
 Take a look at the source code, and you'll notice that the game logic
 and structure is exactly the same as the first version of the game.
