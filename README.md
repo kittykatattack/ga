@@ -88,7 +88,6 @@ huge number of useful tools for making games. You can use as many or
 as few of these tools as you want to. Here are some of the goodies
 you'll find in `plugins.js`:
 
-- Make versatile particle explosions with `burst`.
 - Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
@@ -112,6 +111,9 @@ you'll find in `plugins.js`:
   checking you'll need for tile-based games. You can use it in combination
   with the any of the 2D geometric collision methods for optimized
   broadphase/narrowphase collision checking if you want to.
+- A `particleEffect` function for creating all kinds of particle
+  effects for games. Use the `emitter` function to create a constant
+  stream of particles.
 - Use `updateMap` to keep a tile-based world's map data array up-to-date
   with moving sprites.
 - Create a `worldCamera` that follows sprites around a scrolling game

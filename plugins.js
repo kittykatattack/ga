@@ -91,6 +91,8 @@ Here's the table of contents to get you started:
 `shoot`: A function for making sprites shoot bullets.
 `grid`: Easily plot a grid of sprites. Returns a container full of sprite `children`.
 `progressBar`: A loading progress bar you can use to display while game assets are loading.`
+`particleEffect`: A versatile function for creating particles.
+`emitter`: A particle emitter for creating a constant stream of particles.
 `burst`: A versatile particle explosion effect.
 
 ### Chapter 4: Collision
@@ -1083,7 +1085,290 @@ GA.plugins = function(ga) {
   };
 
   /*
-  ### burst
+  particleEffect
+  -----
+
+  Create particles with a versatile function called function called
+  `particleEffect`. It's all you'll need for most 2D action games.
+  Here's an example of how to use it to 
+  produce a starburst effect at the pointer's x and y position.
+
+      g.particleEffect(
+        g.pointer.x,                             //The particle’s starting x position
+        g.pointer.y,                             //The particle’s starting y position
+        function(){                              //Particle function
+          return g.sprite("images/star.png");
+        },
+        20,                                      //Number of particles
+        0.1,                                     //Gravity
+        true,                                    //Random spacing
+        0, 6.28,                                 //Min/max angle
+        12, 24,                                  //Min/max size
+        1, 2,                                    //Min/max speed
+        0.005, 0.01,                             //Min/max scale speed
+        0.005, 0.01,                             //Min/max alpha speed
+        0.05, 0.1                                //Min/max rotation speed
+      );
+
+  You can see that most of those arguments describe range between 
+  the minimum and maximum values that should be used to change 
+  the sprites’ speed, rotation, scale and alpha.
+  You can also assign the number of particles that should be created,
+  and add optional gravity. 
+
+  You can make particles using any sprites by customizing the third argument. 
+  Just supply a function that returns the kind of sprite you want to use for each particle:
+
+      function(){                              
+        return g.sprite("images/star.png");
+      },
+
+  If you supply a sprite that has multiple frames, the particleEffect 
+  function will automatically choose a random frame for each particle.
+
+  The minimum and maximum angle values are important for defining the 
+  circular spread of particles as they radiate out from the origin point. 
+  For a completely circular explosion effect, use a minimum angle 
+  of 0, and a maximum angle for 6.28.
+
+      0, 6.28
+
+  (These numbers values are radians; the equivalent in degrees is 0 and 360.) 
+  0 starts at the 3 o’clock position, pointing directly to the right. 3.14 
+  is the 9 o’clock position, and 6.28 takes you around back to 0 again.
+
+  If you want to constrain the particles to a narrower angle range, just supply 
+  the minimum and maximum values that describe that range. Here are values 
+  you could use to constrain the angle to a pizza-slice with the crust pointing left.
+
+  2.4, 3.6
+
+  You could use a constrained angle range like this to create a particle stream, 
+  like a fountain or rocket engine flames. By carefully choosing the sprite for 
+  the particle and finely adjusting each parameter, you can use this 
+  all-purpose `particleEffect` function to simulate everything from liquid to fire. 
+  */
+
+  ga.particleEffect = function(
+    x, 
+    y, 
+    spriteFunction,
+    numberOfParticles,
+    gravity,
+    randomSpacing,
+    minAngle, maxAngle,
+    minSize, maxSize, 
+    minSpeed, maxSpeed,
+    minScaleSpeed, maxScaleSpeed,
+    minAlphaSpeed, maxAlphaSpeed,
+    minRotationSpeed, maxRotationSpeed
+  ) {
+
+    if (x === undefined) x = 0;
+    if (y === undefined) y = 0; 
+    if (spriteFunction === undefined) spriteFunction = function(){return ga.circle(10, "red")};
+    if (numberOfParticles === undefined) numberOfParticles = 10;
+    if (gravity === undefined) gravity = 0;
+    if (randomSpacing === undefined) randomSpacing = true;
+    if (minAngle === undefined) minAngle = 0; 
+    if (maxAngle === undefined) maxAngle = 6.28;
+    if (minSize === undefined) minSize = 4; 
+    if (maxSize === undefined) maxSize = 16; 
+    if (minSpeed === undefined) minSpeed = 0.1; 
+    if (maxSpeed === undefined) maxSpeed = 1; 
+    if (minScaleSpeed === undefined) minScaleSpeed = 0.01; 
+    if (maxScaleSpeed === undefined) maxScaleSpeed = 0.05;
+    if (minAlphaSpeed === undefined) minAlphaSpeed = 0.02; 
+    if (maxAlphaSpeed === undefined) maxAlphaSpeed = 0.02;
+    if (minRotationSpeed === undefined) minRotationSpeed = 0.01; 
+    if (maxRotationSpeed === undefined) maxRotationSpeed = 0.03;
+    
+    //`randomFloat` and `randomInt` helper functions
+    var randomFloat = function(min, max){return min + Math.random() * (max - min)},
+        randomInt = function(min, max){return Math.floor(Math.random() * (max - min + 1)) + min};
+
+    //An array to store the angles
+    var angles = [];
+
+    //A variable to store the current particle's angle
+    var angle;
+
+    //Figure out by how many radians each particle should be separated
+    var spacing = (maxAngle - minAngle) / (numberOfParticles - 1);
+
+    //Create an angle value for each particle and push that
+    //value into the `angles` array
+    for(var i = 0; i < numberOfParticles; i++) {
+
+      //If `randomSpacing` is `true`, give the particle any angle
+      //value between `minAngle` and `maxAngle`
+      if (randomSpacing) {
+        angle = randomFloat(minAngle, maxAngle);
+        angles.push(angle);
+      } 
+      
+      //If `randomSpacing` is `false`, space each particle evenly,
+      //starting with the `minAngle` and ending with the `maxAngle`
+      else {
+        if (angle === undefined) angle = minAngle;
+        angles.push(angle);
+        angle += spacing;
+      }
+    }
+
+    //Make a particle for each angle
+    angles.forEach(function(angle){
+      makeParticle(angle)
+    });
+
+    //Make the particle
+    function makeParticle(angle) {
+
+      //Create the particle using the supplied sprite function
+      var particle = spriteFunction();
+
+      //Display a random frame if the particle has more than 1 frame
+      if (particle.frames.length > 0) {
+        particle.gotoAndStop(randomInt(0, particle.frames.length - 1));
+      }
+
+      //Set the x and y position
+      particle.x = x - particle.halfWidth;
+      particle.y = y - particle.halfHeight;
+
+      //Set a random width and height
+      var size = randomInt(minSize, maxSize);
+      particle.width = size;
+      particle.height = size;
+
+      //Set a random speed to change the scale, alpha and rotation
+      particle.scaleSpeed = randomFloat(minScaleSpeed, maxScaleSpeed);
+      particle.alphaSpeed = randomFloat(minAlphaSpeed, maxAlphaSpeed);
+      particle.rotationSpeed = randomFloat(minRotationSpeed, maxRotationSpeed);
+
+      //Set a random velocity at which the particle should move
+      var speed = randomFloat(minSpeed, maxSpeed);
+      particle.vx = speed * Math.cos(angle);
+      particle.vy = speed * Math.sin(angle);
+
+      //The particle's `update` method is called on each frame of the
+      //game loop
+      particle.update = function() {
+
+        //Add gravity
+        particle.vy += gravity;
+
+        //Move the particle
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        //Change the particle's `scale`
+        if (particle.scaleX - particle.scaleSpeed > 0) {
+          particle.scaleX -= particle.scaleSpeed;
+        }
+        if (particle.scaleY - particle.scaleSpeed > 0) {
+          particle.scaleY -= particle.scaleSpeed;
+        }
+
+        //Change the particle's rotation
+        particle.rotation += particle.rotationSpeed;
+
+        //Change the particle's `alpha`
+        particle.alpha -= particle.alphaSpeed;
+
+        //Remove the particle if its `alpha` reaches zero
+        if (particle.alpha <= 0) {
+          ga.remove(particle);
+          ga.particles.splice(ga.particles.indexOf(particle), 1);
+        }
+      };
+
+      //Push the particle into the `particles` array
+      //The `particles` array needs to be updated by the game loop each
+      //frame
+      ga.particles.push(particle);
+    }
+  }
+  
+  /*
+  emitter
+  -------
+
+  Use the `emitter` function to create a constant stream of particles
+  at fixed intervals. The emitter is a simple timer that calls the 
+  `particleEffect` function repeatedly at intervals in milliseconds that
+  you define. Use the emitter's `play` and `stop` methods to start and 
+  stop the particle stream.
+
+  Here's how to use it to create particle emitter that emits star sprites
+  a 100ms intervals when the pointer is pressed:
+
+      //Create the emitter
+      var particleStream = g.emitter(
+        100,                                           //The interval
+        function(){
+          return g.particleEffect(                     //The particle function
+            g.pointer.x,                               //x position
+            g.pointer.y,                               //y position
+            function(){                                //Particle sprite
+              return g.sprite("images/star.png");
+            }, 
+            10,                                        //Number of particles
+            0.1,                                       //Gravity
+            false,                                     //Random spacing
+            3.14, 6.28,                                //Min/max angle
+            16, 32,                                    //Min/max size
+            2, 5                                       //Min/max speed
+          );
+        }
+      );
+
+      //Play the particle stream when the pointer is pressed
+      g.pointer.press = function(){
+        particleStream.play();
+        console.log(particleStream.playing)
+      };
+
+      //Stop the particle stream when the pointer is released
+      g.pointer.release = function(){
+        particleStream.stop();
+        console.log(particleStream.playing)
+      };
+  */
+
+  ga.emitter = function(interval, particleFunction) {
+    var emitter = {},
+        timerInterval = undefined;
+
+    emitter.playing = false;
+
+    function play() {
+      if (!emitter.playing) {
+        particleFunction();
+        timerInterval = setInterval(emitParticle.bind(this), interval);
+        emitter.playing = true;
+      }
+    }
+
+    function stop() {
+      if (emitter.playing) {
+        clearInterval(timerInterval);
+        emitter.playing = false;
+      }
+    }
+
+    function emitParticle() {
+      particleFunction();
+    }
+
+    emitter.play = play;
+    emitter.stop = stop;
+    return emitter;
+  }
+
+
+  /*
+  ### burst - DEPRICATED! DO NOT USE! Use `particleEffect` and `emitter` instead.
   A versatile particle explosion effect. It has lots of little parameters to tweak for maaking
   all sorts of particle burst effects. Here's an example of how to use it:
 
