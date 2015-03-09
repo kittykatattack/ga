@@ -1145,6 +1145,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Dynamically calculate the width and height of the sprite based
     //on the size and position of the children it contains
+    /*
     o.calculateSize = function() {
 
       //Calculate the width based on the size of the largest child
@@ -1159,6 +1160,41 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             o.height = child.y + child.height;
           }
         }
+      }
+    };
+    */
+
+    o.calculateSize = function() {
+      //Calculate the width based on the size of the largest child
+      //that this sprite contains
+      if (o.children.length > 0) {
+
+        //Some temporary private variables to help track the new
+        //calculated width and height
+        o._newWidth = 0;
+        o._newHeight = 0;
+
+        //Find the width and height of the child sprites furthest
+        //from the top left corner of the group
+        o.children.forEach(function(child){
+
+          //Find child sprites that combined x value and width
+          //that's greater than the current value of `_newWidth`
+          if (child.x + child.width > o._newWidth) {
+
+            //The new width is a combination of the child's
+            //x position and its width
+            o._newWidth = child.x + child.width;
+          }
+          if (child.y + child.height > o._newHeight) {
+            o._newHeight = child.y + child.height;
+          }
+        }); 
+        
+        //Apply the `_newWidth` and `_newHeight` to this sprite's width
+        //and height
+        o.width = o._newWidth;
+        o.height = o._newHeight;
       }
     };
 
