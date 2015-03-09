@@ -134,8 +134,9 @@ function play() {
 
   //Check for a collision between the ball and the pegs using the
   //universal `hit` method.
-  //arguments: circle, arrayOfCircles, reactToCollision?, bounceApart?
-  g.hit(ball, pegs.children, true, true);
+  //arguments: circle, arrayOfCircles, reactToCollision?,
+  //bounceApart?, useGlobalPosition? 
+  g.hit(ball, pegs.children, true, true, true);
 
   //Alternatively, use a `forEach` loop and the lower-level
   //`circleCollision` method

@@ -103,6 +103,7 @@ you'll find in `plugins.js`:
 - A loading progress bar for game assets.
 - Make sprites shoot things with `shoot`. 
 - Easily plot sprites in a grid formation with `grid`.
+- Use a `tilingSprite` to easily create a seamless scrolling background.
 - Tiled Editor support using `makeTiledWorld`. Design your game in
   Tiled Editor and access all the sprites, layers and objects directly
   in your game code. It's an extremely fun, quick and easy way to make

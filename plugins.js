@@ -93,7 +93,8 @@ Here's the table of contents to get you started:
 `progressBar`: A loading progress bar you can use to display while game assets are loading.`
 `particleEffect`: A versatile function for creating particles.
 `emitter`: A particle emitter for creating a constant stream of particles.
-`burst`: A versatile particle explosion effect.
+`tilingSprite`: An easy way to create a seamless scrolling background effect.
+`burst`: DEPRICATED. A particle explosion effect.
 
 ### Chapter 4: Collision
 
@@ -935,6 +936,15 @@ GA.plugins = function(ga) {
       extra
     ){
     //Set the defaults
+    if (columns === undefined) columns = 0;
+    if (rows === undefined) rows = 0;
+    if (cellWidth === undefined) cellWidth = 32;
+    if (cellHeight === undefined) cellHeight = 32;
+    if (xOffset === undefined) xOffset = 0;
+    if (yOffset === undefined) yOffset = 0;
+    if (centerCell === undefined) centerCell = false;
+    
+    /*
     if (!columns && columns !== 0) columns = 0;
     if (!rows && rows !== 0) rows = 0;
     if (!cellWidth && cellWidth !== 0) cellWidth = 32;
@@ -942,6 +952,7 @@ GA.plugins = function(ga) {
     if (!xOffset && xOffset !== 0) xOffset = 0;
     if (!yOffset && yOffset !== 0) yOffset = 0;
     centerCell = centerCell || false;
+    */
 
     //Create an empty DisplayObjectContainer
     var container = ga.group();
@@ -1366,7 +1377,171 @@ GA.plugins = function(ga) {
     return emitter;
   }
 
+  /*
+  tilingSprite
+  ------------
+  Use a `tilingSprite` to create a seamless scrolling effect.
+  You could use it to create an infinite scrolling background.
+  Scroll the sprite's tile pattern using `tileX` and `tileY` properties.
+  For example, you could create a tiling sprite like this:
 
+      box = g.tilingSprite(128, 128, "images/tile.png");
+
+  Then in the game loop, scroll the x and y background position like this:
+
+      box.tileY += 1;
+      box.tileX += 1;
+      
+  The position of the box won't change, but the position of the image that it contains will.
+  
+  */
+
+  ga.tilingSprite = function(width, height, source, x, y) {
+
+    //Set the defaults.
+    if (x === undefined) x = 0;
+    if (y === undefined) y = 0;
+
+    //Figure out the tile's width and height.
+    var tileWidth, tileHeight;
+
+    //If the source is a texture atlas frame, use its
+    //`frame.w` and `frame.h` properties.
+    if(ga.assets[source].frame) {
+      tileWidth = ga.assets[source].frame.w;
+      tileHeight = ga.assets[source].frame.h;
+    }
+
+    //If it's an image, use the image's 
+    //`width` and `height` properties.
+    else {
+      tileWidth = ga.assets[source].width;
+      tileHeight = ga.assets[source].height;
+    }
+
+    //Figure out the rows and columns.
+    //The number of rows and columns should always be
+    //one greater than the total number of tiles
+    //that can fit in the rectangle. This give us one 
+    //additional row and column that we can reposition
+    //to create the infinite scroll effect.
+
+    var columns, rows;
+
+    //1. Columns
+    //If the width of the rectangle is greater than the width of the tile,
+    //calculate the number of tile columns.
+    if (width >= tileWidth) {
+      columns = Math.round(width / tileWidth) + 1;
+    } 
+    
+    //If the rectangle's width is less than the width of the
+    //tile, set the columns to 2, which is the minimum.
+    else {
+      columns = 2;
+    }
+
+    //2. Rows
+    //Calculate the tile rows in the same way.
+    if (height >= tileHeight) {
+      rows = Math.round(height / tileHeight) + 1;
+    } else {
+      rows = 2; 
+    }
+
+    //Create a grid of sprites that's just one sprite larger
+    //than the `totalWidth` and `totalHeight`.
+    var tileGrid = ga.grid(
+      columns, rows, tileWidth, tileHeight, false, 0, 0,
+      function(){
+
+        //Make a sprite from the supplied `source`.
+        var tile = ga.sprite(source);
+        return tile;
+      }
+    );
+
+    //Declare the grid's private properties that we'll use to
+    //help scroll the tiling background.
+    tileGrid._tileX = 0;
+    tileGrid._tileY = 0;
+
+    //Create an empty rectangle sprite without a fill or stoke color.
+    //Set it to the supplied `width` and `height`.
+    var container = ga.rectangle(width, height, "none", "none");
+    container.x = x;
+    container.y = y;
+
+    //Set the rectangle's `mask` property to `true`. This switches on `ctx.clip()`
+    //In the rectangle sprite's `render` method.
+    container.mask = true;
+
+    //Add the tile grid to the rectangle container.
+    container.addChild(tileGrid);
+
+    //Define the `tileX` and `tileY` properties on the parent container
+    //so that you can scroll the tiling background.
+    Object.defineProperties(container, {
+      tileX: {
+        get: function() {
+          return tileGrid._tileX;
+        },
+
+        set: function(value) {
+
+          //Loop through all of the grid's child sprites.
+          tileGrid.children.forEach(function(child){
+
+            //Figure out the difference between the new position
+            //and the previous position.
+            var difference = value - tileGrid._tileX;
+            
+            //Offset the child sprite by the difference.
+            child.x += difference;
+
+            //If the x position of the sprite exceeds the total width
+            //of the visible columns, reposition it to just in front of the 
+            //left edge of the container. This creates the wrapping
+            //effect.
+            if (child.x > (columns - 1) * tileWidth) {
+              child.x = 0 - tileWidth + difference;
+            }
+
+            //Use the same procedure to wrap sprites that 
+            //exceed the left boundary.
+            if (child.x < 0 - tileWidth - difference) {
+              child.x = (columns - 1) * tileWidth;
+            }
+          });
+
+          //Set the private `_tileX` property to the new value.
+          tileGrid._tileX = value;
+        },
+        enumerable: true, configurable: true
+      },
+      tileY: {
+        get: function() {
+          return tileGrid._tileY;
+        },
+
+        //Follow the same format to wrap sprites on the y axis.
+        set: function(value) {
+          tileGrid.children.forEach(function(child){
+            var difference = value - tileGrid._tileY;
+            child.y += difference;
+            if (child.y > (rows - 1) * tileHeight) child.y = 0 - tileHeight + difference;
+            if (child.y < 0 - tileHeight - difference) child.y = (rows - 1) * tileHeight;
+          });
+          tileGrid._tileY = value;
+        },
+        enumerable: true, configurable: true
+      }
+    });
+
+    //Return the rectangle container.
+    return container;
+  }
+  
   /*
   ### burst - DEPRICATED! DO NOT USE! Use `particleEffect` and `emitter` instead.
   A versatile particle explosion effect. It has lots of little parameters to tweak for maaking
