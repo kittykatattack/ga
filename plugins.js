@@ -1146,7 +1146,7 @@ GA.plugins = function(ga) {
         //of assets that have loaded
         this.percentage = ga.text("0%", "28px sans-serif", "black");
         this.percentage.x = (ga.canvas.width / 2) - (this.maxWidth / 2) + 12;
-        this.percentage.y = (ga.canvas.height / 2) - 16;
+        this.percentage.y = (ga.canvas.height / 2) - 12;
 
         //Flag the progressBar as having been initialized
         this.initialized = true;

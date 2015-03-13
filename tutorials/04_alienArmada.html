@@ -19,7 +19,11 @@ var g = ga(
     "sounds/music.mp3",
     "sounds/shoot.mp3",
     "fonts/emulogic.ttf"
-  ]
+  ],
+
+  //Set the optional `load` state which creates
+  //the loading progress bar.
+  load
 );
 g.start();
 
@@ -47,9 +51,24 @@ var cannon,
     alienTimer,
     gameOverMessage;
 
+//Use the `load` function to run any code while the assets are
+//loading. The `load` function runs in the game loop.
+function load(){
+
+    //Use Ga's built in `progressBar` to display a loading progress
+    //percentage bar while the assets are loading.
+    g.progressBar.create(g.canvas, g.assets);
+
+    //Call the `progressBar`'s `update` method each frame. 
+    g.progressBar.update();
+}
+
 //The `setup` function will run only once.
 //Use it for initialization tasks.
 function setup() {
+
+  //Remove the `progressBar`
+  g.progressBar.remove();
 
   //Make the background.
   var background = g.sprite("background.png");
@@ -81,7 +100,7 @@ function setup() {
   shootSound = g.sound("sounds/shoot.mp3");
 
   //Pan the `shootSound` so that it's 75% in the left speaker.
-  //Paning values range between -1 (left speaker) and 1 (right
+  //Panning values range between -1 (left speaker) and 1 (right
   //speaker.) A pan value of 0 means that the sound is equal
   //in both speakers.
   shootSound.pan = -0.5;
@@ -210,10 +229,10 @@ function play() {
       "explosion.png"
     ];
 
-    //Initilaize the alien sprite with the frames
+    //Initialize the alien sprite with the frames
     var alien = g.sprite(alienFrames);
 
-    //Define some states on the alien that corresponed
+    //Define some states on the alien that correspond
     //to the its two frames.
     alien.states = {
       normal: 0,
@@ -320,8 +339,8 @@ function play() {
     //Set the player as the winner.
     winner = "player";
 
-    //Change the game's state to `endGame`.
-    g.state = endGame();
+    //Change the game's state to `end`.
+    g.state = end;
   }
 
   //The aliens win if one of them reaches the bottom of
@@ -332,19 +351,23 @@ function play() {
       //Set the aliens as the winner.
       winner = "aliens";
 
-      //Change the game's state to `endGame`.
-      g.state = endGame();
+      //Change the game's state to `end`.
+      g.state = end;
     }
   });
 }
 
-function endGame() {
+function end() {
 
   //Pause the game loop.
   g.pause();
   
   //Create the game over message text.
   gameOverMessage = g.text("", "20px emulogic", "#00FF00", 90, 120);
+
+  //Reduce the music volume by half.
+  //1 is full volume, 0 is no volume, and 0.5 is half volume.
+  music.volume = 0.5;
 
   //Display "Earth Saved!" if the player wins.
   if (winner === "player") {
@@ -357,13 +380,13 @@ function endGame() {
     gameOverMessage.content = "Earth Destroyed!";  
   }
 
-  //Wait for 3 seconds then run the `reset` function
+  //Wait for 3 seconds then run the `reset` function.
   g.wait(3000, function(){
     reset(); 
   });
 }
 
-//The `reset` fucntion resets all the game variables
+//The `reset` function resets all the game variables.
 function reset() {
 
   //Reset the game variables.
@@ -372,6 +395,9 @@ function reset() {
   alienTimer = 0;
   winner = "";
 
+  //Set the music back to full volume.
+  music.volume = 1;
+
   //Remove any remaining alien and bullet sprites.
   //The universal `remove` method will loop through
   //all the sprites in an array of sprites, removed them
@@ -379,7 +405,7 @@ function reset() {
   g.remove(aliens);
   g.remove(bullets);
 
-  //You can also use the universal `remove` function to remove
+  //You can also use the universal `remove` function to remove.
   //a single sprite.
   g.remove(gameOverMessage);
 
