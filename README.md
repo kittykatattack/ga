@@ -226,13 +226,12 @@ enemy avoidance game called Treasure Hunter. Open the file
 `tutorials` folder, and you'll need to run it in a
 [webserver](https://github.com/nodeapps/http-server)).
 
-![Treasure Hunter](/tutorials/screenshots/01.png)
+[![Treasure Hunter](/tutorials/screenshots/01.png)](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/01_treasureHunter.html)
 
-Use the keyboard to move the explorer (the blue square), collect the
+(Follow the link in the image above to play the game.) Use the keyboard to move the explorer (the blue square), collect the
 treasure (the yellow square), avoid the monsters (the red squares) and
 reach the exit (the green square.) Yes, you have to use your
-imagination - for now. [You can play Treasure Hunter
-here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/01_treasureHunter.html)
+imagination - for now. 
 
 Don't be fooled by it's apparent simplicity. Treasure Hunter contains
 everything a video game needs:
@@ -251,7 +250,8 @@ video](https://www.youtube.com/watch?v=Fy0aCDmgnxg) and
 about this essential game design ingredient.)
 
 If you can make a simple game like Treasure Hunter, you can make
-almost any other kind of game. Yes, really! Getting from Treasure Hunter to Skyrim
+almost any other kind of game. Yes, really! Getting from Treasure
+Hunter to Skyrim or Zelda
 is just a matter of lots of small steps; adding more
 detail as you go. How much detail you want to add is up to you. 
 
@@ -319,18 +319,18 @@ g.start();
 ```
 
 You can see that the result of the `ga` function is being assigned to
-an object called `g`. 
+an variable called `g`. 
 
     var g = ga(
 
 Now, whenever you want to use any of Ga's custom
-methods of objects in your game, just prefix it with `g`. (You don't
+methods or objects in your game, just prefix it with `g`. (You don't
 have to use `g` to represent the game engine, you can use any variable
 name you want. `g` is just nice, short, and easy to remember; `g` =
 "game".)
 
 In this example Ga creates a canvas element with a size of 512 by 512
-pixels. That's specified by the first two arguments.
+pixels. That's specified by the first two arguments:
   
     512, 512, setup,
 
@@ -369,8 +369,8 @@ After Ga has been started, declare all the variables that your game
 functions will need to use.
 
 ```
-var world, player, treasure, enemies, chimes, exit, player,
-    healthBar, message, gameScene, gameOverScene, enemies;
+var dungeon, player, treasure, enemies, chimes, exit,
+    healthBar, message, gameScene, gameOverScene;
 ```
 
 Because they're not enclosed inside a function, these variables are "global" 
@@ -381,7 +381,7 @@ your JavaScript code in an enclosing **immediate function** to isolate it
 from the global
 space](http://stackoverflow.com/questions/17058606/why-using-self-executing-function-in-javascript).
 
-#### Intitialize your game with a setup function
+#### Initialize your game with a setup function
 
 As soon as Ga starts, it will look for and run a function in your game
 code called `setup` (or whatever other name you want to give this
@@ -391,7 +391,7 @@ objects, create sprites, game scenes, populate data arrays or parse
 loaded JSON game data. 
 
 Here's an abridged, birds-eye view of the `setup` function in Treasure Hunter,
-and the tasks that it performs
+and the tasks that it performs.
 
 ```
 function setup() {
@@ -453,7 +453,7 @@ Any assets that you've preloaded like this are accessible in the
 Many assets that you might want to use, like sounds, fonts, and JSON
 files, can
 only be loaded by the browser if your code is running inside a
-web server. If you're trying to load or use an asset, and the browser if
+web server. If you're trying to load or use an asset, and the browser is
 giving your a
 strange security related error message, check to make sure that the
 web server is initialized.
@@ -497,7 +497,24 @@ only uses `rectangle` sprites. You can make a rectangle sprite like
 this:
 
     var box = g.rectangle(
-      width, height, "fillColor", "strokeColor", lineWidth, xPosition, yPosition
+      widthInPixels, 
+      heightInPixels, 
+      "fillColor", 
+      "strokeColor", 
+      lineWidth, 
+      xPosition, 
+      yPosition
+    );
+
+You can use Ga's `circle` method to make a circular shape sprite:
+
+    var ball = g.circle(
+      diameterInPixels, 
+      "fillColor", 
+      "strokeColor", 
+      lineWidth,
+      xPosition, 
+      yPosition 
     );
 
 It's often useful to prototype a new game using only `rectangle` and
@@ -522,11 +539,11 @@ gameScene.addChild(player);
 //Create the treasure sprite
 treasure = g.rectangle(16, 16, "gold");
 
-//Position the treasure next to the left edge of the canvas
+//Position the treasure next to the right edge of the canvas
 treasure.x = g.canvas.width - treasure.width - 10;
 treasure.y = g.canvas.height / 2 - treasure.halfHeight;
 
-//Create a `pickedUp` property on the treasure to help us Figure
+//Create a `pickedUp` property on the treasure to help us figure
 //out whether or not the treasure has been picked up by the player
 treasure.pickedUp = false;
 
@@ -558,7 +575,7 @@ as you like.
 
 There are 6 enemies sprites (red squares) in Treasure Hunter. They're
 spaced evenly horizontally but but have random initial vertical
-positions. All the enemies sprites are created in a `for`  loop using
+positions. All the enemies sprites are created in a `for` loop using
 this code in the `setup` function:
 
 ```
@@ -611,11 +628,11 @@ Here's what this code produces:
 ![Treasure Hunter](/tutorials/screenshots/04.png)
 
 The code gives each of the enemies a random `y` position with the help
-of Ga's `random` method:
+of Ga's `randomInt` method:
 ```
 var y = g.randomInt(0, g.canvas.height - enemy.height);
 ```
-`random` will give you a random number between any two integers that you
+`randomInt` will give you a random number between any two integers that you
 provide in the arguments. (If you need a random decimal number, use
 `randomFloat` instead).
 
@@ -747,7 +764,7 @@ Ga has a built-in `key` object with keyboard bindings
 to the arrow keys and space bar. Access them like this:
 `key.leftArray`, `key.rightArrow`, `key.upArrow`, `key.downArrow`,
 `key.space`. All these keys have `press` and
-`release` methods that you can define.  Here's code in the `setup`
+`release` methods that you can define. Here's code in the `setup`
 function that customizes the `press` and `release` methods of   
 Ga's pre-defined arrow keys to control the player character: 
 ```
@@ -757,6 +774,7 @@ g.key.leftArrow.press = function() {
   player.vx = -5;
   player.vy = 0;
 };
+
 //Left arrow key `release` method
 g.key.leftArrow.release = function() {
   //If the left arrow has been released, and the right arrow isn't down,
@@ -766,28 +784,34 @@ g.key.leftArrow.release = function() {
     player.vx = 0;
   }
 };
+
 g.key.upArrow.press = function() {
   player.vy = -5;
   player.vx = 0;
 };
+
 g.key.upArrow.release = function() {
   if (!g.key.downArrow.isDown && player.vx === 0) {
     player.vy = 0;
   }
 };
+
 g.key.rightArrow.press = function() {
   player.vx = 5;
   player.vy = 0;
 };
+
 g.key.rightArrow.release = function() {
   if (!g.key.leftArrow.isDown && player.vy === 0) {
     player.vx = 0;
   }
 };
+
 g.key.downArrow.press = function() {
   player.vy = 5;
   player.vx = 0;
 };
+
 g.key.downArrow.release = function() {
   if (!g.key.upArrow.isDown && player.vx === 0) {
     player.vy = 0;
@@ -816,7 +840,7 @@ order is listed clockwise, starting from the top.)
 
 Reference to the arrow keys and space key are built-in to Ga, but you
 if want to use other keys, you can easily create and assign your own
-with Ga's `keybaord` method:
+with Ga's `keyboard` method:
 
     var customKey = g.keyboard(asciiCode);
 
@@ -845,7 +869,7 @@ any function assigned to the game state will run in a continuous loop, at
 is known as the **game loop**. Ga handles the loop management for you,
 so you don't need to worry about how it works. (In case you're curious, Ga uses
 a `requestAnimationFrame` loop with a [fixed logic time step and variable rendering time](http://gameprogrammingpatterns.com/game-loop.html). It
-also does sprite position interpolation to smooth out any inconsistent
+also does sprite position interpolation to smoothe out any inconsistent
 spikes in the frame rate.)
 
 If you ever need to pause the loop, just use Ga's `pause`method, like
@@ -995,11 +1019,15 @@ enemies.forEach(function(enemy) {
 
 //If the player is hit...
 if(playerHit) {
+
   //Make the player semi-transparent
   player.alpha = 0.5;
+
   //Reduce the width of the health bar's inner rectangle by 1 pixel
   healthBar.inner.width -= 1;
+
 } else {
+
   //Make the player fully opaque (non-transparent) if it hasn't been hit
   player.alpha = 1;
 }
@@ -1010,7 +1038,7 @@ enemies for a collision.
 
     var playerHit = false;
 
-(Because the `play` function is run 60 times per second, `playerHit`
+(Because the `play` function runs 60 times per second, `playerHit`
 will be reinitialized to `false` on every new frame.)
 
 If `hitTestRectangle` returns `true`, the `forEach` loop sets
@@ -1028,11 +1056,15 @@ setting its `alpha` value to 0.5. It also reduces the width of the
 
 ```
 if(playerHit) {
+
   //Make the player semi-transparent
   player.alpha = 0.5;
+
   //Reduce the width of the health bar's inner rectangle by 1 pixel
   healthBar.inner.width -= 1;
+
 } else {
+
   //Make the player fully opaque (non-transparent) if it hasn't been hit
   player.alpha = 1;
 }
@@ -1083,6 +1115,7 @@ if (g.hitTestRectangle(player, treasure)) {
   treasure.y = player.y + 8;
 
   if(!treasure.pickedUp) {
+
     //If the treasure hasn't already been picked up,
     //play the `chimes` sound
     chimes.play();
@@ -1214,15 +1247,13 @@ Thanks, Lanea!)
 #### Individual images
 
 Open and play the next version of Treasure Hunter:
-`02_treasureHunterImages.html` (you'll find in the `tutorials`
+`02_treasureHunterImages.html` (you'll find it in the `tutorials`
 folder.) It plays exactly the same as the first version, but all the
 colored squares have been replaced by images.
 
-![Treasure Hunter](/tutorials/screenshots/09.png)
+[![Treasure Hunter](/tutorials/screenshots/09.png)](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/02_treasureHunterImages.html)
 
-[You can play this new version of Treasure Hunter here.](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/02_treasureHunterImages.html)
-
-Take a look at the source code, and you'll notice that the game logic
+(Click the image and follow the link to play the game.) Take a look at the source code, and you'll notice that the game logic
 and structure is exactly the same as the first version of the game.
 The only thing that's changed is the appearance of the sprites.
 How was this done?

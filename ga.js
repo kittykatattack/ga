@@ -558,6 +558,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
   });
 
+  
+
   /*
   Chapter 2: Sprites
 
@@ -669,17 +671,18 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The `addChild` method lets you add sprites to this container.
 
     o.addChild = function(sprite) {
+
       //Remove the sprite from its current parent, if it has one, and
       //the parent isn't already this object
-
       if (sprite.parent) {
         sprite.parent.removeChild(sprite);
       }
+
       //Make this object the sprite's parent and
       //add it to this object's `children` array.
-
       sprite.parent = o;
       o.children.push(sprite);
+
       //Calculate the sprite's new width and height
       //o.calculateSize();
     };
@@ -692,6 +695,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       } else {
         throw new Error(sprite + "is not a child of " + o);
       }
+
       //Calculate the sprite's new width and height
       //o.calculateSize();
     };
@@ -1049,12 +1053,28 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //remove any sprite, or an argument list of sprites, from its parent.
   ga.remove = function(spritesToRemove) {
     var sprites = Array.prototype.slice.call(arguments);
-    if(sprites.length > 1) {
-      sprites.forEach(function(sprite) {
-        sprite.parent.removeChild(sprite);
-      });
-    } else {
-      sprites[0].parent.removeChild(sprites[0]);
+
+    //Remove sprites that's aren't in an array
+    if (!(sprites[0] instanceof Array)) {
+      if(sprites.length > 1) {
+        sprites.forEach(function(sprite) {
+          sprite.parent.removeChild(sprite);
+        });
+      } else {
+        sprites[0].parent.removeChild(sprites[0]);
+      }
+    } 
+
+    //Remove sprites in an array of sprites
+    else {
+      var spritesArray = sprites[0];
+      if (spritesArray.length > 0) {
+        for (var i = spritesArray.length - 1; i >= 0; i--) {
+          var sprite = spritesArray[i];
+          sprite.parent.removeChild(sprite);
+          spritesArray.splice(spritesArray.indexOf(sprite), 1);
+        }
+      }
     }
   };
 
@@ -1145,6 +1165,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Dynamically calculate the width and height of the sprite based
     //on the size and position of the children it contains
+    /*
     o.calculateSize = function() {
 
       //Calculate the width based on the size of the largest child
@@ -1159,6 +1180,41 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             o.height = child.y + child.height;
           }
         }
+      }
+    };
+    */
+
+    o.calculateSize = function() {
+      //Calculate the width based on the size of the largest child
+      //that this sprite contains
+      if (o.children.length > 0) {
+
+        //Some temporary private variables to help track the new
+        //calculated width and height
+        o._newWidth = 0;
+        o._newHeight = 0;
+
+        //Find the width and height of the child sprites furthest
+        //from the top left corner of the group
+        o.children.forEach(function(child){
+
+          //Find child sprites that combined x value and width
+          //that's greater than the current value of `_newWidth`
+          if (child.x + child.width > o._newWidth) {
+
+            //The new width is a combination of the child's
+            //x position and its width
+            o._newWidth = child.x + child.width;
+          }
+          if (child.y + child.height > o._newHeight) {
+            o._newHeight = child.y + child.height;
+          }
+        }); 
+        
+        //Apply the `_newWidth` and `_newHeight` to this sprite's width
+        //and height
+        o.width = o._newWidth;
+        o.height = o._newHeight;
       }
     };
 

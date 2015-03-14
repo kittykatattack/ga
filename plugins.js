@@ -76,6 +76,7 @@ Here's the table of contents to get you started:
 `randomFloat`: Generate a random floating point number within a range.
 `wait`: Wait for a certain number of milliseconds and then execute a callback function.
 `worldCamera`: A method that creates and returns a camera for a scrolling game world.
+`scaleToWindow`: Automatically scales and centers the game to the maximum browser window area.
 `shake`: Make a sprite or group shake. You can use it for a screen shake effect.
 
 ### Chapter 2: Tween methods for sprite and scene transitions
@@ -507,8 +508,86 @@ GA.plugins = function(ga) {
     return camera;
   };
   */
+  //### scaleToWindow
+  //Center and scale the game engine inside the HTML page 
+  ga.scaleToWindow = function(backgroundColor) {
 
-  //### scaleToFit
+    backgroundColor = backgroundColor || "#2C3539";
+    var scaleX, scaleY, scale, center;
+    
+    //1. Scale the canvas to the correct size
+    //Figure out the scale amount on each axis
+    scaleX = window.innerWidth / ga.canvas.width;
+    scaleY = window.innerHeight / ga.canvas.height;
+
+    //Scale the canvas based on whichever value is less: `scaleX` or `scaleY`
+    scale = Math.min(scaleX, scaleY);
+    ga.canvas.style.transformOrigin = "0 0";
+    ga.canvas.style.transform = "scale(" + scale + ")";
+
+    //2. Center the canvas.
+    //Decide whether to center the canvas vertically or horizontally.
+    //Wide canvases should be centered vertically, and 
+    //square or tall canvases should be centered horizontally
+    if (this.canvas.width > this.canvas.height) {
+      if (ga.canvas.width * scale < window.innerWidth) {
+        center = "horizontally";
+      } else { 
+        center = "vertically";
+      }
+    } else {
+      if (ga.canvas.height * scale < window.innerHeight) {
+        center = "vertically";
+      } else { 
+        center = "horizontally";
+      }
+    }
+    
+    //Center horizontally (for square or tall canvases)
+    var margin;
+    if (center === "horizontally") {
+      margin = (window.innerWidth - ga.canvas.width * scale) / 2;
+      ga.canvas.style.marginLeft = margin + "px";
+      ga.canvas.style.marginRight = margin + "px";
+    }
+
+    //Center vertically (for wide canvases) 
+    if (center === "vertically") {
+      margin = (window.innerHeight - ga.canvas.height * scale) / 2;
+      ga.canvas.style.marginTop = margin + "px";
+      ga.canvas.style.marginBottom = margin + "px";
+    }
+
+    //3. Remove any padding from the canvas  and body and set the canvas
+    //display style to "block"
+    ga.canvas.style.paddingLeft = 0;
+    ga.canvas.style.paddingRight = 0;
+    ga.canvas.style.paddingTop = 0;
+    ga.canvas.style.paddingBottom = 0;
+    ga.canvas.style.display = "block";
+    
+    //4. Set the color of the HTML body background
+    document.body.style.backgroundColor = backgroundColor;
+    
+    //5. Set the game engine and pointer to the correct scale. 
+    //This is important for correct hit testing between the pointer and sprites
+    ga.pointer.scale = scale;
+    ga.scale = scale;
+
+    //Fix some quirkiness in scaling for Safari
+    var ua = navigator.userAgent.toLowerCase(); 
+    if (ua.indexOf("safari") != -1) { 
+      if (ua.indexOf("chrome") > -1) {
+        // Chrome
+      } else {
+        // Safari
+        ga.canvas.style.maxHeight = "100%";
+        ga.canvas.style.minHeight = "100%";
+      }
+    }
+  };
+  
+  //### scaleToFit - DEPRICATED - DO NOT USE!
   /*
   Center and scale Ga inside the HTML page. The `dimension` can be either "width" or "height"
   depending on you want to center the game horizontally ("width") or vertically ("height").
@@ -1067,7 +1146,7 @@ GA.plugins = function(ga) {
         //of assets that have loaded
         this.percentage = ga.text("0%", "28px sans-serif", "black");
         this.percentage.x = (ga.canvas.width / 2) - (this.maxWidth / 2) + 12;
-        this.percentage.y = (ga.canvas.height / 2) - 16;
+        this.percentage.y = (ga.canvas.height / 2) - 12;
 
         //Flag the progressBar as having been initialized
         this.initialized = true;
