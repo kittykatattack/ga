@@ -1322,8 +1322,8 @@ use them to make sprites.
 
 ##### Making sprites with images
 
-Create an image sprite using the `sprite` method, in format you learnt
-above. Here's how to create a sprite using the `dungeon.png` image.
+Create an image sprite using the `sprite` method using the same format you learnt
+earlier. Here's how to create a sprite using the `dungeon.png` image.
 (`dungeon.png` is a 512 by 512 pixel background image.)
 
     dungeon = g.sprite("images/dungeon.png");
@@ -1372,7 +1372,7 @@ the sprites in a single step.)
 Look familiar? That's right, the only code that has changed are the
 lines that create the sprites. This modularity is a feature of Ga that lets you create quick
 game prototypes using simple shapes that you can easily swap out for
-detailed images as your game idea develops. The rest of the code in the
+detailed images as your game ideas develops. The rest of the code in the
 game can remain as-is.
 
 ##### Fine-tuning the containment area
@@ -1516,4 +1516,196 @@ make sprites.
 
 ### Alien Armada
 
-... Coming soon! 
+The next example game in this tutorial is Alien Armada. Can you
+destroy 60 aliens before one of them lands and destroys the Earth? Click the
+image link below to play the game:
+
+[![Alien Armada](/tutorials/screenshots/13.png)](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/04_alienArmada.html)
+
+Use the arrow keys to move and press the space bar to shoot. The aliens appear randomly at the top of the screen and appear with
+increasing frequency as the game progresses. Here's how the game is played:
+
+![Alien Armada gameplay](/tutorials/screenshots/14.png)
+
+Alien Armada illustrates some new techniques that you'll definitely want
+to use in your games:
+
+- Load and use custom fonts.
+- Automatically scale and center the game to the browser window. 
+- Display a loading progress bar while the game assets load.
+- Shoot bullets.
+- Create sprites with multiple image states.
+- Remove sprites from a game.
+- Displaying a game score.
+- Reset and restart a game.
+
+You'll find the fully commented Alien Armada source code in the `tutorials` folder. Its general structure is identical
+to Treasure Hunter, with the addition of these new techniques. Let's
+find out how they were implemented.
+
+#### Load and use a custom font
+
+Alien Armada uses a custom font called `emulogic.ttf` to display the
+score at the top right corner of the screen. The font file is
+preloaded with the rest of the asset files (sounds and images) in the assets array that
+initializes the game. 
+
+    var g = ga(
+      480, 320, setup,
+      [
+        "images/alienArmada.json",
+        "sounds/explosion.mp3",
+        "sounds/music.mp3",
+        "sounds/shoot.mp3",
+        "fonts/emulogic.ttf"
+      ],
+      load
+    );
+
+To use the font, create a `text` sprite. The `text` method's second argument is a
+string that describes the font's point size and name: "20px emulogic".  
+```
+scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
+```
+You and load and use any fonts in TTF, OTF, TTC or WOFF format.
+
+#### Scale and center the game in the browser
+
+You'll notice that when you play Alien Armada, the game is centered
+inside the browser window, and automatically fills to the window's maximum
+width and height.
+
+![Alien Armada gameplay](/tutorials/screenshots/15.png)
+
+The browser background that borders the game is set to a dark gray. This
+is thanks to one of Ga's built-in features: the
+`scaleToWindow` method. To use it, call `scaleToWindow` just after
+you call Ga's `start` method, like this:
+```
+g.start();
+g.scaleToWindow();
+```
+`scaleToWindow` will center your game for the best fit. Long, wide
+game screens are centered vertically. Tall or square screens are
+centered horizontally. If you want to specify your own browser
+background color that borders the game, supply it in `scaleToWindow`'s
+arguments, like this:
+```
+g.scaleToWindow("seaGreen");
+```
+For best results, make sure you set the default margins and paddings
+on all your HTML elements to `0`. The following bit of CSS does the
+trick: 
+```
+<style> * {margin: 0; padding: 0;} </style>
+```
+Here's how this `<style>` tag was inserted into Alien Armada's HTML
+container page:
+```
+<!doctype html>
+<meta charset="utf-8">
+<title>Alien Armada</title>
+<style> * {margin: 0; padding: 0;} </style>
+```
+Optionally, if you want to make sure that your game dynamically
+re-sizes and re-centers itself if the user changes the browser window,
+just drop in this bit of code: 
+```
+window.addEventListener("resize", function(event){ 
+  g.scaleToWindow();
+});
+```
+Add it just after you've
+called `scaleToWindow` the first time. Here's what all this code looks
+like in context:
+```
+//...Intilaize Ga...
+
+g.start();
+g.scaleToWindow();
+window.addEventListener("resize", function(event){ 
+  g.scaleToWindow();
+});
+
+//...The rest of your game code...
+
+```
+If you want to find out how it works, or you want to customize it further, you'll
+find the `scaleToWindow` method in Ga's `plugins.js` file. 
+
+####A loading progress bar
+
+Alien Armada loads three MP3 sound files: a shooting sound, an
+explosion sound, and music. The music sound is about 2 MB in size. 
+On a slow network connection this sound could take a few seconds to
+load, so Alien Armada 
+implements a loading bar to inform players of the loading progress of
+game's assets. It's a blue rectangle that expands from left to right, and
+displays a number that indicates the percentage of assets that have loaded
+so far.
+
+![Loading progress bar](/tutorials/screenshots/16.png)
+
+This is a feature that's built into the Ga engine. Let's find out how
+you can use it in your games if you want to.
+
+Ga has a special loading state that runs while game assets are being
+loaded. You can decide what you want to have happen during the loading
+state. All you need to do is write a function with code that should
+run while the assets are loading, and tell Ga what that function name
+is. The Ga engine will automatically run that loading function in a
+loop until the assets have finished loading.
+
+In Alien Armada I defined a loading function called `load`. I told Ga
+that I wanted to use `load` function by listing it as the final option
+in Ga's initialization arguments.
+```
+var g = ga(
+  480, 320, setup,
+  [
+    "images/alienArmada.json",
+    "sounds/explosion.mp3",
+    "sounds/music.mp3",
+    "sounds/shoot.mp3",
+    "fonts/emulogic.ttf"
+  ],
+  load  //<- This is the function that will run while loading
+);
+```
+This tells Ga to run the `load` function in a loop while the assets
+are loading. Here's the `load` function from Alien Armada. It creates a `progressBar` object, and then calls the progress bar's
+`update` method each frame. 
+```
+function load(){
+
+    //Use Ga's built in `progressBar` to display a loading progress
+    //percentage bar while the assets are loading.
+    g.progressBar.create(g.canvas, g.assets);
+
+    //Call the `progressBar`'s `update` method each frame. 
+    g.progressBar.update();
+}
+```
+After the assets have loaded, the `setup` state runs. The first
+thing it does is call the `progressBar`'s `remove` method to make the
+bar disappear:
+```
+function setup() {
+
+  g.progressBar.remove();
+ 
+  //... the rest of the setup function...
+```
+You'll find the `progressBar` code in the `plugins.js` file. It's
+meant to be a very simple example that you can use as the basis for
+writing your own custom loading animation, if you want to. You can run any code you
+like in the `load` function, so it's entirely up to you to decide what
+should happen or what is displayed while your game is loading.
+
+#### Shooting bullets
+
+
+
+
+
+

@@ -1660,7 +1660,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         }
 
         //If neither of the above are true, then each frame must be
-        //an individual Image object
+        //an individual Image object.
         else {
           o.source = g.assets[o.frames[frameNumber]];
           o.sourceX = 0;
