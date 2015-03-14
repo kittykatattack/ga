@@ -1657,6 +1657,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         else if (g.assets[o.frames[frameNumber]].frame) {
           o.sourceX = g.assets[o.frames[frameNumber]].frame.x;
           o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
+          o.sourceWidth = Q.assetsCache[o.frames[frameNumber]].frame.w;
+          o.sourceHeight = Q.assetsCache[o.frames[frameNumber]].frame.h;
+          o.width = Q.assetsCache[o.frames[frameNumber]].frame.w;
+          o.height = Q.assetsCache[o.frames[frameNumber]].frame.h;
         }
 
         //If neither of the above are true, then each frame must be
