@@ -35,7 +35,7 @@ Here's Ga's core feature list:
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
-  `gotoAndStop` to go to a specific frame number. Use `fps` to set the
+  `show` to display a specific frame number. Use `fps` to set the
   frame rate for sprite animations which is independent from the game's
   frame rate.
 - Interactive `button` sprites with `up`, `over` and `down` states.
@@ -154,7 +154,7 @@ Ga's philosophy and technical constraints
   everyone can learn from it. It should also be architecturally flat
   so that anyone can rip it apart and easily drop it into something
   else.
-- For the same reasons, all the source code is hand-written written from scratch without any 3rd party dependencies (external libraries.)
+- For the same reasons, all the source code must be hand-written written from scratch without any 3rd party dependencies (external libraries.)
 - Any special features, like Tiled Editor support, can be added to the
   plugins.js file, so that game developers can pick and choose a
   minimal custom set of components they want for specific games without bloating the core engine.
@@ -1654,7 +1654,7 @@ load. While this is happening players would just see the blank canvas while Alie
 loads. Some players might think the game has frozen, so the game
 helpfully implements a loading bar to inform
 players that the assets are loading. It's a blue rectangle that expands from left to right, and
-displays a number that tells you the percentage loaded of game assets
+displays a number that tells you the percentage of game assets
 loaded so far.
 
 ![Loading progress bar](/tutorials/screenshots/16.png)
@@ -1741,11 +1741,11 @@ bullets in any direction. Here's the general format you can use to
 implement the `shoot` method.
 ```
 g.shoot(
-  cannon,  //The shooting sprite
-  4.71,    //The angle, in radians, at which to shoot (4.71 is up)
-  16,      //The bullet's offset from the center of the sprite
-  7,       //The bullet's speed (pixels per frame)
-  bullets, //The array used to store the bullets
+  cannon,      //The shooting sprite
+  4.71,        //The angle, in radians, at which to shoot (4.71 is up)
+  16,          //The bullet's offset from the center of the sprite
+  7,           //The bullet's speed (pixels per frame)
+  bullets,     //The array used to store the bullets
 
   //A function that returns the sprite that should
   //be used to make each bullet
@@ -1798,7 +1798,7 @@ g.key.space.press = function() {
 
 ```
 You can see that the `press` method also makes the `shootSound` play.
-(The code above is initialized in the game's `setup` function.
+(The code above is initialized in the game's `setup` function.)
 
 There's one more thing you need to do: you have to make the bullets move.
 You can do this with some code inside the game's looping `play` function. Use Ga's
@@ -1892,7 +1892,7 @@ engine.)
 
 #### Generating random aliens
 
-Alien Armada generates aliens at 1 of 14 randomly chosen positions
+Alien Armada generates aliens at any 1 of 14 randomly chosen positions
 just above the top boundary of the stage. The aliens first appear
 infrequently, but gradually start to
 appear at an ever-increasing rate. This makes the game gradually more
@@ -1914,7 +1914,7 @@ and the next one.
 ```
 alienTimer = 0;
 ```
-`alienTimer` is updated by one each frame in the `play` function (the game loop).
+`alienTimer` is updated by 1 each frame in the `play` function (the game loop).
 When `alienTimer` reaches the value of `alienFrequency`, a new alien
 sprite is generated. Here's the code from the `play` function that
 does this. (This code omits the actual code that generates the alien
@@ -1948,15 +1948,20 @@ the next new alien.
 ##### The aliens' random start positions
 
 Before we generate any aliens, we need an array to store all the alien
-sprites. The `aliens` array is initialized in the `setup` function.
+sprites. An empty array called `aliens` is initialized in the `setup`
+function for this purpose.
 ```
 aliens = [];
 ```
 Each alien is then created in the `play` function, inside the same
-`if` statement we looked at above. The alien's image frames and states are set, its
-velocity (`vx` and `vy`) is initialized, it's
-positioned above the top stage boundary, and, finally, it's pushed into the
-`aliens` array. Here's the full code that does all this:
+`if` statement we looked at above. This code has a lot of work to do:
+
+- It sets the alien's image frames and states. 
+- Its sets the alien's velocity (`vx` and `vy`.) 
+- It positions the alien at a random horizontal position above the top stage boundary.
+- And, finally, it pushes the alien into the `aliens` array. 
+
+Here's the full code that does all this:
 ```
 //Add one to the alienTimer.
 alienTimer++;
@@ -2004,7 +2009,7 @@ if(alienTimer === alienFrequency) {
   }
 }
 ```
-You can see in the code above that each alien's y position places it
+You can see in the code above that th alien's `y` position places it
 out of sight just above the stage's top boundary.
 ```
 alien.y = 0 - alien.height;
@@ -2033,7 +2038,7 @@ each alien is initialized with a `vy` (vertical velocity) value of 1.
 ```
 alien.vy = 1;
 ```
-This will make the alien move down, towards the bottom of the stage,
+When this value is applied to the alien's `y` position, it will make the alien move down, towards the bottom of the stage,
 at the rate of 1 pixel per frame. All the alien sprites in the game are in
 the `aliens` array. So to make all of them move you need to loop
 through each sprite in the `aliens` array each frame and add their
@@ -2078,13 +2083,17 @@ if (g.hitTestRectangle(alien, bullet)) {
 }
 
 ```
-You can use Ga's universal `remove` function to remove any sprite from an
-array. You can optionally use it to remove more than one sprite at a time by
+You can use Ga's universal `remove` function to remove any sprite from a
+a game, like this:
+```
+g.remove(anySprite);
+```
+You can optionally use it to remove more than one sprite at a time by
 listing the sprites to remove in the arguments, like this:
 ```
 g.remove(spriteOne, spriteTwo, spriteThree);
 ```
-You can even use it to remove all the sprites in an array. Just
+You can even use it to remove all the sprites in an array of sprites. Just
 supply the sprite array as `remove`'s only argument:
 ```
 g.remove(arrayOfSprites);
@@ -2188,7 +2197,7 @@ And that's how the game's collision works!
 
 Another new feature introduced by Alien Armada is a dynamic score
 display. Each time an alien is hit, the score at the top right corner
-of the game screen goes up by one. How does this work?
+of the game screen increases by one. How does this work?
 
 Alien Armada initializes a `text` sprite called `scoreDisplay` in the
 game's `setup` function.
@@ -2249,7 +2258,8 @@ The `end` function pauses the game, so that the animation freezes. It
 then displays the `gameOverMessage`, which will either be "Earth
 Saved!" or "Earth Destroyed!", depending on the outcome. As an extra
 touch, the music `volume` is also set to 50%. Then after a
-delay of 3 seconds, a function named `reset` is called.
+delay of 3 seconds, a function named `reset` is called. Here's the
+complete `end` function that does all this:
 
 ```
 function end() {
