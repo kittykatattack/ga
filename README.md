@@ -130,7 +130,7 @@ you want to use for your game. Your `custom.js` file can load at
 compile time, so it's ready to use before your game code runs. 
 (See the `plugins.js` file for instructions on how to do this).
 
-### Coming very soon... 
+### Coming soon... 
 
 - Tiled Editor isometric maps support.
 - Many more examples including complete game prototypes.
@@ -140,10 +140,12 @@ Ga's philosophy and technical constraints
 -----------------------------------------
 
 - The `ga.js` core game engine file can't ever be bigger that 6.5k
-  minified and zipped. This makes it suitable for making games for micro game
-  competitions, like [js13k](http://js13kgames.com). But, more
+  minified and zipped. Yes, 6.5k! This makes it suitable for making games for micro game
+  competitions, like [js13k](http://js13kgames.com). This absurdly
+  low overhead means you can drop a full-featured 2D action game into a web page and have it load and play almost
+  instantly. But, more
   importantly, this constraint also discourages feature-creep and keeps
-  the engine lean and focused.
+  the engine lean and focused. 
 - The API has to be fun, intuitive and expressive with as little
   boilerplate code as possible. Game designers should be 
   free to explore their imaginations without tripping over a tangled
@@ -152,6 +154,7 @@ Ga's philosophy and technical constraints
   everyone can learn from it. It should also be architecturally flat
   so that anyone can rip it apart and easily drop it into something
   else.
+- For the same reasons, all the source code is hand-written written from scratch without any 3rd party dependencies (external libraries.)
 - Any special features, like Tiled Editor support, can be added to the
   plugins.js file, so that game developers can pick and choose a
   minimal custom set of components they want for specific games without bloating the core engine.
@@ -224,7 +227,10 @@ The first game we're going to make is a simple object collection and
 enemy avoidance game called Treasure Hunter. Open the file
 `01_treasureHunter.html` in a web browser. (You'll find it in Ga's
 `tutorials` folder, and you'll need to run it in a
-[webserver](https://github.com/nodeapps/http-server)).
+[webserver](https://github.com/nodeapps/http-server)). If you don't
+want to bother setting up a webserver, use a text-editor like
+[Brackets](http://brackets.io) that will launch one for you
+automatically (see Brackets' documentation for this feature).
 
 [![Treasure Hunter](/tutorials/screenshots/01.png)](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/01_treasureHunter.html)
 
@@ -1605,7 +1611,7 @@ trick:
 ```
 <style> * {margin: 0; padding: 0;} </style>
 ```
-Here's how this `<style>` tag was inserted into Alien Armada's HTML
+Here's how this `<style>` tag is inserted into Alien Armada's HTML
 container page:
 ```
 <!doctype html>
@@ -1645,7 +1651,7 @@ Alien Armada loads three MP3 sound files: a shooting sound, an
 explosion sound, and music. The music sound is about 2 MB in size so
 on a slow network connection this sound could take a few seconds to
 load. While this is happening players would just see the blank canvas while Alien Armada
-loads. Some players might thing the game has frozen, so the game
+loads. Some players might think the game has frozen, so the game
 helpfully implements a loading bar to inform
 players that the assets are loading. It's a blue rectangle that expands from left to right, and
 displays a number that tells you the percentage loaded of game assets
@@ -1749,7 +1755,7 @@ g.shoot(
 );
 
 ```
-The second argument determines the angle, in radians, in which the
+The second argument determines the angle, in radians, at which the
 bullet should travel. 4.71 radians, used in this example, is up. 0 is
 to the right, 1.57 is down, and 3.14 is to the left.
 
@@ -1773,11 +1779,11 @@ the game implements this by calling `shoot` inside the space key's
 g.key.space.press = function() {
 
   g.shoot(
-    cannon,  //The shooting sprite
-    4.71,    //The angle at which to shoot (4.71 is up)
-    16,      //The bullet's offset from the center
-    7,       //The bullet's speed (pixels per frame)
-    bullets, //The array used to store the bullets
+    cannon,      //The shooting sprite
+    4.71,        //The angle at which to shoot (4.71 is up)
+    16,          //The bullet's offset from the center
+    7,           //The bullet's speed (pixels per frame)
+    bullets,     //The array used to store the bullets
 
     //A function that returns the sprite that should
     //be used to make each bullet
@@ -1792,7 +1798,7 @@ g.key.space.press = function() {
 
 ```
 You can see that the `press` method also makes the `shootSound` play.
-This bit of code is initialized in the game's `setup` function.
+(The code above is initialized in the game's `setup` function.
 
 There's one more thing you need to do: you have to make the bullets move.
 You can do this with some code inside the game's looping `play` function. Use Ga's
@@ -1878,7 +1884,7 @@ alien.show(alien.states.destroyed);
 This makes your code a little more readable because you can tell at a
 glance which sprite state is being displayed.
 
-(Note: Ga also has a lower-lever `gotoAndStop` method that does
+(Note: Ga also has a lower-level `gotoAndStop` method that does
 exactly the
 same thing as `show`. Although you're free use `gotoAndStop` in your
 game code, by convention it's only used internally by Ga's rendering
@@ -1932,11 +1938,11 @@ if(alienTimer === alienFrequency) {
   }
 }
 ```
-You can see in the code above that `alienFrquency` is reduced by 1
+You can see in the code above that `alienFrequency` is reduced by 1
 after the sprite has been created. That will make the next alien appear 1 frame earlier than the
 previous alien, and which is why the rate of falling aliens slowly
 increases. You can also see that the `alienTimer` is set back to 0 after the sprite
-has been created so that it can start counting again towards making
+has been created so that it can restart counting towards making
 the next new alien. 
 
 ##### The aliens' random start positions
@@ -2074,7 +2080,7 @@ if (g.hitTestRectangle(alien, bullet)) {
 ```
 You can use Ga's universal `remove` function to remove any sprite from an
 array. You can optionally use it to remove more than one sprite at a time by
-listing the sprites to remove it the arguments, like this:
+listing the sprites to remove in the arguments, like this:
 ```
 g.remove(spriteOne, spriteTwo, spriteThree);
 ```
