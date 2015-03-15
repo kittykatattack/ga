@@ -1155,12 +1155,13 @@ GA.plugins = function(ga) {
     update: function() {
 
       //Change the width of the blue `frontBar` to match the
-      //ratio of assets that have loaded. Adding `+ 1` to
+      //ratio of assets that have loaded. Adding `+1` to
       //`assets.loaded` means that the loading bar will appear at 100%
       //when the last asset is being loaded, which is reassuring for the
-      //player.
-      var ratio = (this.assets.loaded + 1) / this.assets.toLoad;
-      this.frontBar.scaleX = ratio;
+      //player observing the load progress
+      var ratio = (ga.assets.loaded + 1) / ga.assets.toLoad;
+      this.frontBar.width = this.maxWidth * ratio;
+
 
       //Display the percentage
       this.percentage.content = Math.floor((ratio) * 100) + "%";
