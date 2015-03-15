@@ -173,8 +173,8 @@ function setup() {
   //Game variables
   score = 0;
   scoreNeededToWin = 60;
-  alienFrequency = 100;
   alienTimer = 0;
+  alienFrequency = 100;
   winner = "";
 
   //set the game state to `play`
@@ -217,7 +217,7 @@ function play() {
   //Add one to the alienTimer.
   alienTimer++;
 
-  //Make a new alien if alienTimer equals the alienFrequency.
+  //Make a new alien if `alienTimer` equals the `alienFrequency`.
   if(alienTimer === alienFrequency) {
 
     //Create the alien.
@@ -271,11 +271,13 @@ function play() {
   aliens = aliens.filter(function(alien) {
 
     //A variable to help check if the alien is
-    //alive or dead
+    //alive or dead.
     var alienIsAlive = true;
 
-    //Filter though all the bullets
+    //Filter though all the bullets.
     bullets = bullets.filter(function(bullet) {
+
+      //Check for a collision between an alien and bullet.
       if (g.hitTestRectangle(alien, bullet)) {
 
         //Remove the bullet sprite.
@@ -284,12 +286,12 @@ function play() {
         //Show the alien's `destroyed` state.
         alien.show(alien.states.destroyed);
 
-        //Play the explosion sound.
-        explosionSound.play();
-
         //You could alternatively use the frame number,
         //like this:
         //alien.show(1);
+
+        //Play the explosion sound.
+        explosionSound.play();
 
         //Stop the alien from moving.
         alien.vy = 0;
@@ -307,7 +309,7 @@ function play() {
         //Update the score.
         score += 1;
 
-        //Remove the bullet from the `bullets array
+        //Remove the bullet from the `bullets array.
         return false;
 
       } else {
@@ -345,6 +347,9 @@ function play() {
   //The aliens win if one of them reaches the bottom of
   //the stage.
   aliens.forEach(function(alien){
+
+    //Check to see if the `alien`'s `y` position is greater
+    //than the `stage`'s `height`
     if (alien.y > g.stage.height) { 
 
       //Set the aliens as the winner.
@@ -374,7 +379,7 @@ function end() {
     gameOverMessage.x = 120;
   }
 
-  //Display "Earth Destroyed" if the aliens win.
+  //Display "Earth Destroyed!" if the aliens win.
   if (winner === "aliens") {
     gameOverMessage.content = "Earth Destroyed!";  
   }

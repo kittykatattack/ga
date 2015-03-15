@@ -1964,7 +1964,7 @@ GA.plugins = function(ga) {
     hit = false;
 
     //Calculate the distance vector
-    if(global) {
+    if (global) {
       vx = (r1.gx + r1.halfWidth) - (r2.gx + r2.halfWidth);
       vy = (r1.gy + r1.halfHeight) - (r2.gy + r2.halfHeight);
     } else {

@@ -1516,13 +1516,14 @@ make sprites.
 
 ### Alien Armada
 
-The next example game in this tutorial is Alien Armada. Can you
+The next example game in this series of tutorials is Alien Armada. Can you
 destroy 60 aliens before one of them lands and destroys the Earth? Click the
 image link below to play the game:
 
 [![Alien Armada](/tutorials/screenshots/13.png)](https://cdn.rawgit.com/kittykatattack/ga/master/tutorials/04_alienArmada.html)
 
-Use the arrow keys to move and press the space bar to shoot. The aliens appear randomly at the top of the screen and appear with
+Use the arrow keys to move and press the space bar to shoot. The
+aliens descend from the top of the screen with
 increasing frequency as the game progresses. Here's how the game is played:
 
 ![Alien Armada gameplay](/tutorials/screenshots/14.png)
@@ -1535,11 +1536,14 @@ to use in your games:
 - Display a loading progress bar while the game assets load.
 - Shoot bullets.
 - Create sprites with multiple image states.
+- Generate random enemies.
 - Remove sprites from a game.
-- Displaying a game score.
+- Display a game score.
 - Reset and restart a game.
 
-You'll find the fully commented Alien Armada source code in the `tutorials` folder. Its general structure is identical
+You'll find the fully commented Alien Armada source code in the
+`tutorials` folder. Make sure to take a look at it so that you can see
+all of this code in its proper context. Its general structure is identical
 to Treasure Hunter, with the addition of these new techniques. Let's
 find out how they were implemented.
 
@@ -1549,25 +1553,26 @@ Alien Armada uses a custom font called `emulogic.ttf` to display the
 score at the top right corner of the screen. The font file is
 preloaded with the rest of the asset files (sounds and images) in the assets array that
 initializes the game. 
-
-    var g = ga(
-      480, 320, setup,
-      [
-        "images/alienArmada.json",
-        "sounds/explosion.mp3",
-        "sounds/music.mp3",
-        "sounds/shoot.mp3",
-        "fonts/emulogic.ttf"
-      ],
-      load
-    );
-
-To use the font, create a `text` sprite. The `text` method's second argument is a
+```
+var g = ga(
+  480, 320, setup,
+  [
+    "images/alienArmada.json",
+    "sounds/explosion.mp3",
+    "sounds/music.mp3",
+    "sounds/shoot.mp3",
+    "fonts/emulogic.ttf"  //<- The custom font.
+  ],
+  load
+);
+```
+To use the font, create a `text` sprite in the game's `setup`
+function. The `text` method's second argument is a
 string that describes the font's point size and name: "20px emulogic".  
 ```
 scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
 ```
-You and load and use any fonts in TTF, OTF, TTC or WOFF format.
+You can and load and use any fonts in TTF, OTF, TTC or WOFF format.
 
 #### Scale and center the game in the browser
 
@@ -1577,7 +1582,8 @@ width and height.
 
 ![Alien Armada gameplay](/tutorials/screenshots/15.png)
 
-The browser background that borders the game is set to a dark gray. This
+The browser background that borders the game is set to a dark gray
+color. This
 is thanks to one of Ga's built-in features: the
 `scaleToWindow` method. To use it, call `scaleToWindow` just after
 you call Ga's `start` method, like this:
@@ -1608,8 +1614,8 @@ container page:
 <style> * {margin: 0; padding: 0;} </style>
 ```
 Optionally, if you want to make sure that your game dynamically
-re-sizes and re-centers itself if the user changes the browser window,
-just drop in this bit of code: 
+re-sizes and re-centers itself if the user changes the browser window
+size, just drop in this bit of code: 
 ```
 window.addEventListener("resize", function(event){ 
   g.scaleToWindow();
@@ -1619,7 +1625,7 @@ Add it just after you've
 called `scaleToWindow` the first time. Here's what all this code looks
 like in context:
 ```
-//...Intilaize Ga...
+//...Initialize Ga...
 
 g.start();
 g.scaleToWindow();
@@ -1636,29 +1642,29 @@ find the `scaleToWindow` method in Ga's `plugins.js` file.
 ####A loading progress bar
 
 Alien Armada loads three MP3 sound files: a shooting sound, an
-explosion sound, and music. The music sound is about 2 MB in size. 
-On a slow network connection this sound could take a few seconds to
-load, so Alien Armada 
-implements a loading bar to inform players of the loading progress of
-game's assets. It's a blue rectangle that expands from left to right, and
-displays a number that indicates the percentage of assets that have loaded
-so far.
+explosion sound, and music. The music sound is about 2 MB in size so
+on a slow network connection this sound could take a few seconds to
+load. While this is happening players would just see the blank canvas while Alien Armada
+loads. Some players might thing the game has frozen, so the game
+helpfully implements a loading bar to inform
+players that the assets are loading. It's a blue rectangle that expands from left to right, and
+displays a number that tells you the percentage loaded of game assets
+loaded so far.
 
 ![Loading progress bar](/tutorials/screenshots/16.png)
 
-This is a feature that's built into the Ga engine. Let's find out how
-you can use it in your games if you want to.
-
-Ga has a special loading state that runs while game assets are being
+This is a feature that's built into the Ga engine. 
+Ga has a optional loading state that runs while game assets are being
 loaded. You can decide what you want to have happen during the loading
 state. All you need to do is write a function with code that should
-run while the assets are loading, and tell Ga what that function name
-is. The Ga engine will automatically run that loading function in a
+run while the assets are loading, and tell Ga what the name of that
+function is. Ga's engine will automatically run that function in a
 loop until the assets have finished loading.
 
-In Alien Armada I defined a loading function called `load`. I told Ga
-that I wanted to use `load` function by listing it as the final option
-in Ga's initialization arguments.
+Let's find out how this works in Alien Armada. The game code tells 
+Ga to use a function called `load` during the loading state. It does
+this by listing `load` as the final argument
+in Ga's initialization constructor. (Look for `load` in the code below):
 ```
 var g = ga(
   480, 320, setup,
@@ -1669,11 +1675,13 @@ var g = ga(
     "sounds/shoot.mp3",
     "fonts/emulogic.ttf"
   ],
-  load  //<- This is the function that will run while loading
+  load  //<- This is the function that will run while loading.
 );
 ```
 This tells Ga to run the `load` function in a loop while the assets
-are loading. Here's the `load` function from Alien Armada. It creates a `progressBar` object, and then calls the progress bar's
+are loading. 
+
+Here's the `load` function from Alien Armada. It creates a `progressBar` object, and then calls the progress bar's
 `update` method each frame. 
 ```
 function load(){
@@ -1686,7 +1694,7 @@ function load(){
     g.progressBar.update();
 }
 ```
-After the assets have loaded, the `setup` state runs. The first
+After the assets have loaded, the `setup` state runs automatically. The first
 thing it does is call the `progressBar`'s `remove` method to make the
 bar disappear:
 ```
@@ -1695,6 +1703,7 @@ function setup() {
   g.progressBar.remove();
  
   //... the rest of the setup function...
+}
 ```
 You'll find the `progressBar` code in the `plugins.js` file. It's
 meant to be a very simple example that you can use as the basis for
@@ -1703,6 +1712,628 @@ like in the `load` function, so it's entirely up to you to decide what
 should happen or what is displayed while your game is loading.
 
 #### Shooting bullets
+
+How can you make the cannon fire bullets? 
+
+When you press the space bar, the cannon fires bullets at the enemies.
+The bullets start from the end of the cannon's turret, and travel up the
+canvas at 7 pixels per frame. If they hit an alien, the alien
+explodes. If a bullet misses and flies past the top of the stage, the
+game code removes it.
+
+![Firing bullets](/tutorials/screenshots/17.png)
+
+To implement a bullet-firing system in your game, the first thing you
+need is an array to store the all the bullet sprites.
+```
+bullets = [];
+```
+This `bullets` array is initialized in the game's `setup` function.
+
+You can then use Ga's custom `shoot` method to make any sprite fire
+bullets in any direction. Here's the general format you can use to
+implement the `shoot` method.
+```
+g.shoot(
+  cannon,  //The shooting sprite
+  4.71,    //The angle, in radians, at which to shoot (4.71 is up)
+  16,      //The bullet's offset from the center of the sprite
+  7,       //The bullet's speed (pixels per frame)
+  bullets, //The array used to store the bullets
+
+  //A function that returns the sprite that should
+  //be used to make each bullet
+  function() {
+    return g.sprite("bullet.png");
+  }
+);
+
+```
+The second argument determines the angle, in radians, in which the
+bullet should travel. 4.71 radians, used in this example, is up. 0 is
+to the right, 1.57 is down, and 3.14 is to the left.
+
+The last argument is a function that returns a sprite that should be
+used as the bullet. In this example the bullet is created using using the 
+"bullet.png" frame from the game's loaded texture atlas.
+```
+function() {
+  return g.sprite("bullet.png");
+}
+```
+Replace this function with your own to create any kind of custom
+bullet you might need.
+
+When will your bullets be fired? You can call the `shoot` method
+whenever you want to make bullets, at any point in your code. In Alien
+Armada, bullets are fired when the player presses the space key. So
+the game implements this by calling `shoot` inside the space key's
+`press` method. Here's how:
+```
+g.key.space.press = function() {
+
+  g.shoot(
+    cannon,  //The shooting sprite
+    4.71,    //The angle at which to shoot (4.71 is up)
+    16,      //The bullet's offset from the center
+    7,       //The bullet's speed (pixels per frame)
+    bullets, //The array used to store the bullets
+
+    //A function that returns the sprite that should
+    //be used to make each bullet
+    function() {
+      return g.sprite("bullet.png");
+    }
+  );
+
+  //Play the shoot sound.
+  shootSound.play();
+};
+
+```
+You can see that the `press` method also makes the `shootSound` play.
+This bit of code is initialized in the game's `setup` function.
+
+There's one more thing you need to do: you have to make the bullets move.
+You can do this with some code inside the game's looping `play` function. Use Ga's
+`move` method and supply the `bullets` array as an argument:
+```
+g.move(bullets);
+
+```
+The `move` method automatically loops through all the sprites in the
+array and updates their x and y positions with the value of their `vx` and `vy` velocity values.
+
+So now you know how the bullets are created and animated. But what happens when
+they hit one of the aliens?
+
+#### Sprite states
+
+When a bullet hits an alien, a yellow explosion image appears. This
+simple effect is created by giving each alien sprite two states: a `normal`
+state and a `destroyed` state. Aliens are created with their states
+set to `normal`. If they're hit, their states change to `destroyed`.
+
+![The sprite's states](/tutorials/screenshots/18.png)
+
+How does this system work?
+
+First, let's take a look at the Alien Armada tileset, shown here:
+
+![The Alien Armada tileset](/tutorials/screenshots/19.png)
+
+You can see two image frames that define these two states: `alien.png`
+and `explosion.png`. Before you create the sprite, first create an
+array that lists these two frames: 
+```
+var alienFrames = [
+  "alien.png", 
+  "explosion.png"
+];
+```
+Next use the `alienFrames` array to initialize the `alien` sprite.
+```
+alien = g.sprite(alienFrames);
+```
+If you prefer, you could combine these two steps into one, like this:
+```
+alien = g.sprite([
+  "alien.png", 
+  "explosion.png"
+]);
+```
+This loads the sprite up with two frames. Frame `0` is the `alien.png`
+frame, and frame `1` is the `explosion.png` frame. Frame `0` is
+displayed by default by when the sprite is first created. 
+
+You can use the sprite's `show` method to display any other frame number on the
+sprite, like this:
+```
+alien.show(1);
+```
+The code above will set the alien to frame number one, which is the
+`explosion.png` frame.
+
+To make your code a little more readable, its a good idea to define
+your sprite's states in a special `states` object. Give each state a
+name, with a value that corresponds to that state's frame number.
+Here's how you could define two states on the alien: `normal` and
+`destroyed`:
+```
+alien.states = {
+  normal: 0,
+  destroyed: 1
+};
+```
+`alien.states.normal` now has the value `0`, and
+`alien.states.destroyed` now has the value `1`. That means you could
+display the alien's `normal` state like this:
+```
+alien.show(alien.states.normal);
+```
+And display the alien's `destroyed` state like this:
+```
+alien.show(alien.states.destroyed);
+```
+This makes your code a little more readable because you can tell at a
+glance which sprite state is being displayed.
+
+(Note: Ga also has a lower-lever `gotoAndStop` method that does
+exactly the
+same thing as `show`. Although you're free use `gotoAndStop` in your
+game code, by convention it's only used internally by Ga's rendering
+engine.)
+
+#### Generating random aliens
+
+Alien Armada generates aliens at 1 of 14 randomly chosen positions
+just above the top boundary of the stage. The aliens first appear
+infrequently, but gradually start to
+appear at an ever-increasing rate. This makes the game gradually more
+difficult as it
+progresses. Let's find out how these two features are implemented.
+
+##### Timing the aliens
+
+When the game starts, the first new alien is generated after 100
+frames have elapsed. A variable called `alienFrequency`, initialized in
+the game's `setup` function is used to help track this. it's
+initialized to 100.
+```
+alienFrequency = 100;
+```
+Another variable called `alienTimer` is used to count the number of
+of frames that have elapsed between the previously generated alien,
+and the next one. 
+```
+alienTimer = 0;
+```
+`alienTimer` is updated by one each frame in the `play` function (the game loop).
+When `alienTimer` reaches the value of `alienFrequency`, a new alien
+sprite is generated. Here's the code from the `play` function that
+does this. (This code omits the actual code that generates the alien
+sprite - we'll look at that ahead)
+```
+//Add one to the alienTimer.
+alienTimer++;
+
+//Make a new alien if `alienTimer` equals the `alienFrequency`.
+if(alienTimer === alienFrequency) {
+
+  //... Create the alien: see ahead for the missing code that does this...
+
+  //Set the `alienTimer` back to zero.
+  alienTimer = 0;
+
+  //Reduce `alienFrequency` by one to gradually increase
+  //the frequency that aliens are created
+  if(alienFrequency > 2){  
+    alienFrequency--;
+  }
+}
+```
+You can see in the code above that `alienFrquency` is reduced by 1
+after the sprite has been created. That will make the next alien appear 1 frame earlier than the
+previous alien, and which is why the rate of falling aliens slowly
+increases. You can also see that the `alienTimer` is set back to 0 after the sprite
+has been created so that it can start counting again towards making
+the next new alien. 
+
+##### The aliens' random start positions
+
+Before we generate any aliens, we need an array to store all the alien
+sprites. The `aliens` array is initialized in the `setup` function.
+```
+aliens = [];
+```
+Each alien is then created in the `play` function, inside the same
+`if` statement we looked at above. The alien's image frames and states are set, its
+velocity (`vx` and `vy`) is initialized, it's
+positioned above the top stage boundary, and, finally, it's pushed into the
+`aliens` array. Here's the full code that does all this:
+```
+//Add one to the alienTimer.
+alienTimer++;
+
+//Make a new alien if `alienTimer` equals the `alienFrequency`.
+if(alienTimer === alienFrequency) {
+
+  //Create the alien.
+  //Assign two frames from the texture atlas as the 
+  //alien's two states.
+  var alienFrames = [
+    "alien.png", 
+    "explosion.png"
+  ];
+
+  //Initialize the alien sprite with the frames
+  var alien = g.sprite(alienFrames);
+
+  //Define some states on the alien that correspond
+  //to the its two frames.
+  alien.states = {
+    normal: 0,
+    destroyed: 1
+  };
+  
+  //Set its y position above the screen boundary.
+  alien.y = 0 - alien.height;
+  
+  //Assign the alien a random x position.
+  alien.x = g.randomInt(0, 14) * alien.width;
+  
+  //Set its speed.
+  alien.vy = 1;
+  
+  //Push the alien into the `aliens` array.
+  aliens.push(alien);
+
+  //Set the `alienTimer` back to zero.
+  alienTimer = 0;
+
+  //Reduce `alienFrequency` by one to gradually increase
+  //the frequency that aliens are created
+  if(alienFrequency > 2){  
+    alienFrequency--;
+  }
+}
+```
+You can see in the code above that each alien's y position places it
+out of sight just above the stage's top boundary.
+```
+alien.y = 0 - alien.height;
+```
+It's `x` position, however, is random. 
+``` 
+alien.x = g.randomInt(0, 14) * alien.width;
+```
+This code places it in one of 15 possible random positions (0 to 14) above the
+top of the stage. Here's an illustration of these positions:
+
+![The Alien Armada tileset](/tutorials/screenshots/20.png)
+
+Finally, and very importantly, the code pushes the alien sprite into
+the `aliens` array.
+```
+aliens.push(alien);
+```
+All this code starts pumping out aliens at a steadily increasing rate.
+
+#### Moving the aliens
+
+How do we make the aliens move? In exactly the same way made the
+bullets move. You'll notice in the code above that
+each alien is initialized with a `vy` (vertical velocity) value of 1.
+```
+alien.vy = 1;
+```
+This will make the alien move down, towards the bottom of the stage,
+at the rate of 1 pixel per frame. All the alien sprites in the game are in
+the `aliens` array. So to make all of them move you need to loop
+through each sprite in the `aliens` array each frame and add their
+`vy` values to their `y` positions. Some code like this in the `play`
+function would work:
+```
+aliens.forEach(function(alien){
+  alien.y += alien.vy;
+});
+```
+However, its easier just to use Ga's convenient built-in `move` function. Just
+supply `move` with the array of sprites that you want to move, like
+this:
+```
+g.move(aliens);
+```
+This updates the aliens positions with their velocities automatically.
+
+#### Making the aliens explode
+
+Now that you know how to change the alien's state, how can you use
+this skill to create the explosion effect? Here's the simplified code
+from Alien Armada that shows you how to do this. Use `hitTestRectangle` to
+check for a collision between an alien and bullet. If a collision is detected,
+remove the bullet, show the alien's `destroyed` state, and then remove
+the alien after a delay of one second.
+
+```
+if (g.hitTestRectangle(alien, bullet)) {
+
+  //Remove the bullet sprite.
+  g.remove(bullet);
+
+  //Show the alien's `destroyed` state.
+  alien.show(alien.states.destroyed);
+
+  //Wait for 1 second (1000 milliseconds) then 
+  //remove the alien sprite.
+  g.wait(1000, function(){
+    g.remove(alien);
+  });
+}
+
+```
+You can use Ga's universal `remove` function to remove any sprite from an
+array. You can optionally use it to remove more than one sprite at a time by
+listing the sprites to remove it the arguments, like this:
+```
+g.remove(spriteOne, spriteTwo, spriteThree);
+```
+You can even use it to remove all the sprites in an array. Just
+supply the sprite array as `remove`'s only argument:
+```
+g.remove(arrayOfSprites);
+```
+This will both make the sprites disappear from the screen, and also
+empty them out of the array that they were in.
+
+Ga also has a convenient method called `wait` that will run a function
+after any delay (in milliseconds) that you specify. The Alien Armada
+game code uses `wait` to remove the alien after a one second delay,
+like this:
+```
+g.wait(1000, function(){
+  g.remove(alien);
+});
+
+```
+This allows the alien to display its `explosion` image state for one
+second before it disappears from the game.
+
+These are the basic techniques involved in making the aliens explode
+and removing the aliens and bullets from the game when they collide.
+But the actual code used in Alien Armada is a little more complex. That's
+because the code uses nested `filter` loops to loop through all the bullets
+and aliens so that they can be checked against each other for
+collisions. The code also plays an explosion sound when a collision
+occurs, and updates the score by 1. Here's all the code from the
+game's `play` function that does this. (If you're new to JavaScript's
+`filter` loops, you can [read about how to use them here.](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/filter))
+
+```
+//Check for a collision between the aliens and the bullets.
+//Filter through each alien in the `aliens` array.
+aliens = aliens.filter(function(alien) {
+
+  //A variable to help check if the alien is
+  //alive or dead.
+  var alienIsAlive = true;
+
+  //Filter though all the bullets.
+  bullets = bullets.filter(function(bullet) {
+
+    //Check for a collision between an alien and bullet.
+    if (g.hitTestRectangle(alien, bullet)) {
+
+      //Remove the bullet sprite.
+      g.remove(bullet);
+
+      //Show the alien's `destroyed` state.
+      alien.show(alien.states.destroyed);
+
+      //You could alternatively use the frame number,
+      //like this:
+      //alien.show(1);
+
+      //Play the explosion sound.
+      explosionSound.play();
+
+      //Stop the alien from moving.
+      alien.vy = 0;
+
+      //Set `alienAlive` to false so that it can be
+      //removed from the array.
+      alienIsAlive = false;
+
+      //Wait for 1 second (1000 milliseconds) then 
+      //remove the alien sprite.
+      g.wait(1000, function(){
+        g.remove(alien);
+      });
+
+      //Update the score.
+      score += 1;
+
+      //Remove the bullet from the `bullets array.
+      return false;
+
+    } else {
+
+      //If there's no collision, keep the bullet in the
+      //bullets array.
+      return true;
+    }
+  });
+
+  //Return the value of `alienIsAlive` back to the 
+  //filter loop. If it's `true`, the alien will be
+  //kept in the `aliens` array. 
+  //If it's `false` it will be removed from the `aliens` array.
+  return alienIsAlive;
+});
+```
+As long as the filter loops return `true`, the current sprite being
+checked will remain in the array. If there's a collision, however, the
+loops return `false` and the current alien and bullet will be removed
+from their arrays. 
+
+And that's how the game's collision works!
+
+#### Displaying the score
+
+Another new feature introduced by Alien Armada is a dynamic score
+display. Each time an alien is hit, the score at the top right corner
+of the game screen goes up by one. How does this work?
+
+Alien Armada initializes a `text` sprite called `scoreDisplay` in the
+game's `setup` function.
+```
+scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
+```
+You saw in the previous section
+that 1 is added to the game's `score` variable each time an alien is
+hit:
+```
+score += 1;
+```
+To visibly update the score, all you need to do is set the `score`
+value as the `scoreDisplay`'s `content`, like this:
+```
+scoreDisplay.content = score;
+```
+And that's all there is to it!
+
+#### Ending and resetting the game
+
+There are two ways the game can end. Either the player shoots down 60
+aliens, in which case the player wins. Or, one of the aliens has to travel
+beyond the bottom edge of the stage, in which case the aliens win. 
+
+A simple if statement in the `play` function checks for this. If
+either condition becomes `true`, the `winner` is set to either
+"player" or "aliens" and the game's `state` is changed to `end`.
+```
+//The player wins if the score matches the value
+//of `scoreNeededToWin`, which is 60
+if (score === scoreNeededToWin) {
+
+  //Set the player as the winner.
+  winner = "player";
+
+  //Change the game's state to `end`.
+  g.state = end;
+}
+
+//The aliens win if one of them reaches the bottom of
+//the stage.
+aliens.forEach(function(alien){
+
+  //Check to see if the `alien`'s `y` position is greater
+  //than the `stage`'s `height`
+  if (alien.y > g.stage.height) { 
+
+    //Set the aliens as the winner.
+    winner = "aliens";
+
+    //Change the game's state to `end`.
+    g.state = end;
+  }
+});
+```
+The `end` function pauses the game, so that the animation freezes. It
+then displays the `gameOverMessage`, which will either be "Earth
+Saved!" or "Earth Destroyed!", depending on the outcome. As an extra
+touch, the music `volume` is also set to 50%. Then after a
+delay of 3 seconds, a function named `reset` is called.
+
+```
+function end() {
+
+  //Pause the game loop.
+  g.pause();
+  
+  //Create the game over message text.
+  gameOverMessage = g.text("", "20px emulogic", "#00FF00", 90, 120);
+
+  //Reduce the music volume by half.
+  //1 is full volume, 0 is no volume, and 0.5 is half volume.
+  music.volume = 0.5;
+
+  //Display "Earth Saved!" if the player wins.
+  if (winner === "player") {
+    gameOverMessage.content = "Earth Saved!";
+    gameOverMessage.x = 120;
+  }
+
+  //Display "Earth Destroyed!" if the aliens win.
+  if (winner === "aliens") {
+    gameOverMessage.content = "Earth Destroyed!";  
+  }
+
+  //Wait for 3 seconds then run the `reset` function.
+  g.wait(3000, function(){
+    reset(); 
+  });
+}
+```
+The `reset` function resets all of the game variables back to their
+starting values. It also turns the music volume back up to 1. It uses
+the `remove` function to remove any remaining sprites from the
+`aliens` and `bullets` arrays, so that those arrays can be
+re-populated when the game starts again. `remove` is also used to
+remove the `gameOverMessage`, and the `cannon` sprite is re-centered
+at the bottom of the stage. Finally, the game `state` is set back to
+`play`, and the game loop is un-paused by calling Ga's `resume`
+method.
+```
+function reset() {
+
+  //Reset the game variables.
+  score = 0;
+  alienFrequency = 100;
+  alienTimer = 0;
+  winner = "";
+
+  //Set the music back to full volume.
+  music.volume = 1;
+
+  //Remove any remaining alien and bullet sprites.
+  //The universal `remove` method will loop through
+  //all the sprites in an array of sprites, removed them
+  //from their parent container, and splice them out of the array.
+  g.remove(aliens);
+  g.remove(bullets);
+
+  //You can also use the universal `remove` function to remove.
+  //a single sprite.
+  g.remove(gameOverMessage);
+
+  //Re-center the cannon.
+  g.stage.putBottom(cannon, 0, -40);
+
+  //Change the game state back to `play`.
+  g.state = play;
+  g.resume();
+}
+```
+And this is all the code needed to start the game again. You can play
+Alien Armada as many times as you like and it will reset and restart
+itself like this endlessly.
+
+### Coming very soon: Flappy Fairy!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
