@@ -466,16 +466,18 @@ web server is initialized.
 
 ##### Creating game scenes
 
-Ga has a useful method called `group` that lets you group game sprites
-together so that you can work with them as one unit. This is great
-for making compound sprites, and also for making game scenes. Treasure
-  Hunter uses two game scenes: `gameScene` which is the main game, and
-  `gameOverScene` which is displayed when the game is finished. Here's
-  how the `gameScene` is made using the `group` method:
+Ga has a useful method called `group` that lets you group game objects
+together so that you can work with them as one unit. Groups are used for
+grouping together special objects called **sprites**  (which you'll
+learn all about in the next section.) But they're also used for making game scenes. 
+
+Treasure Hunter uses two game scenes: `gameScene` which is the main game, 
+and `gameOverScene` which is displayed when the game is finished. 
+Here's how the `gameScene` is made using the `group` method:
 
     gameScene = g.group();
 
-Now if you want to add sprites to the `gameScene`, you can do it using
+But after you've made some sprites you want to add sprites to the `gameScene`, you can do it using
 the `addChild` method.
     
     gameScene.addChild(anySprite);
@@ -492,9 +494,14 @@ the sprites, and group them together with one line of code, like this:
 You'll see a few different examples of how to add sprites to groups in
 the examples ahead.
 
+But what are sprites, and how do you make them?
+
 ##### Making sprites
 
-The most important elements in any game are sprites. Ga lets you make
+Sprites are the most important elements in any game. Sprites are
+just graphics (shapes or images) that you can control with
+special properties. Everything you can see in your games, like
+game characters, objects and backgrounds, are sprites. Ga lets you make
 5 kinds of basic sprites: `rectangle`, `circle`, `line`, `text`, and
 `sprite` (an image-based sprite). You can make almost any 2D action game
 with these basic sprite types. (If they aren't enough, you can also define your own custom
@@ -512,7 +519,7 @@ this:
       yPosition
     );
 
-You can use Ga's `circle` method to make a circular shape sprite:
+You can use Ga's `circle` method to make a circular shaped sprite:
 
     var ball = g.circle(
       diameterInPixels, 
@@ -546,7 +553,7 @@ gameScene.addChild(player);
 treasure = g.rectangle(16, 16, "gold");
 
 //Position the treasure next to the right edge of the canvas
-treasure.x = g.canvas.width - treasure.width - 10;
+treasure.x = g.canvas.width - treasure.width - 32;
 treasure.y = g.canvas.height / 2 - treasure.halfHeight;
 
 //Create a `pickedUp` property on the treasure to help us figure
@@ -562,20 +569,78 @@ Notice that after each sprite is created, it's added to the
 
 ![Treasure Hunter](/tutorials/screenshots/03.png)
 
+Let's find out a little more about these sprites are positioned on
+the canvas.
+
+##### Positioning sprites
+
 All sprites have `x` and `y` properties that you can use to precisely
-position sprites on the canvas. They also have `width` and `height`
+position sprites on the canvas. The `x` and `y` values refer to the sprites' pixel
+coordinates relative to the top left corner of the canvas. The top
+left corner has `x` and `y` values of 0. That means any
+positive `x` and `y` values you assign to sprites will position them left (`x`) and down
+(`y`) relative to that corner point. For example, Here's the
+code that positions the `exit` door (the green square). 
+```
+exit.x = 8;
+exit.y = 8;
+```
+You can see that this code places the door 8 pixel to the right and 8 pixels below the
+canvas's top left corner. Positive `x` value position sprites to the
+right of the canvas's left edge. Positive `y` values position them
+below the canvas's top edge.
+
+Sprites also have `width` and `height`
 properties that tell you their width and height in pixels. If you need
 to find out what half the width or half the height of a sprite is, use
 `halfWidth` and `halfHeight`.
 
-This code also adds a `pickedUp` property to the `treasure` sprite
-that we'll use later in the game logic to help us determine the
-progress of the game.
+Ga also has a some convenience methods that help you quickly position
+sprites relative to other sprites: `putTop`, `putRight`, `putBottom`, `putLeft` and `putCenter`.
+For example, here are the lines from the code above that
+position the treasure sprite (the gold box). The code places the
+treasure 26 pixels to the left of the
+canvas's right edge, and centers it vertically.
+```
+treasure.x = g.canvas.width - treasure.width - 32;
+treasure.y = g.canvas.height / 2 - treasure.halfHeight;
+```
+That's a lot of complicated positioning code to write. Instead, you
+could use Ga's built-in `putCenter` method to achieve the same effect
+like this:
+```
+g.stage.putCenter(treasure, 220, 0);
+```
+What is the `stage`? It's the root container for all the sprites, and
+has exactly the same dimensions as the canvas. You can think of it as
+a big, invisible sprite, the same size as the canvas, that contains
+all the sprites in your game, as well as any containers those sprites
+might be grouped in (Like the `gameScene`). `putCenter` works by
+centering the `treasure` inside the `stage`, and then offsetting its
+`x` position by 220 pixels. Here's the format for using `putCenter`:
+```
+anySprite.putCenter(anyOtherSprite, xOffset, yOffset);
+```
+You can use the other `put` methods in the same way. For example, if
+you wanted to position a sprite directly to the left of another
+sprite, without any offset, you could use `putLeft`, like this:
+```
+spriteOne.putLeft(spriteTwo);
+```
+This would place `spriteTwo` directly to the left of `spriteOne`, and
+align it vertically .You'll see many examples of how to use these `put` methods throughout
+these tutorials.
 
-    treasure.pickedUp = false;
+##### Assigning dynamic properties
 
-You can dynamically assign any custom properties or methods to sprites
-as you like.
+Before we continue, there's one small detail you need to notice. The
+code that creates the sprites also adds a `pickedUp` property to the
+`treasure` sprite:
+```
+treasure.pickedUp = false;
+```
+You'll see how we're going to use `treasure.pickedUp` later in the game logic to help us determine the
+progress of the game. You can dynamically assign any custom properties or methods to sprites like this, if you need to.
 
 ##### Creating the enemy sprites
 
@@ -941,7 +1006,7 @@ argument is any JavaScript object with an `x`, `y`, `width`, and
 `height` property. As a convenience, all Ga sprites have a property
 called `localBounds` that return an object with this information.
 
-`stage` is the root container object for all Ga's sprites, and it has
+As you learnt earlier, `stage` is the root container object for all Ga's sprites, and it has
 the same width and height as the `canvas`. That means you can use its
 `localBounds` property to keep the sprite contained inside the canvas.
 
