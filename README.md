@@ -586,7 +586,7 @@ exit.x = 8;
 exit.y = 8;
 ```
 You can see that this code places the door 8 pixel to the right and 8 pixels below the
-canvas's top left corner. Positive `x` value position sprites to the
+canvas's top left corner. Positive `x` values position sprites to the
 right of the canvas's left edge. Positive `y` values position them
 below the canvas's top edge.
 
