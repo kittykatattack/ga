@@ -477,7 +477,7 @@ Here's how the `gameScene` is made using the `group` method:
 
     gameScene = g.group();
 
-But after you've made some sprites you want to add sprites to the `gameScene`, you can do it using
+After you've made the group, you can add sprites (game objects) to the `gameScene`, using
 the `addChild` method.
     
     gameScene.addChild(anySprite);
@@ -487,7 +487,7 @@ Or, you can add multiple sprites at one time with the `add` method, like this:
     gameScene.add(spriteOne, spriteTwo, spriteThree);
 
 Or, if you prefer, you can create the game scene after you've made all
-the sprites, and group them together with one line of code, like this:
+the sprites, and group all the sprites together with one line of code, like this:
 
     gameScene = g.group(spriteOne, spriteTwp, spriteThree);
 
@@ -569,14 +569,14 @@ Notice that after each sprite is created, it's added to the
 
 ![Treasure Hunter](/tutorials/screenshots/03.png)
 
-Let's find out a little more about these sprites are positioned on
+Let's find out a little more about how these sprites are positioned on
 the canvas.
 
 ##### Positioning sprites
 
 All sprites have `x` and `y` properties that you can use to precisely
 position sprites on the canvas. The `x` and `y` values refer to the sprites' pixel
-coordinates relative to the top left corner of the canvas. The top
+coordinates relative to the canvas's top left corner. The top
 left corner has `x` and `y` values of 0. That means any
 positive `x` and `y` values you assign to sprites will position them left (`x`) and down
 (`y`) relative to that corner point. For example, Here's the
@@ -612,7 +612,8 @@ like this:
 g.stage.putCenter(treasure, 220, 0);
 ```
 What is the `stage`? It's the root container for all the sprites, and
-has exactly the same dimensions as the canvas. You can think of it as
+has exactly the same dimensions as the canvas. You can think of the
+`stage` as
 a big, invisible sprite, the same size as the canvas, that contains
 all the sprites in your game, as well as any containers those sprites
 might be grouped in (Like the `gameScene`). `putCenter` works by
