@@ -605,8 +605,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.vy = 0;
 
     //Initialize the `width` and `height`.
-    o.width = 0;
-    o.height = 0;
+    o._width = 0;
+    o._height = 0;
 
     //The sprite's width and height scale factors.
     o.scaleX = 1;
@@ -872,6 +872,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         },
         enumerable: true, configurable: true
       },
+    width: {
+        get: function() {
+            return o._width * o.scaleX;
+        },
+        set: function(value) {
+            o.scaleX = value / o._width;
+        },
+        enumerable: true, configurable: true
+    },
+    height: {
+        get: function() {
+            return o._height * o.scaleY;
+        },
+        set: function(value) {
+            o.scaleY = value / o._height;
+        },
+        enumerable: true, configurable: true
+    },
 
       //The sprite's `halfWidth` and `halfHeight`.
       halfWidth: {
@@ -890,13 +908,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //The sprite's center point.
       centerX: {
         get: function() {
-          return o.x + o.halfWidth;
+          return o.x + (o._width * o.pivotX) + (1 - 2 * o.pivotX) * o.halfWidth;
         },
         enumerable: true, configurable: true
       },
       centerY: {
         get: function() {
-          return o.y + o.halfHeight;
+          return o.y + (o._height * o.pivotY) + (1 - 2 * o.pivotY) * o.halfHeight;
         },
         enumerable: true, configurable: true
       },
@@ -1086,21 +1104,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     Object.defineProperties(o, {
       diameter: {
         get: function() {
-          return o.width;
+          return o._width;
         },
         set: function(value) {
-          o.width = value;
-          o.height = value;
+          o._width = value;
+          o._height = value;
         },
         enumerable: true, configurable: true
       },
       radius: {
         get: function() {
-          return o.width / 2;
+          return o._width / 2;
         },
         set: function (value) {
-          o.width = value * 2;
-          o.height = value * 2;
+          o._width = value * 2;
+          o._height = value * 2;
         },
         enumerable: true, configurable: true
       }
@@ -1121,8 +1139,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Set the stage to the same height and width as the canvas
     //and position it at the top left corner
-    o.width = ga.canvas.width;
-    o.height = ga.canvas.height;
+    o._width = ga.canvas.width;
+    o._height = ga.canvas.height;
     o.x = 0;
     o.y = 0;
 
@@ -1213,8 +1231,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         
         //Apply the `_newWidth` and `_newHeight` to this sprite's width
         //and height
-        o.width = o._newWidth;
-        o.height = o._newHeight;
+        o._width = o._newWidth;
+        o._height = o._newHeight;
       }
     };
 
@@ -1248,8 +1266,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.mask = false;
 
     //Set the defaults.
-    o.width = width || 32;
-    o.height = height || 32;
+    o._width = width || 32;
+    o._height = height || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || 0;
@@ -1269,10 +1287,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Draw the rectangle around the context's center `0` point.
       ctx.rect(
-        -o.width * o.pivotX, 
-        -o.height * o.pivotY, 
-        o.width, 
-        o.height
+        -o._width * o.pivotX, 
+        -o._height * o.pivotY, 
+        o._width, 
+        o._height
       );
       if (o.mask === true) {
         ctx.clip();
@@ -1300,8 +1318,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.mask = false;
 
     //Set the defaults.
-    o.width = diameter || 32;
-    o.height = diameter || 32;
+    o._width = diameter || 32;
+    o._height = diameter || 32;
     o.fillStyle = fillStyle || "red";
     o.strokeStyle = strokeStyle || "none";
     o.lineWidth = lineWidth || "none";
@@ -1423,6 +1441,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.x = x || 0;
     o.y = y || 0;
 
+    o._width = ga.canvas.ctx.measureText(o.content).width;
+    o._height = ga.canvas.ctx.measureText("M").width;
+    
     //Add a `render` method that explains to the canvas how to draw text.
     o.render = function(ctx) {
       ctx.strokeStyle = o.strokeStyle;
@@ -1432,7 +1453,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Measure the width and height of the text
       if (o.width === 0) o.width = ctx.measureText(o.content).width;
       if (o.height === 0) o.height = ctx.measureText("M").width;      
-      ctx.translate(-o.width * o.pivotX, -o.height * o.pivotY)
+      ctx.translate(-o._width * o.pivotX, -o._height * o.pivotY)
       ctx.font = o.font;
       ctx.textBaseline = o.textBaseline;
       ctx.fillText(
@@ -1554,8 +1575,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.source = ga.assets[source];
           o.sourceX =  0;
           o.sourceY =  0;
-          o.width = o.source.width;
-          o.height = o.source.height;
+          o._width = o.source.width;
+          o._height = o.source.height;
           o.sourceWidth = o.source.width;
           o.sourceHeight = o.source.height;
         }
@@ -1570,8 +1591,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.source = o.tilesetFrame.source;
           o.sourceX = o.tilesetFrame.frame.x;
           o.sourceY = o.tilesetFrame.frame.y;
-          o.width = o.tilesetFrame.frame.w;
-          o.height = o.tilesetFrame.frame.h;
+          o._width = o.tilesetFrame.frame.w;
+          o._height = o.tilesetFrame.frame.h;
           o.sourceWidth = o.tilesetFrame.frame.w;
           o.sourceHeight = o.tilesetFrame.frame.h;
         }
@@ -1586,8 +1607,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.source = ga.assets[source[0]].source;
           o.sourceX = ga.assets[source[0]].frame.x;
           o.sourceY = ga.assets[source[0]].frame.y;
-          o.width = ga.assets[source[0]].frame.w;
-          o.height = ga.assets[source[0]].frame.h;
+          o._width = ga.assets[source[0]].frame.w;
+          o._height = ga.assets[source[0]].frame.h;
           o.sourceWidth = ga.assets[source[0]].frame.w;
           o.sourceHeight = ga.assets[source[0]].frame.h;
         }
@@ -1598,8 +1619,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.source = ga.assets[source[0]];
           o.sourceX = 0;
           o.sourceY = 0;
-          o.width = o.source.width;
-          o.height = o.source.height;
+          o._width = o.source.width;
+          o._height = o.source.height;
           o.sourceWidth = o.source.width;
           o.sourceHeight = o.source.height;
         }
@@ -1619,8 +1640,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.source = ga.assets[source.image];
       o.sourceX = source.x;
       o.sourceY = source.y;
-      o.width = source.width;
-      o.height = source.height;
+      o._width = source.width;
+      o._height = source.height;
       o.sourceWidth = source.width;
       o.sourceHeight = source.height;
     }
@@ -1634,8 +1655,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Set the sprite to the first frame
       o.sourceX = o.frames[0][0];
       o.sourceY = o.frames[0][1];
-      o.width = source.width;
-      o.height = source.height;
+      o._width = source.width;
+      o._height = source.height;
       o.sourceWidth = source.width;
       o.sourceHeight = source.height;
     }
@@ -1659,8 +1680,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
           o.sourceWidth = g.assets[o.frames[frameNumber]].frame.w;
           o.sourceHeight = g.assets[o.frames[frameNumber]].frame.h;
-          o.width = g.assets[o.frames[frameNumber]].frame.w;
-          o.height = g.assets[o.frames[frameNumber]].frame.h;
+          o._width = g.assets[o.frames[frameNumber]].frame.w;
+          o._height = g.assets[o.frames[frameNumber]].frame.h;
         }
 
         //If neither of the above are true, then each frame must be
@@ -1669,8 +1690,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.source = g.assets[o.frames[frameNumber]];
           o.sourceX = 0;
           o.sourceY = 0;
-          o.width = o.source.width;
-          o.height = o.source.height;
+          o._width = o.source.width;
+          o._height = o.source.height;
           o.sourceWidth = o.source.width;
           o.sourceHeight = o.source.height;
         }
@@ -1708,9 +1729,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         o.source,
         o.sourceX, o.sourceY,
         o.sourceWidth, o.sourceHeight,
-        -o.width * o.pivotX,
-        -o.height * o.pivotY,
-        o.width, o.height
+        -o._width * o.pivotX,
+        -o._height * o.pivotY,
+        o._width, o._height
       );
     };
 
@@ -2069,8 +2090,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
         //Draw the sprite
         ctx.translate(
-          sprite.renderX + (sprite.width * sprite.pivotX),
-          sprite.renderY + (sprite.height * sprite.pivotY)
+          sprite.renderX + (sprite._width * sprite.pivotX),
+          sprite.renderY + (sprite._height * sprite.pivotY)
         );
       /* 
         var cos = Math.cos(sprite.rotation),
