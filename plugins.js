@@ -237,10 +237,10 @@ GA.plugins = function(ga) {
     }
   };
 
-  //### rotateSprite
+  //### rotateAroundSprite
   //Make a sprite rotate around another sprite
 
-  ga.rotateSprite = function(rotatingSprite, centerSprite, distance, angle) {
+  ga.rotateAroundSprite = function(rotatingSprite, centerSprite, distance, angle) {
     rotatingSprite.x
       = centerSprite.centerX - rotatingSprite.parent.x
       + (distance * Math.cos(angle))
@@ -252,13 +252,13 @@ GA.plugins = function(ga) {
       - rotatingSprite.halfWidth;
   };
 
-  //### rotatePoint
+  //### rotateAroundPoint
   //Make a point rotate around another point.
   //If distanceX and distanceY are the same value, the rotation will
   //be circular. If they're different values, the rotation will be
   //ellipical.
 
-  ga.rotatePoint = function(pointX, pointY, distanceX, distanceY, angle) {
+  ga.rotateAroundPoint = function(pointX, pointY, distanceX, distanceY, angle) {
     var point = {};
     point.x = pointX + Math.cos(angle) * distanceX;
     point.y = pointY + Math.sin(angle) * distanceY;

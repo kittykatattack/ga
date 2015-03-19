@@ -93,7 +93,7 @@ you'll find in `plugins.js`:
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
 - A handful of useful convenience functions: `followEase`,
   `followConstant`,
-  `angle`, `distance`, `rotateSprite`, `rotatePoint`, `wait`,
+  `angle`, `distance`, `rotateAroundSprite`, `rotateAroundPoint`, `wait`,
   `randomInt`, `randomFloat`, `contain` and `outsideBounds`.
 - A fast, universal `hit` method that handles collision testing and
   reactions (blocking and bounce) for all types of sprites. Use one collision method for

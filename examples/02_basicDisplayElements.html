@@ -218,21 +218,21 @@ function play() {
     + "pointer.y: " + g.pointer.y;
 
   //Make the line's `ax` and `ay` points rotate clockwise around
-  //point 162, 52. Use the `rotatePoint` method to help you do this. 
+  //point 162, 52. Use the `rotateAroundPoint` method to help you do this. 
   //`rotatePoint` returns an object with `x` and `y` properties
   //containing the point's new rotated position. Supply different
   //rotationRadiusX/Y arguments if you want the rotation to be ellipical.
   //`rotatePoint` arguments:
   //pointX, pointY, rotationRadiusX, rotationRadiusY, angleOfRotation
   line.angleA += 0.02;
-  var rotatingA = g.rotatePoint(162, 52, 10, 10, line.angleA);
+  var rotatingA = g.rotateAroundPoint(162, 52, 10, 10, line.angleA);
   line.ax = rotatingA.x;
   line.ay = rotatingA.y;
 
   //Make the line's `bx` and `by` point rotate counter
   //clockwise around point 222, 94
   line.angleB -= 0.03;
-  var rotatingB = g.rotatePoint(220, 94, 10, 10, line.angleB);
+  var rotatingB = g.rotateAroundPoint(220, 94, 10, 10, line.angleB);
   line.bx = rotatingB.x;
   line.by = rotatingB.y;
 }
