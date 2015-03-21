@@ -237,10 +237,10 @@ GA.plugins = function(ga) {
     }
   };
 
-  //### rotateSprite
+  //### rotateAroundSprite
   //Make a sprite rotate around another sprite
 
-  ga.rotateSprite = function(rotatingSprite, centerSprite, distance, angle) {
+  ga.rotateAroundSprite = function(rotatingSprite, centerSprite, distance, angle) {
     rotatingSprite.x
       = centerSprite.centerX - rotatingSprite.parent.x
       + (distance * Math.cos(angle))
@@ -252,13 +252,13 @@ GA.plugins = function(ga) {
       - rotatingSprite.halfWidth;
   };
 
-  //### rotatePoint
+  //### rotateAroundPoint
   //Make a point rotate around another point.
   //If distanceX and distanceY are the same value, the rotation will
   //be circular. If they're different values, the rotation will be
   //ellipical.
 
-  ga.rotatePoint = function(pointX, pointY, distanceX, distanceY, angle) {
+  ga.rotateAroundPoint = function(pointX, pointY, distanceX, distanceY, angle) {
     var point = {};
     point.x = pointX + Math.cos(angle) * distanceX;
     point.y = pointY + Math.sin(angle) * distanceY;
@@ -1155,12 +1155,13 @@ GA.plugins = function(ga) {
     update: function() {
 
       //Change the width of the blue `frontBar` to match the
-      //ratio of assets that have loaded. Adding `+ 1` to
+      //ratio of assets that have loaded. Adding `+1` to
       //`assets.loaded` means that the loading bar will appear at 100%
       //when the last asset is being loaded, which is reassuring for the
-      //player.
-      var ratio = (this.assets.loaded + 1) / this.assets.toLoad;
-      this.frontBar.scaleX = ratio;
+      //player observing the load progress
+      var ratio = (ga.assets.loaded + 1) / ga.assets.toLoad;
+      this.frontBar.width = this.maxWidth * ratio;
+
 
       //Display the percentage
       this.percentage.content = Math.floor((ratio) * 100) + "%";
@@ -1964,7 +1965,7 @@ GA.plugins = function(ga) {
     hit = false;
 
     //Calculate the distance vector
-    if(global) {
+    if (global) {
       vx = (r1.gx + r1.halfWidth) - (r2.gx + r2.halfWidth);
       vy = (r1.gy + r1.halfHeight) - (r2.gy + r2.halfHeight);
     } else {

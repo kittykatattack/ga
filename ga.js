@@ -1527,18 +1527,20 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga.sprite = function(source) {
     var o = {};
 
-    //Make this a display object.
-    makeDisplayObject(o);
-    o.frames = [];
-    o.loop = true;
-    o._currentFrame = 0;
-
     //This next part is complicated. The code has to figure out what
     //the source is referring to, and then assign its properties
     //correctly to the sprite's properties. Read carefully!
     //If no `source` is provided, alert the user.
     if (source === undefined) throw new Error("Sprites require a source");
 
+    //Make this a display object.
+    makeDisplayObject(o);
+    o.frames = [];
+    o.loop = true;
+    o._currentFrame = 0;
+    o.setTexture(source);
+
+    o.setTexture = function(source) {
     //If the source is just an ordinary string, use it to create the
     //sprite.
     if (!source.image) {
@@ -1639,7 +1641,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       o.sourceWidth = source.width;
       o.sourceHeight = source.height;
     }
-
+    };
+    
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {
       if (o.frames.length > 0) {
@@ -1657,10 +1660,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         else if (g.assets[o.frames[frameNumber]].frame) {
           o.sourceX = g.assets[o.frames[frameNumber]].frame.x;
           o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
+          o.sourceWidth = g.assets[o.frames[frameNumber]].frame.w;
+          o.sourceHeight = g.assets[o.frames[frameNumber]].frame.h;
+          o.width = g.assets[o.frames[frameNumber]].frame.w;
+          o.height = g.assets[o.frames[frameNumber]].frame.h;
         }
 
         //If neither of the above are true, then each frame must be
-        //an individual Image object
+        //an individual Image object.
         else {
           o.source = g.assets[o.frames[frameNumber]];
           o.sourceX = 0;
