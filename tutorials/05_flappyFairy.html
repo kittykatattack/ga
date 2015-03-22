@@ -129,6 +129,10 @@ function setup() {
     fairy.vy += 1.5;
   };  
 
+  g.key.space.press = function(){
+    g.enterFullScreen();
+  };
+
   //set the game state to `play`
   g.state = play;
 }

@@ -13,6 +13,60 @@ started. Keep scrolling, and you'll find a complete beginner's
 tutorial ahead. If you've never made a game before, the tutorials are
 the best place to start.
 
+### Table of contents:
+1. [Features](#features)
+2. [The Plugins](#plugins)
+3. [Coming soon...](#comingsoon)
+4. [Ga's philosophy and technical constraints](#philosophy)
+5. [Minifying, crushing and compressing](#minifying)
+6. [Contributions and Licencing](#contibutions)
+7. [Tutorials](#tutorials)
+  1. [Treasure Hunter](#treasure)
+    1. [Setting up the HTML container page](#settingup)
+    2. [Initializing the Ga engine](#initializing)
+    3. [Define your "global" variables](#defineglobals)
+    4. [Initialize your game with a setup function](#setupfunction)
+      1. [Customizing the canvas](#customizing)
+      2. [Creating the `chimes` sound object](#creatingsound)
+      3. [Creating game scenes](#gamescenes)
+      4. [Making sprites](#makingsprites)
+      5. [Positioning sprites](#positioningsprites)
+      6. [Assigning dynamic properties](#dynamicproperties)
+      7. [Creating the enemy sprites](#enemysprites)
+      8. [The health bar](#healthbar)
+      9. [The game over scene](#gameoverscene)
+      10. [Keyboard interactivity](#keyboard)
+      11. [Setting the game state](#gamestate)
+    5. [Game logic with the play function loop](#gamelogic)
+      1. [Moving the player sprite](#movingplayer)
+      2. [Containing sprites inside the screen boundaries](#boundries)
+      3. [Collision with the enemies](#collisionenemy)
+        1. [Collision with the treasure](#collisiontreasure)
+      4. [Ending the game](#endinggame1)
+    6. [Using images](#usingimages)
+      1. [Individual images](#individualimages)
+        1. [Loading image files](#loadingimagefile)
+        2. [Making sprites with images](#makingsprites)
+        3. [Fine-tuning the containment area](#finetuning)
+    7. [Using a texture atlas](#textureatlas)
+      1. [Preparing the images](#preparingimages)
+      2. [loading the texture atlas](#loadingatlas)
+  2. [Alien Armada](#alianarmada)
+    1. [Load and use a custom font](#customfonts)
+    2. [Scale and center the game in the browser](#scalebrowser)
+    3. [A loading progress bar](#progressbar)
+    4. [Shooting bullets](#shootingbullets)
+    5. [Sprite states](#spritestates)
+    6. [Generating random aliens](#randomaliens)
+      1. [Timing the aliens](#timingaliens)
+      2. [The aliens' random start positions](#randomposition)
+    7. [Moving the aliens](#movingaliens)
+    8. [Making the aliens explode](#explodealiens)
+    9. [Displaying the score](#displayingscore)
+    10. [Ending and resetting the game](#endinggame2)
+  3. [Coming very soon: Flappy Fairy!](#flappyfairy)
+
+<a id='features'></a>
 Features
 --------
 
@@ -81,7 +135,7 @@ a solar powered laptop, an unlimited supply of
 coconuts, and a copy of `ga.js` you could recreate the entire history of 2D video games,
 from SpaceWar! to Flappy Bird. And all of it would fit on a 3.5 inch
 floppy disk.
-
+<a id='plugins'></a>
 ### The plugins
 
 But there's more! Ga comes with a `plugins.js` file that includes a
@@ -131,12 +185,14 @@ you want to use for your game. Your `custom.js` file can load at
 compile time, so it's ready to use before your game code runs. 
 (See the `plugins.js` file for instructions on how to do this).
 
+<a id='comingsoon'></a>
 ### Coming soon... 
 
 - Tiled Editor isometric maps support.
 - Many more examples including complete game prototypes.
 - Additional documentation, examples, and tutorials.
 
+<a id='philosophy'></a>
 Ga's philosophy and technical constraints
 -----------------------------------------
 
@@ -160,6 +216,7 @@ Ga's philosophy and technical constraints
   plugins.js file, so that game developers can pick and choose a
   minimal custom set of components they want for specific games without bloating the core engine.
 
+<a id='minifying'></a>
 Minifying, crushing and compressing
 -----------------------------------
 
@@ -182,7 +239,7 @@ flag to `ECMASCRIPT5`, like this:
 
 `java -jar ~/compiler.jar --language_in=ECMASCRIPT5 --js ga.js --js_output_file ga.min.js`
 
-
+<a id='contributions'></a>
 Contributions and Licencing
 ---------------------------
 It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
@@ -196,6 +253,7 @@ That means its freer than free.
 It's like a pebble.
 You can pick it up and throw into the sea.
 
+<a id='tutorials'></a>
 Tutorials
 ---------
 
@@ -222,6 +280,7 @@ Ok, got it?
 Do you know what JavaScript variables, functions, arrays and objects are and how to
 use them? Good, then read on!
 
+<a id='treasure'></a>
 ### Treasure Hunter
 
 The first game we're going to make is a simple object collection and
@@ -277,6 +336,7 @@ covered in these tutorials. When you're finished working through these
 tutorials, the `examples` will take you on the next stage of your
 journey.
 
+<a id='setingup'></a>
 #### Setting up the HTML container page
 
 Before you can start programming in JavaScript, you need to set up a
@@ -304,6 +364,7 @@ features. You'll write all your game code inside the last pair of
 This is the [minimum amount of HTML code you need for a valid HTML5
 document](http://stackoverflow.com/questions/9797046/whats-a-valid-html5-document).
 
+<a id='initializing'></a>
 #### Initializing the Ga engine
 
 The next step is to write some JavaScript code that initializes and starts the Ga game
@@ -370,6 +431,7 @@ The last thing you need to do is call Ga's `start` method.
 
 This is the switch that turns the Ga engine on.
 
+<a id='definingglobals'></a>
 #### Define your "global" variables
 
 After Ga has been started, declare all the variables that your game
@@ -388,6 +450,7 @@ your JavaScript code in an enclosing **immediate function** to isolate it
 from the global
 space](http://stackoverflow.com/questions/17058606/why-using-self-executing-function-in-javascript).
 
+<a id='setupfunction'></a>
 #### Initialize your game with a setup function
 
 As soon as Ga starts, it will look for and run a function in your game
@@ -424,6 +487,7 @@ because it starts the `play` function. The `play` function runs all the game log
 in a loop. But before we look at how that works, let's see what the
 specific code inside the `setup` function does.
 
+<a id='customizing'></a>
 ##### Customizing the canvas
 
 The first two lines in the `setup` function give the canvas a black dashed border and set its
@@ -440,6 +504,7 @@ Ga uses an ordinary 2D canvas element to display the game graphics,
 and you can access it in your code at any time with `g.canvas`. You
 can modify it with any ordinary HTML/CSS properties.
 
+<a id='creatingsound'></a>
 ##### Creating the `chimes` sound object
 
 You'll remember from the code above that we preloaded a sound file
@@ -465,6 +530,7 @@ giving your a
 strange security related error message, check to make sure that the
 web server is initialized.
 
+<a id='gamescenes'></a>
 ##### Creating game scenes
 
 Ga has a useful method called `group` that lets you group game objects
@@ -497,6 +563,7 @@ the examples ahead.
 
 But what are sprites, and how do you make them?
 
+<a id='makingsprites'></a>
 ##### Making sprites
 
 Sprites are the most important elements in any game. Sprites are
@@ -573,6 +640,7 @@ Notice that after each sprite is created, it's added to the
 Let's find out a little more about how these sprites are positioned on
 the canvas.
 
+<a id='positioningsprites'></a>
 ##### Positioning sprites
 
 All sprites have `x` and `y` properties that you can use to precisely
@@ -633,6 +701,7 @@ This would place `spriteTwo` directly to the left of `spriteOne`, and
 align it vertically .You'll see many examples of how to use these `put` methods throughout
 these tutorials.
 
+<a id='dynamicproperties'></a>
 ##### Assigning dynamic properties
 
 Before we continue, there's one small detail you need to notice. The
@@ -644,6 +713,7 @@ treasure.pickedUp = false;
 You'll see how we're going to use `treasure.pickedUp` later in the game logic to help us determine the
 progress of the game. You can dynamically assign any custom properties or methods to sprites like this, if you need to.
 
+<a id='enemysprites'></a>
 ##### Creating the enemy sprites
 
 There are 6 enemies sprites (red squares) in Treasure Hunter. They're
@@ -736,6 +806,7 @@ called `enemies`.
 Later in the code you'll see how we'll access all the enemies in this
 array to figure out if they're touching the player.
 
+<a id='healthbar'></a>
 ##### The health bar
 
 You'll notice that when the player
@@ -781,6 +852,7 @@ that looks like this:
 
 That's pretty neat and readable, so we'll keep it!
 
+<a id='gameoverscene'></a>
 ##### The game over scene
 
 If the player's health drops to zero, or the player manages to
@@ -830,6 +902,7 @@ property to `true` to display the text message. We'll also set the
 `gameScene`'s `visible` property to `false` so that all the game
 sprites are hidden.
 
+<a id='keyboard'></a>
 ##### Keyboard interactivity
 
 You control the player (the blue square) with the keyboard arrow keys.
@@ -920,6 +993,7 @@ with Ga's `keyboard` method:
 Your new `customKey` has `press` and `release` methods
 that you can program in the same way as the examples above. 
 
+<a id='gamestate'></a>
 ##### Setting the game state
 
 The **game state** is the function that Ga is currently running. When
@@ -956,6 +1030,7 @@ You can start the game loop again with the `resume` method, like this:
 
 Now let's find out how Treasure Hunter's `play` function works. 
 
+<a id='gamelogic'></a>
 #### Game logic with the play function loop
 
 As you've just learned, everything in the `play` function runs in a
@@ -969,6 +1044,7 @@ function play() {
 This is where all the game logic happens. It's the fun part,
 so let's find out what the code inside the `play` function does.
 
+<a id='movingplayer'></a>
 ##### Moving the player sprite
 
 Treasure Hunter uses Ga's `move` method inside the `play` function to move the sprites in the
@@ -996,6 +1072,7 @@ supplying the array as the argument.
 So now you can easily move the player, but what happens when the
 player reaches the edges of the screen?
 
+<a id='boundries'></a>
 ##### Containing sprites inside the screen boundaries
 
 Use Ga's `contain` method to keep sprites inside the boundaries of
@@ -1044,6 +1121,7 @@ if (playerHitsEdges) {
     = "The player hit the " + playerHitsEdges + " of the canvas";
 }
 ```
+<a id='collisionenemy'></a>
 ##### Collision with the enemies
 
 When the player hits any of the enemies, the width of the health bar
@@ -1168,6 +1246,7 @@ Multiplying the enemy's `vy` (vertical velocity) value by negative 1
 makes it go in the opposite direction. It's a really simple **bounce**
 effect.
 
+<a id='collisiontreasure'></a>
 ###### Collision with the treasure
 
 If the player touches the treasure (the yellow square), the `chimes`
@@ -1249,6 +1328,7 @@ the treasure has been picked up, the code sets `treasure.pickedUp` to
 Now that the player has picked up the treasure, how can you check for
 the end of the game?
 
+<a id='endinggame1'></a>
 ##### Ending the game
 
 There are two ways the game can end. The player's health can run out,
@@ -1286,6 +1366,7 @@ And that's it for Treasure Hunter! Before you continue, try making
 your own game from scratch using some of these same techniques. When
 you're ready, read on!
 
+<a id='usingimages'></a>
 ### Using images
 
 There are three main ways you can use images in your Ga games. 
@@ -1317,6 +1398,7 @@ can find more of her artwork
 [here](http://opengameart.org/users/sharm).
 Thanks, Lanea!)
 
+<a id='individualimages'></a>
 #### Individual images
 
 Open and play the next version of Treasure Hunter:
@@ -1331,6 +1413,7 @@ and structure is exactly the same as the first version of the game.
 The only thing that's changed is the appearance of the sprites.
 How was this done?
 
+<a id='loadingimagefile'></a>
 ##### Loading image files 
 
 Each sprite in the game uses an individual PNG image file. You'll find
@@ -1393,6 +1476,7 @@ g.assets.whenLoaded = function() {
 Now that you've loaded the images into the game, let's find out how to
 use them to make sprites.
 
+<a id='makingsprites'></a>
 ##### Making sprites with images
 
 Create an image sprite using the `sprite` method using the same format you learnt
@@ -1448,6 +1532,7 @@ game prototypes using simple shapes that you can easily swap out for
 detailed images as your game ideas develops. The rest of the code in the
 game can remain as-is.
 
+<a id='finetuning'></a>
 ##### Fine-tuning the containment area
 
 One small improvement that was made to this new version Treasure
@@ -1473,6 +1558,7 @@ g.contain(
 Just tweak the `x`, `y`, `width` and `height` values so that the
 containing area looks natural for the game you're making.
 
+<a id='textureatlas'></a>
 #### Using a texture atlas
 
 If you’re working on a big, complex game, you’ll want a fast and
@@ -1503,6 +1589,7 @@ don’t use Texture Packer, similar tools like [Shoebox](http://renderhjs.net/sh
 in the same format. Let’s find out how to use it to make a texture
 atlas with Texture Packer, and how to load it into a game.
 
+<a id='preparingimages'></a>
 ##### Preparing the images
 
 You first need individual PNG images for each image in your game.
@@ -1529,6 +1616,7 @@ this example my file names are `treasureHunter.json` and
 your life easier, just keep both files in your project’s `images`
 folder. (Think of the JSON file as extra metadata for the image file.)
 
+<a id='loadingatlas'></a>
 ##### loading the texture atlas
 
 To load the texture atlas into your game, just include the JSON file
@@ -1587,6 +1675,7 @@ Take a look at `treasureHunterAtlas.html` file in the `tutorials` folder
 to see a working example of how to load a texture atlas and use it to
 make sprites.
 
+<a id='alienarmada'></a>
 ### Alien Armada
 
 The next example game in this series of tutorials is Alien Armada. Can you
@@ -1620,6 +1709,7 @@ all of this code in its proper context. Its general structure is identical
 to Treasure Hunter, with the addition of these new techniques. Let's
 find out how they were implemented.
 
+<a id='customfonts'></a>
 #### Load and use a custom font
 
 Alien Armada uses a custom font called `emulogic.ttf` to display the
@@ -1647,6 +1737,7 @@ scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
 ```
 You can and load and use any fonts in TTF, OTF, TTC or WOFF format.
 
+<a id='scalebrowser'></a>
 #### Scale and center the game in the browser
 
 You'll notice that when you play Alien Armada, the game is centered
@@ -1712,6 +1803,7 @@ window.addEventListener("resize", function(event){
 If you want to find out how it works, or you want to customize it further, you'll
 find the `scaleToWindow` method in Ga's `plugins.js` file. 
 
+<a id='progressbar'></a>
 ####A loading progress bar
 
 Alien Armada loads three MP3 sound files: a shooting sound, an
@@ -1784,6 +1876,7 @@ writing your own custom loading animation, if you want to. You can run any code 
 like in the `load` function, so it's entirely up to you to decide what
 should happen or what is displayed while your game is loading.
 
+<a id='shootingbullets'></a>
 #### Shooting bullets
 
 How can you make the cannon fire bullets? 
@@ -1880,6 +1973,7 @@ array and updates their x and y positions with the value of their `vx` and `vy` 
 So now you know how the bullets are created and animated. But what happens when
 they hit one of the aliens?
 
+<a id='spritestates'></a>
 #### Sprite states
 
 When a bullet hits an alien, a yellow explosion image appears. This
@@ -1957,6 +2051,7 @@ same thing as `show`. Although you're free use `gotoAndStop` in your
 game code, by convention it's only used internally by Ga's rendering
 engine.)
 
+<a id='randomaliens'></a>
 #### Generating random aliens
 
 Alien Armada generates aliens at any 1 of 14 randomly chosen positions
@@ -1966,6 +2061,7 @@ appear at an ever-increasing rate. This makes the game gradually more
 difficult as it
 progresses. Let's find out how these two features are implemented.
 
+<a id='timingaliens'></a>
 ##### Timing the aliens
 
 When the game starts, the first new alien is generated after 100
@@ -2012,6 +2108,7 @@ increases. You can also see that the `alienTimer` is set back to 0 after the spr
 has been created so that it can restart counting towards making
 the next new alien. 
 
+<a id='randomposition'></a>
 ##### The aliens' random start positions
 
 Before we generate any aliens, we need an array to store all the alien
@@ -2048,7 +2145,7 @@ if(alienTimer === alienFrequency) {
   var alien = g.sprite(alienFrames);
 
   //Define some states on the alien that correspond
-  //to the its two frames.
+  //to its two frames.
   alien.states = {
     normal: 0,
     destroyed: 1
@@ -2097,6 +2194,7 @@ aliens.push(alien);
 ```
 All this code starts pumping out aliens at a steadily increasing rate.
 
+<a id='movingaliens'></a>
 #### Moving the aliens
 
 How do we make the aliens move? In exactly the same way made the
@@ -2124,6 +2222,7 @@ g.move(aliens);
 ```
 This updates the aliens positions with their velocities automatically.
 
+<a id='explodealiens'></a>
 #### Making the aliens explode
 
 Now that you know how to change the alien's state, how can you use
@@ -2260,6 +2359,7 @@ from their arrays.
 
 And that's how the game's collision works!
 
+<a id='displayingscore'></a>
 #### Displaying the score
 
 Another new feature introduced by Alien Armada is a dynamic score
@@ -2284,6 +2384,7 @@ scoreDisplay.content = score;
 ```
 And that's all there is to it!
 
+<a id='endinggame2'></a>
 #### Ending and resetting the game
 
 There are two ways the game can end. Either the player shoots down 60
@@ -2402,6 +2503,7 @@ And this is all the code needed to start the game again. You can play
 Alien Armada as many times as you like and it will reset and restart
 itself like this endlessly.
 
+<a id='flappyfairy'></a>
 ### Coming very soon: Flappy Fairy!
 
 
