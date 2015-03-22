@@ -1538,110 +1538,117 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.frames = [];
     o.loop = true;
     o._currentFrame = 0;
-    o.setTexture(source);
 
+    //Set the sprite's source image
+    //(`setTexture` is called on the sprite after this function
+    //definition.)
     o.setTexture = function(source) {
-    //If the source is just an ordinary string, use it to create the
-    //sprite.
-    if (!source.image) {
 
-      //If the source isn't an array, then it must be a single image.
-      if(!(source instanceof Array)) {
+      //If the source is just an ordinary string, use it to create the
+      //sprite.
+      if (!source.image) {
 
-        //Is the string referring to a tileset frame from a Texture Packer JSON
-        //file, or is it referring to a JavaScript Image object? Let's find out.
-        if (ga.assets[source] instanceof Image) {
+        //If the source isn't an array, then it must be a single image.
+        if(!(source instanceof Array)) {
 
-          //Cool, it's just an ordinary Image object. That's easy.
-          o.source = ga.assets[source];
-          o.sourceX =  0;
-          o.sourceY =  0;
-          o.width = o.source.width;
-          o.height = o.source.height;
-          o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.height;
-        }
+          //Is the string referring to a tileset frame from a Texture Packer JSON
+          //file, or is it referring to a JavaScript Image object? Let's find out.
+          if (ga.assets[source] instanceof Image) {
 
-        //No, it's not an Image object. So it must be a tileset frame
-        //from a texture atlas.
-        else {
+            //Cool, it's just an ordinary Image object. That's easy.
+            o.source = ga.assets[source];
+            o.sourceX =  0;
+            o.sourceY =  0;
+            o.width = o.source.width;
+            o.height = o.source.height;
+            o.sourceWidth = o.source.width;
+            o.sourceHeight = o.source.height;
+          }
 
-          //Use the texture atlas's properties to assign the sprite's
-          //properties.
-          o.tilesetFrame = ga.assets[source];
-          o.source = o.tilesetFrame.source;
-          o.sourceX = o.tilesetFrame.frame.x;
-          o.sourceY = o.tilesetFrame.frame.y;
-          o.width = o.tilesetFrame.frame.w;
-          o.height = o.tilesetFrame.frame.h;
-          o.sourceWidth = o.tilesetFrame.frame.w;
-          o.sourceHeight = o.tilesetFrame.frame.h;
-        }
+          //No, it's not an Image object. So it must be a tileset frame
+          //from a texture atlas.
+          else {
 
-      //The source is an array. But what kind of array? Is it an array
-      //Image objects or an array of texture atlas frame ids?
-      } else {
-        if (ga.assets[source[0]] && ga.assets[source[0]].source) {
+            //Use the texture atlas's properties to assign the sprite's
+            //properties.
+            o.tilesetFrame = ga.assets[source];
+            o.source = o.tilesetFrame.source;
+            o.sourceX = o.tilesetFrame.frame.x;
+            o.sourceY = o.tilesetFrame.frame.y;
+            o.width = o.tilesetFrame.frame.w;
+            o.height = o.tilesetFrame.frame.h;
+            o.sourceWidth = o.tilesetFrame.frame.w;
+            o.sourceHeight = o.tilesetFrame.frame.h;
+          }
 
-          //The source is an array of frames on a texture atlas tileset.
-          o.frames = source;
-          o.source = ga.assets[source[0]].source;
-          o.sourceX = ga.assets[source[0]].frame.x;
-          o.sourceY = ga.assets[source[0]].frame.y;
-          o.width = ga.assets[source[0]].frame.w;
-          o.height = ga.assets[source[0]].frame.h;
-          o.sourceWidth = ga.assets[source[0]].frame.w;
-          o.sourceHeight = ga.assets[source[0]].frame.h;
-        }
+        //The source is an array. But what kind of array? Is it an array
+        //Image objects or an array of texture atlas frame ids?
+        } else {
+          if (ga.assets[source[0]] && ga.assets[source[0]].source) {
 
-        //It must be an array of image objects
-        else {
-          o.frames = source;
-          o.source = ga.assets[source[0]];
-          o.sourceX = 0;
-          o.sourceY = 0;
-          o.width = o.source.width;
-          o.height = o.source.height;
-          o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.height;
+            //The source is an array of frames on a texture atlas tileset.
+            o.frames = source;
+            o.source = ga.assets[source[0]].source;
+            o.sourceX = ga.assets[source[0]].frame.x;
+            o.sourceY = ga.assets[source[0]].frame.y;
+            o.width = ga.assets[source[0]].frame.w;
+            o.height = ga.assets[source[0]].frame.h;
+            o.sourceWidth = ga.assets[source[0]].frame.w;
+            o.sourceHeight = ga.assets[source[0]].frame.h;
+          }
+
+          //It must be an array of image objects
+          else {
+            o.frames = source;
+            o.source = ga.assets[source[0]];
+            o.sourceX = 0;
+            o.sourceY = 0;
+            o.width = o.source.width;
+            o.height = o.source.height;
+            o.sourceWidth = o.source.width;
+            o.sourceHeight = o.source.height;
+          }
         }
       }
-    }
 
-    //If the source contains an `image` sub-property, this must
-    //be a `frame` object that's defining the rectangular area of an inner sub-image
-    //Use that sub-image to make the sprite. If it doesn't contain a
-    //`data` property, then it must be a single frame.
-    else if(source.image && !source.data) {
+      //If the source contains an `image` sub-property, this must
+      //be a `frame` object that's defining the rectangular area of an inner sub-image
+      //Use that sub-image to make the sprite. If it doesn't contain a
+      //`data` property, then it must be a single frame.
+      else if(source.image && !source.data) {
 
-      //Throw an error if the source is not an image file.
-      if (!(ga.assets[source.image] instanceof Image)) {
-        throw new Error(source.image + " is not an image file");
+        //Throw an error if the source is not an image file.
+        if (!(ga.assets[source.image] instanceof Image)) {
+          throw new Error(source.image + " is not an image file");
+        }
+        o.source = ga.assets[source.image];
+        o.sourceX = source.x;
+        o.sourceY = source.y;
+        o.width = source.width;
+        o.height = source.height;
+        o.sourceWidth = source.width;
+        o.sourceHeight = source.height;
       }
-      o.source = ga.assets[source.image];
-      o.sourceX = source.x;
-      o.sourceY = source.y;
-      o.width = source.width;
-      o.height = source.height;
-      o.sourceWidth = source.width;
-      o.sourceHeight = source.height;
-    }
 
-    //If the source contains an `image` sub-property
-    //and a `data` property, then it contains multiple frames
-    else if(source.image && source.data) {
-      o.source = ga.assets[source.image];
-      o.frames = source.data;
+      //If the source contains an `image` sub-property
+      //and a `data` property, then it contains multiple frames
+      else if(source.image && source.data) {
+        o.source = ga.assets[source.image];
+        o.frames = source.data;
 
-      //Set the sprite to the first frame
-      o.sourceX = o.frames[0][0];
-      o.sourceY = o.frames[0][1];
-      o.width = source.width;
-      o.height = source.height;
-      o.sourceWidth = source.width;
-      o.sourceHeight = source.height;
-    }
+        //Set the sprite to the first frame
+        o.sourceX = o.frames[0][0];
+        o.sourceY = o.frames[0][1];
+        o.width = source.width;
+        o.height = source.height;
+        o.sourceWidth = source.width;
+        o.sourceHeight = source.height;
+      }
     };
+
+    //Use `setTexture` to change a sprite's source image 
+    //while the game is running
+    o.setTexture(source);
     
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {

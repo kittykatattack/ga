@@ -31,7 +31,8 @@ Here's Ga's core feature list:
   loop at any time.
 - Tileset (spritesheet) support using `frame` and `filmstrip` methods to make
   sprites using tileset frames.
-- Built-in texture atlas support for the popular Texture Packer format.
+- Built-in texture atlas support for the popular Texture Packer
+- format. Use a sprite's `setTexture` method if you want to change a sprite's image source while the game is running 
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
