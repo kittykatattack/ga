@@ -529,7 +529,7 @@ GA.plugins = function(ga) {
     //Decide whether to center the canvas vertically or horizontally.
     //Wide canvases should be centered vertically, and 
     //square or tall canvases should be centered horizontally
-    if (this.canvas.width > this.canvas.height) {
+    if (ga.canvas.width > ga.canvas.height) {
       if (ga.canvas.width * scale < window.innerWidth) {
         center = "horizontally";
       } else { 
@@ -1169,9 +1169,9 @@ GA.plugins = function(ga) {
     remove: function() {
 
       //Remove the progress bar
-      g.remove(this.frontBar);
-      g.remove(this.backBar);
-      g.remove(this.percentage);
+      ga.remove(this.frontBar);
+      ga.remove(this.backBar);
+      ga.remove(this.percentage);
     }
   };
 
