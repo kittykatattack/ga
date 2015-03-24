@@ -340,6 +340,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   */
   ga.scale = 1;
 
+  //Properties required for optional fullscreen mode.
+  ga.fullscreen = false;
+  ga.fullscreenEnabled = false;
+
   /*
   ### Core game engine methods
   This next sections contains all the important methods that the game engine needs to do its work.
@@ -1775,8 +1779,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //the button has been pressed down.
     o.pressed = false;
 
+    //`enabled` is a Boolean which, if false, deactivates the button.
+    o.enabled = true;
+
     //`hoverOver` is a Boolean which checkes whether the pointer
-    //has hoverd over the button.
+    //has hovered over the button.
     o.hoverOver = false;
 
     //Add the button into the global `buttons` array so that it
@@ -1787,94 +1794,98 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Ga's game loop.
     o.update = function(pointer, canvas) {
 
-      //Figure out if the pointer is touching the button.
-      var hit = ga.pointer.hitTestSprite(o);
+      //Only update the button if it's enabled.
+      if(o.enabled) {
 
-      //1. Figure out the current state.
-      if (pointer.isUp) {
+        //Figure out if the pointer is touching the button.
+        var hit = ga.pointer.hitTestSprite(o);
 
-        //Up state.
-        o.state = "up";
+        //1. Figure out the current state.
+        if (pointer.isUp) {
 
-        //Show the first frame, if this is a button.
-        if (o.subtype === "button") o.show(0);
-      }
+          //Up state.
+          o.state = "up";
 
-      //If the pointer is touching the button, figure out
-      //if the over or down state should be displayed.
-      if (hit) {
-
-        //Over state.
-        o.state = "over";
-
-        //Show the second frame if this sprite has
-        //3 frames and it's button.
-        if (o.frames && o.frames.length === 3 && o.subtype === "button") {
-          o.show(1);
+          //Show the first frame, if this is a button.
+          if (o.subtype === "button") o.show(0);
         }
 
-        //Down state.
-        if (pointer.isDown) {
-          o.state = "down";
+        //If the pointer is touching the button, figure out
+        //if the over or down state should be displayed.
+        if (hit) {
 
-          //Show the third frame if this sprite is a button and it
-          //has only three frames, or show the second frame if it
-          //only has two frames.
-          if(o.subtype === "button") {
-            if (o.frames.length === 3) {
-              o.show(2);
-            } else {
-              o.show(1);
+          //Over state.
+          o.state = "over";
+
+          //Show the second frame if this sprite has
+          //3 frames and it's button.
+          if (o.frames && o.frames.length === 3 && o.subtype === "button") {
+            o.show(1);
+          }
+
+          //Down state.
+          if (pointer.isDown) {
+            o.state = "down";
+
+            //Show the third frame if this sprite is a button and it
+            //has only three frames, or show the second frame if it
+            //only has two frames.
+            if(o.subtype === "button") {
+              if (o.frames.length === 3) {
+                o.show(2);
+              } else {
+                o.show(1);
+              }
             }
           }
         }
-      }
 
-      //Run the correct button action.
-      //a. Run the `press` method if the button state is "down" and
-      //the button hasn't already been pressed.
-      if (o.state === "down") {
-        if (!o.pressed) {
-          if (o.press) o.press();
-          o.pressed = true;
-          o.action = "pressed";
-        }
-      }
-
-      //b. Run the `release` method if the button state is "over" and
-      //the button has been pressed.
-      if (o.state === "over") {
-        if (o.pressed) {
-          if (o.release) o.release();
-          o.pressed = false;
-          o.action = "released";
-
-          //If the pointer was tapped and the user assigned a `tap`
-          //method, call the `tap` method
-          if (ga.pointer.tapped && o.tap) o.tap();
+        //Run the correct button action.
+        //a. Run the `press` method if the button state is "down" and
+        //the button hasn't already been pressed.
+        if (o.state === "down") {
+          if (!o.pressed) {
+            if (o.press) o.press();
+            o.pressed = true;
+            o.action = "pressed";
+          }
         }
 
-        //Run the `over` method if it has been assigned
-        if (!o.hoverOver) {
-          if (o.over) o.over();
-          o.hoverOver = true;
-        }
-      }
+        //b. Run the `release` method if the button state is "over" and
+        //the button has been pressed.
+        if (o.state === "over") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
 
-      //c. Check whether the pointer has been released outside
-      //the button's area. If the button state is "up" and it's
-      //already been pressed, then run the `release` method.
-      if (o.state === "up") {
-        if (o.pressed) {
-          if (o.release) o.release();
-          o.pressed = false;
-          o.action = "released";
+            //If the pointer was tapped and the user assigned a `tap`
+            //method, call the `tap` method
+            if (ga.pointer.tapped && o.tap) o.tap();
+          }
+
+          //Run the `over` method if it has been assigned
+          if (!o.hoverOver) {
+            if (o.over) o.over();
+            o.hoverOver = true;
+          }
         }
 
-        //Run the `out` method if it has been assigned
-        if (o.hoverOver) {
-          if (o.out) o.out();
-          o.hoverOver = false;
+        //c. Check whether the pointer has been released outside
+        //the button's area. If the button state is "up" and it's
+        //already been pressed, then run the `release` method.
+        if (o.state === "up") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
+          }
+
+          //Run the `out` method if it has been assigned
+          if (o.hoverOver) {
+            if (o.out) o.out();
+            o.hoverOver = false;
+          }
         }
       }
     };
@@ -2483,6 +2494,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Call the `press` method if it's been assigned by the user
       if (o.press) o.press();
       
+      //Set fullscreen mode, if it's been requested.
+      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
+      if(ga.fullscreenEnabled === false && ga.fullscreen === true) ga.canvas.requestFullscreen();
+      if(ga.fullscreenEnabled === true && ga.fullscreen === false) document.exitFullscreen();
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2504,6 +2520,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       
       //Call the `press` method if it's been assigned by the user.
       if (o.press) o.press();
+      
+      //Set fullscreen mode, if it's been requested. 
+      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
+      if(ga.fullscreen !== undefined && ga.fullscreen === true) ga.canvas.requestFullscreen();
+      if(ga.fullscreen !== undefined && ga.fullscreen === false) document.exitFullscreen();
       
       //Prevent the canvas from being selected.
       event.preventDefault();
@@ -2527,6 +2548,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
+      console.log(ga.fullscreen)
+
+      //Set fullscreen mode, if it's been requested.
+      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
+      if(ga.fullscreen) {
+        if (!ga.fullscreenEnabled) {
+          ga.canvas.requestFullscreen();
+          ga.fullscreenEnabled = true;
+        }
+      } else {
+        if(ga.fullscreenEnabled) {
+          document.exitFullscreen();
+          ga.fullscreenEnabled = false;
+        }
+      }
       
       //Prevent the canvas from being selected.
       event.preventDefault();
@@ -2551,6 +2587,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
       
+      //Set fullscreen mode, if it's been requested.
+      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
+      if(ga.fullscreen !== undefined && ga.fullscreen === true) ga.canvas.requestFullscreen();
+      if(ga.fullscreen !== undefined && ga.fullscreen === false) document.exitFullscreen();
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };

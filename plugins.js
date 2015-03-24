@@ -586,7 +586,138 @@ GA.plugins = function(ga) {
       }
     }
   };
-  
+
+
+  //### enterFullscreen
+  /*
+  Use `enterFullscreen` to make the browser display the game full screen.
+  It automatically centers the game canvas for the best fit
+  */
+  ga.enterFullscreen = function(){
+
+    //To center the canvas we need to inject some CSS
+    //and into the HTML document's `<style>` tag. Some
+    //browsers require an existing `<style>` to do this, so
+    //if no `<style>` tag already exists, let's create one and
+    //append it to the `<body>:
+    var styleSheets = document.styleSheets;
+    if (styleSheets.length === 0) {
+      var divNode = document.createElement("div");
+      divNode.innerHTML = "<style></style>";
+      document.body.appendChild(divNode);
+    }
+    
+    //Unfortunately we also need to do some browser detection
+    //to inject the full screen CSS with the correct vendor 
+    //prefix. So, let's find out what the `userAgent` is.
+    //`ua` will be an array containing lower-case browser names.
+    var ua = navigator.userAgent.toLowerCase(); 
+
+    //Now Decide whether to center the canvas vertically or horizontally.
+    //Wide canvases should be centered vertically, and 
+    //square or tall canvases should be centered horizontally.
+
+    if (ga.canvas.width > ga.canvas.height) {
+
+      //Center vertically.
+      //Add CSS to the stylesheet to center the canvas vertically.
+      //You need a version for each browser vendor, plus a generic
+      //version
+      //(Unfortunately the CSS string cannot include line breaks, so
+      //it all has to be on one long line)
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("explorer") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+    } else {
+
+      //Center horizontally.
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("msie") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+
+    }
+    
+    //Add a `requestFullscreen` polyfill to the canvas
+    var vendors = ["ms", "webkit", "o", "moz"];
+    vendors.forEach(function(vendor) {
+      if (!ga.canvas.requestFullscreen) {
+        ga.canvas.requestFullscreen = ga.canvas[vendor + "RequestFullscreen"];
+      }     
+    });
+    //However, some vendors inconsistenly choose to use an uppercase
+    //"S", as in "RequestFullScreen" - so we have to check for that
+    //too.
+    vendors.forEach(function(vendor) {
+      if (!ga.canvas.requestFullscreen) {
+        ga.canvas.requestFullscreen = ga.canvas[vendor + "RequestFullScreen"];
+      }     
+    });
+
+    //Finally, launch full screen mode.
+    //Because this mode can only be set with direct user interaction,
+    //we can only flag it as `true` or `false`. The actual 
+    //`requestFullscreen` command is run in Ga's pointer events
+    //(See the `makePointer`) function in the `ga.js` file.
+    ga.fullscreen = true;
+    
+    //ga.canvas.requestFullscreen();
+
+  };
+
+  //### exitFullscreen
+  /*
+  Use `exitFullscreen` to make cancel the browser's full screen mode.  
+  */
+  ga.exitFullscreen = function(){
+
+    //Add a `exitFullscreen` polyfill to the canvas
+    var vendors = ["ms", "webkit", "o", "moz"];
+    vendors.forEach(function(vendor) {
+      if (!document.exitFullscreen) {
+        document.exitFullscreen = document[vendor + "ExitFullscreen"];
+      }     
+    });
+    //However, some vendors inconsistenly choose to use
+    //`CancelFullScreen` (also note the uppercase "S").
+    vendors.forEach(function(vendor) {
+      if (!document.exitFullscreen) {
+        document.exitFullscreen = document[vendor + "CancelFullScreen"];
+      }     
+    });
+
+    //Finally, exit full screen mode.
+    //Because this mode can only be set with direct user interaction,
+    //we can only flag it as `true` or `false`. The actual 
+    //`exitFullscreen` command is run in Ga's pointer events
+    //(See the `makePointer`) function in the `ga.js` file.
+    ga.fullscreen = false;
+
+  };
+
   //### scaleToFit - DEPRICATED - DO NOT USE!
   /*
   Center and scale Ga inside the HTML page. The `dimension` can be either "width" or "height"

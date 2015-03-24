@@ -174,6 +174,7 @@ you'll find in `plugins.js`:
   with moving sprites.
 - Create a `worldCamera` that follows sprites around a scrolling game
   world.
+- Use `scaleToWindow` to make the game automatically scale to its maximum size and align itself for the best fit inside the browser window. Use `enterFullscreen` to make the browser enter full screen mode, and `exitFullscreen` to exit full screen mode.
 
 To use the plugins, just copy/paste the code you want to use from `plugins.js` into your game. 
 Or, if you're not worried about the extra size, 
