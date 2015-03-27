@@ -89,9 +89,10 @@ Table of contents
 */
 
 /*
-Prologue: Fixing the WebAudio API
+Prologue: Some necessary polyfills
 --------------------------
 
+### Fixing the WebAudio API.
 The WebAudio API is so new that it's API is not consistently implemented properly across
 all modern browsers. Thankfully, Chris Wilson's Audio Context Monkey Patch script
 normalizes the API for maximum compatibility.
@@ -193,6 +194,118 @@ Thank you, Chris!
   }
 }(window));
 
+//### Fixing the Fullscreen API.
+//The Fullscreen API is also in flux and has a quirky browser
+//implementations. Here's a fix for it, thanks to Norman Paschke:
+//https://github.com/neovov/Fullscreen-API-Polyfill/blob/master/fullscreen-api-polyfill.js
+
+(function (doc) {
+	// Use JavaScript script mode
+	"use strict";
+
+	/*global Element */
+
+	var pollute = true,
+		api,
+		vendor,
+		apis = {
+			// http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html
+			w3: {
+				enabled: "fullscreenEnabled",
+				element: "fullscreenElement",
+				request: "requestFullscreen",
+				exit:    "exitFullscreen",
+				events: {
+					change: "fullscreenchange",
+					error:  "fullscreenerror"
+				}
+			},
+			webkit: {
+				enabled: "webkitIsFullScreen",
+				element: "webkitCurrentFullScreenElement",
+				request: "webkitRequestFullScreen",
+				exit:    "webkitCancelFullScreen",
+				events: {
+					change: "webkitfullscreenchange",
+					error:  "webkitfullscreenerror"
+				}
+			},
+			moz: {
+				enabled: "mozFullScreen",
+				element: "mozFullScreenElement",
+				request: "mozRequestFullScreen",
+				exit:    "mozCancelFullScreen",
+				events: {
+					change: "mozfullscreenchange",
+					error:  "mozfullscreenerror"
+				}
+			},
+			ms: {
+				enabled: "msFullscreenEnabled",
+				element: "msFullscreenElement",
+				request: "msRequestFullscreen",
+				exit:    "msExitFullscreen",
+				events: {
+					change: "MSFullscreenChange",
+					error:  "MSFullscreenError"
+				}
+			}
+		},
+		w3 = apis.w3;
+
+	// Loop through each vendor's specific API
+	for (vendor in apis) {
+		// Check if document has the "enabled" property
+		if (apis[vendor].enabled in doc) {
+			// It seems this browser support the fullscreen API
+			api = apis[vendor];
+			break;
+		}
+	}
+
+	function dispatch( type, target ) {
+		var event = doc.createEvent( "Event" );
+
+		event.initEvent( type, true, false );
+		target.dispatchEvent( event );
+	} // end of dispatch()
+
+	function handleChange( e ) {
+		// Recopy the enabled and element values
+		doc[w3.enabled] = doc[api.enabled];
+		doc[w3.element] = doc[api.element];
+
+		dispatch( w3.events.change, e.target );
+	} // end of handleChange()
+
+	function handleError( e ) {
+		dispatch( w3.events.error, e.target );
+	} // end of handleError()
+
+	// Pollute only if the API doesn't already exists
+	if (pollute && !(w3.enabled in doc) && api) {
+		// Add listeners for fullscreen events
+		doc.addEventListener( api.events.change, handleChange, false );
+		doc.addEventListener( api.events.error,  handleError,  false );
+
+		// Copy the default value
+		doc[w3.enabled] = doc[api.enabled];
+		doc[w3.element] = doc[api.element];
+
+		// Match the reference for exitFullscreen
+		doc[w3.exit] = doc[api.exit];
+
+		// Add the request method to the Element's prototype
+		Element.prototype[w3.request] = function () {
+			return this[api.request].apply( this, arguments );
+		};
+	}
+
+	// Return the API found (or undefined if the Fullscreen API is unavailable)
+	return api;
+
+}(document));
+
 
 /*
 Chapter 1: The game engine
@@ -279,9 +392,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //An array to store the tweening functions.
   ga.tweens = [];
   
-  //An array to store the particles.
-  ga.particles = [];
-  
   //Set the game `state`.
   ga.state = undefined;
 
@@ -316,6 +426,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //`true` by default
   ga.interpolation = true;
 
+  //An array that stores functions which should be run inside
+  //Ga's core `update` game loop. Just push any function you write
+  //into this array, and ga will run it in a continuous loop.
+  ga.updateFunctions = [];
+
   /*
   The canvas's x and y scale. These are set by getters and setter in
   the code ahead. The scale is used in the `makeInteractive`
@@ -338,11 +453,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       g.scale = scaleToFit;
 
   */
+  //The game's screen's scale.  
   ga.scale = 1;
-
-  //Properties required for optional fullscreen mode.
-  ga.fullscreen = false;
-  ga.fullscreenEnabled = false;
 
   /*
   ### Core game engine methods
@@ -448,6 +560,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
 
     //Update all the tween functions in the game.
+    //Note: this bit of code is going to be replaced very soon with the new
+    //tween engine
     if (ga.tweens.length > 0) {
       for(var j = ga.tweens.length - 1; j >= 0; j--) {
         var tween = ga.tweens[j];
@@ -455,14 +569,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     }
 
-    //Update all the particles in the game.
-    if (ga.particles.length > 0) {
-      for(var k = ga.particles.length - 1; k >= 0; k--) {
-        var particle = ga.particles[k];
-        particle.update();
-      }
-    }
-    
     //Update the pointer for drag and drop.
     if(ga.dragAndDrop) {
       ga.pointer.updateDragAndDrop();
@@ -474,6 +580,25 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ga.state();
     }
 
+    /*
+    Loop through all the functions in the `updateFunctions` array
+    and run any functions it contains. You can add any of your
+    own custom functions to this array like this:
+        
+        var customFunction = function() {console.log("I'm in the game loop!);}
+        ga.updateFunctions.push(customFunction);
+
+    See the see the code in the `particleEffect` and `enableFullscreen`
+    section of the `plugins.js` file to see typical examples of how code can be
+    added to the game loop like this.
+    */
+
+    if (ga.updateFunctions.length !== 0) {
+      for (var l = 0; l < ga.updateFunctions.length; l++) {
+        var updateFunction = ga.updateFunctions[l];
+        updateFunction();
+      }
+    }
   }
 
   //### start
@@ -2457,6 +2582,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.dragOffsetX = 0;
     o.dragOffsetY = 0;
 
+
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
 
@@ -2494,11 +2620,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Call the `press` method if it's been assigned by the user
       if (o.press) o.press();
       
-      //Set fullscreen mode, if it's been requested.
-      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
-      if(ga.fullscreenEnabled === false && ga.fullscreen === true) ga.canvas.requestFullscreen();
-      if(ga.fullscreenEnabled === true && ga.fullscreen === false) document.exitFullscreen();
-
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2520,11 +2641,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       
       //Call the `press` method if it's been assigned by the user.
       if (o.press) o.press();
-      
-      //Set fullscreen mode, if it's been requested. 
-      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
-      if(ga.fullscreen !== undefined && ga.fullscreen === true) ga.canvas.requestFullscreen();
-      if(ga.fullscreen !== undefined && ga.fullscreen === false) document.exitFullscreen();
       
       //Prevent the canvas from being selected.
       event.preventDefault();
@@ -2548,22 +2664,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
-      console.log(ga.fullscreen)
 
-      //Set fullscreen mode, if it's been requested.
-      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
-      if(ga.fullscreen) {
-        if (!ga.fullscreenEnabled) {
-          ga.canvas.requestFullscreen();
-          ga.fullscreenEnabled = true;
-        }
-      } else {
-        if(ga.fullscreenEnabled) {
-          document.exitFullscreen();
-          ga.fullscreenEnabled = false;
-        }
-      }
-      
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2587,11 +2688,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
       
-      //Set fullscreen mode, if it's been requested.
-      //(See `enterFullscreen` and `exitFullscreen` in `plugins.js`).
-      if(ga.fullscreen !== undefined && ga.fullscreen === true) ga.canvas.requestFullscreen();
-      if(ga.fullscreen !== undefined && ga.fullscreen === false) document.exitFullscreen();
-
       //Prevent the canvas from being selected.
       event.preventDefault();
     };

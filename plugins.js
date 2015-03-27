@@ -134,7 +134,12 @@ Here's the table of contents to get you started:
 
 `makeTiledWorld`: Creates a game world using Tiled Editor's JSON export data.
 
-### Chapter 7: Resources
+### Chapter 7: The fullscreen module
+
+`requestFullscreen`: Used by `enableFullscreen` to launch fullscreen mode.
+`exitFullscreen`: used by `enableFullscreen` to exit fullsrcreen mode.
+`alignFullscreen`: Used by `enableFullscreen` to scale and center the canvas in fullscreen mode.
+`enableFullscreen`: Enables fullscreen mode when the user clicks or touches the canvas.
 
 */
 
@@ -574,6 +579,11 @@ GA.plugins = function(ga) {
     ga.pointer.scale = scale;
     ga.scale = scale;
 
+    //It's important to set `canvasHasBeenScaled` to `true` so that
+    //the scale values aren't overridden by Ga's check for fullscreen
+    //mode in the `update` function (in the `ga.js` file.)
+    ga.canvas.scaled = true;
+
     //Fix some quirkiness in scaling for Safari
     var ua = navigator.userAgent.toLowerCase(); 
     if (ua.indexOf("safari") != -1) { 
@@ -588,135 +598,6 @@ GA.plugins = function(ga) {
   };
 
 
-  //### enterFullscreen
-  /*
-  Use `enterFullscreen` to make the browser display the game full screen.
-  It automatically centers the game canvas for the best fit
-  */
-  ga.enterFullscreen = function(){
-
-    //To center the canvas we need to inject some CSS
-    //and into the HTML document's `<style>` tag. Some
-    //browsers require an existing `<style>` to do this, so
-    //if no `<style>` tag already exists, let's create one and
-    //append it to the `<body>:
-    var styleSheets = document.styleSheets;
-    if (styleSheets.length === 0) {
-      var divNode = document.createElement("div");
-      divNode.innerHTML = "<style></style>";
-      document.body.appendChild(divNode);
-    }
-    
-    //Unfortunately we also need to do some browser detection
-    //to inject the full screen CSS with the correct vendor 
-    //prefix. So, let's find out what the `userAgent` is.
-    //`ua` will be an array containing lower-case browser names.
-    var ua = navigator.userAgent.toLowerCase(); 
-
-    //Now Decide whether to center the canvas vertically or horizontally.
-    //Wide canvases should be centered vertically, and 
-    //square or tall canvases should be centered horizontally.
-
-    if (ga.canvas.width > ga.canvas.height) {
-
-      //Center vertically.
-      //Add CSS to the stylesheet to center the canvas vertically.
-      //You need a version for each browser vendor, plus a generic
-      //version
-      //(Unfortunately the CSS string cannot include line breaks, so
-      //it all has to be on one long line)
-      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain}", 0);
-      }
-      else if (ua.indexOf("firefox") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-moz-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
-      }
-      else if (ua.indexOf("opera") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-o-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
-      }
-      else if (ua.indexOf("explorer") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-ms-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
-      }
-      else {
-        document.styleSheets[0].insertRule("canvas:fullscreen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
-      }
-    } else {
-
-      //Center horizontally.
-      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
-      }
-      else if (ua.indexOf("firefox") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-moz-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
-      }
-      else if (ua.indexOf("opera") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-o-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
-      }
-      else if (ua.indexOf("msie") !== -1) {
-        document.styleSheets[0].insertRule("canvas:-ms-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
-      }
-      else {
-        document.styleSheets[0].insertRule("canvas:fullscreen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
-      }
-
-    }
-    
-    //Add a `requestFullscreen` polyfill to the canvas
-    var vendors = ["ms", "webkit", "o", "moz"];
-    vendors.forEach(function(vendor) {
-      if (!ga.canvas.requestFullscreen) {
-        ga.canvas.requestFullscreen = ga.canvas[vendor + "RequestFullscreen"];
-      }     
-    });
-    //However, some vendors inconsistenly choose to use an uppercase
-    //"S", as in "RequestFullScreen" - so we have to check for that
-    //too.
-    vendors.forEach(function(vendor) {
-      if (!ga.canvas.requestFullscreen) {
-        ga.canvas.requestFullscreen = ga.canvas[vendor + "RequestFullScreen"];
-      }     
-    });
-
-    //Finally, launch full screen mode.
-    //Because this mode can only be set with direct user interaction,
-    //we can only flag it as `true` or `false`. The actual 
-    //`requestFullscreen` command is run in Ga's pointer events
-    //(See the `makePointer`) function in the `ga.js` file.
-    ga.fullscreen = true;
-    
-    //ga.canvas.requestFullscreen();
-
-  };
-
-  //### exitFullscreen
-  /*
-  Use `exitFullscreen` to make cancel the browser's full screen mode.  
-  */
-  ga.exitFullscreen = function(){
-
-    //Add a `exitFullscreen` polyfill to the canvas
-    var vendors = ["ms", "webkit", "o", "moz"];
-    vendors.forEach(function(vendor) {
-      if (!document.exitFullscreen) {
-        document.exitFullscreen = document[vendor + "ExitFullscreen"];
-      }     
-    });
-    //However, some vendors inconsistenly choose to use
-    //`CancelFullScreen` (also note the uppercase "S").
-    vendors.forEach(function(vendor) {
-      if (!document.exitFullscreen) {
-        document.exitFullscreen = document[vendor + "CancelFullScreen"];
-      }     
-    });
-
-    //Finally, exit full screen mode.
-    //Because this mode can only be set with direct user interaction,
-    //we can only flag it as `true` or `false`. The actual 
-    //`exitFullscreen` command is run in Ga's pointer events
-    //(See the `makePointer`) function in the `ga.js` file.
-    ga.fullscreen = false;
-
-  };
 
   //### scaleToFit - DEPRICATED - DO NOT USE!
   /*
@@ -1370,6 +1251,9 @@ GA.plugins = function(ga) {
   the particle and finely adjusting each parameter, you can use this 
   all-purpose `particleEffect` function to simulate everything from liquid to fire. 
   */
+  
+  //First, you need an array to store the particles.
+  ga.particles = [];
 
   ga.particleEffect = function(
     x, 
@@ -1475,7 +1359,7 @@ GA.plugins = function(ga) {
 
       //The particle's `update` method is called on each frame of the
       //game loop
-      particle.update = function() {
+      particle.updateParticle = function() {
 
         //Add gravity
         particle.vy += gravity;
@@ -1511,6 +1395,24 @@ GA.plugins = function(ga) {
       ga.particles.push(particle);
     }
   }
+
+  //`updateParticles` loops through all the sprites in `ga.particles`
+  //and runs their `updateParticles` functions.
+  ga.updateParticles = function() {
+    
+    //Update all the particles in the game.
+    if (ga.particles.length > 0) {
+      for(var i = ga.particles.length - 1; i >= 0; i--) {
+        var particle = ga.particles[i];
+        particle.updateParticle();
+      }
+    }
+  }
+
+  //Push `updateParticles` into the `ga.updateFunctions` array so that
+  //it runs inside Ga's game loop. (See the `ga.update` method in the 
+  //`ga.js` file to see how this works.
+  ga.updateFunctions.push(ga.updateParticles);
   
   /*
   emitter
@@ -3629,10 +3531,204 @@ GA.plugins = function(ga) {
   };
 
   /*
-  Chapter 7: Resources
+  Chapter 7: The fullscreen module
   ---------------------------------
+  
+  Ga has a very simple way of running a game fullscreen:
+
+      g.enableFullscreen();
+
+  Add that to your game code just after the `start` method. As soon as the user
+  clicks or touches the game canvas, the game will enter fullscreen mode. The
+  game will be aligned and centered in the screen. 
+  
+  To exit fullscreen mode, the user can press `esc` on the keyboard. Or, you can 
+  define your own custom exit keys by providing ascii key code numbers as 
+  `enableFullScreen`'s arguments, like this:
+
+      g.enableFullscreen(88, 120);
+
+  In this case pressing lowercase `x` (88) or uppercase `X` (120) will exit fullscreen 
+  mode. If you choose to use fullscreen mode, make sure you inform your users
+  of the keys they need to press to exit it! 
+  
+  Or, preferably, don't use fullscreen mode at all. Many users will panic when your
+  game takes over their entire screen, and may not intuitively understand how to 
+  exit fullscreen mode. So, instead, consider using Ga's more user-friendly
+  `scaleToWindow` method (listed in the code above.) `scaleToWindow` scales the game
+  to the maximum browser window size and center aligns it for the best fit, without
+  removing the browser's UI.
+
+  An important note about fullscreen mode: The WHATWG spec only allows fullscreen mode
+  to be activated if a user interacts with an HTML element (https://fullscreen.spec.whatwg.org).
+  That means you can't use any of Ga's button `press` or `release` actions to 
+  launch fullscreen mode. That's because buttons are canvas based code objects, not HTML
+  elements. You'll see in the code below that fullscreen mode is launched using an 
+  event listener attached directly to Ga's canvas.
+
+  (A Fullscreen API polyfill exists at the head of the `ga.js` file)
+
   */
 
+  //`fullscreenScale` is used to track the size of the scaled canvas
+  //Ga's update loop need to know this so that it can dynmaically
+  //adjust `ga.scale` and `ga.pointer.scale` depending on whether
+  //fullscreen mode is active. 
+  ga.fullscreenScale = 1;
 
+  //`requestFullscreen` is used by `enableFullscreen` to launch
+  //fullscreen mode.
+  ga.requestFullScreen = function() {
+    if (!document.fullscreenEnabled) {
+      ga.canvas.requestFullscreen();
+    }
+  };
+
+  //`exitFullscreen` is used by `enableFullscreen` to exit
+  //fullscreen mode.
+  ga.exitFullScreen = function() {
+    if (document.fullscreenEnabled) {
+      document.exitFullscreen();
+    }
+  };
+
+  //`alignFullscreen` is called by `enableFullscreen` to center and
+  //align the canvas vertically or horizontally inside the users
+  //screen. It also sets `ga.fullscreenScale` that Ga's `update` loop
+  //uses to changed the values of `ga.scale` and `ga.pointer.scale`
+  //when fullscreen mode is entered or exited.
+  ga.alignFullscreen = function() {
+    var scaleX, scaleY;
+    
+    //Scale the canvas to the correct size.
+    //Figure out the scale amount on each axis.
+    scaleX = screen.width / ga.canvas.width;
+    scaleY = screen.height / ga.canvas.height;
+
+    //Set the scale based on whichever value is less: `scaleX` or `scaleY`.
+    ga.fullscreenScale = Math.min(scaleX, scaleY);
+
+    //To center the canvas we need to inject some CSS
+    //and into the HTML document's `<style>` tag. Some
+    //browsers require an existing `<style>` tag to do this, so
+    //if no `<style>` tag already exists, let's create one and
+    //append it to the `<body>:
+    var styleSheets = document.styleSheets;
+    if (styleSheets.length === 0) {
+      var divNode = document.createElement("div");
+      divNode.innerHTML = "<style></style>";
+      document.body.appendChild(divNode);
+    }
+    
+    //Unfortunately we also need to do some browser detection
+    //to inject the full screen CSS with the correct vendor 
+    //prefix. So, let's find out what the `userAgent` is.
+    //`ua` will be an array containing lower-case browser names.
+    var ua = navigator.userAgent.toLowerCase(); 
+
+    //Now Decide whether to center the canvas vertically or horizontally.
+    //Wide canvases should be centered vertically, and 
+    //square or tall canvases should be centered horizontally.
+
+    if (ga.canvas.width > ga.canvas.height) {
+
+      //Center vertically.
+      //Add CSS to the stylesheet to center the canvas vertically.
+      //You need a version for each browser vendor, plus a generic
+      //version
+      //(Unfortunately the CSS string cannot include line breaks, so
+      //it all has to be on one long line.)
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("explorer") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+    } else {
+
+      //Center horizontally.
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("msie") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+    }
+  };
+
+  //### enableFullscreen
+  /*
+  Use `enterFullscreen` to make the browser display the game full screen.
+  It automatically centers the game canvas for the best fit. Optionally supply any number of ascii
+  keycodes as arguments to represent the keyboard keys that should exit fullscreen mode.
+  */
+  ga.enableFullscreen = function(exitKeyCodes) {
+
+    //Get an array of the optional exit key codes.
+    if (exitKeyCodes) exitKeyCodes = Array.prototype.slice.call(arguments);
+
+    //Center and align the fullscreen element.
+    ga.alignFullscreen();
+
+    //Add mouse and touch listeners to the canvas to enable
+    //fullscreen mode.
+    ga.canvas.addEventListener("mouseup", ga.requestFullScreen, false);
+    ga.canvas.addEventListener("touchend", ga.requestFullScreen, false);
+
+    if (exitKeyCodes) {
+      exitKeyCodes.forEach(function(keyCode) {
+        window.addEventListener(
+          "keyup",
+          function(event){
+            if (event.keyCode === keyCode) {
+              ga.exitFullScreen();
+            }
+            event.preventDefault();
+          }, 
+          false
+        );
+      });
+    }
+  }
+
+  //This next function checks to see if the game is in 
+  //full screen mode. If it is, the game's scale is set
+  //to `fullscreen.scale`. If not, and the canvas hasn't already
+  //been scaled, the scale reverts back to 1.   
+  ga.scaleFullscreen = function() {
+    if(document.fullscreenEnabled) {
+      ga.scale = ga.fullscreenScale;
+      ga.pointer.scale = ga.fullscreenScale;
+    } else {
+      if (!ga.canvas.scaled) {
+        ga.scale = 1;
+        ga.pointer.scale = 1;
+      }
+    }
+  }
+
+  //Push `scaleFullscreen` into the `updateFunctions` array so that
+  //it will be updated by Ga's `update` function on each frame of the
+  //game loop.
+  ga.updateFunctions.push(ga.scaleFullscreen);
+  
 //plugins ends
 };
