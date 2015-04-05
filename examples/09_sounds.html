@@ -5,10 +5,28 @@
 <script src="../ga.js"></script>
 <script>
 
-//Create a new GA instance, and start it.
+/*
+This file is a working example of how to use sounds in Ga.
+Ga implements the latest version of "Sound for Games" under the
+hood.
+Check out the "Sound for Games" repository for full details on how
+to control and generate sounds:
+
+https://github.com/kittykatattack/soundForGames
+
+The only difference in Ga's implementation is that you can pre-load sounds inside Ga's assets
+array, in the same way that you can pre-load images and data files.
+Also, after sounds have loaded you can access them like this:
+
+    g.sound("sounds/anySound.mp3")
+
+Let's find out how it all works:
+*/
+
+//First, create a new GA instance, and start it.
 //Pre-load sounds in the constructor array.
 var g = ga(
-  256, 256, setup, 
+  256, 350, setup, 
   [
     "sounds/shoot.wav",
     "sounds/music.wav",
@@ -24,9 +42,9 @@ function setup() {
 
   //First, create some sound objects
   //Use the `sounds` method to create sound objects. The `sound`
-  //method takes one argument: a string of sound file path
+  //method takes one argument: a string that describes the sound file path
   var shoot = g.sound("sounds/shoot.wav"),
-      explosion = g.sound("sounds/explosion.wav");
+      explosion = g.sound("sounds/explosion.wav"),
       music = g.sound("sounds/music.wav");
 
   //Next, setup the sounds
@@ -47,7 +65,13 @@ function setup() {
       a = g.keyboard(65),
       b = g.keyboard(66),
       c = g.keyboard(67),
-      d = g.keyboard(68);
+      d = g.keyboard(68),
+      e = g.keyboard(69),
+      f = g.keyboard(70),
+      gee = g.keyboard(71),
+      h = g.keyboard(72),
+      i = g.keyboard(73),
+      j = g.keyboard(74);
 
   //Create `press` actions for each sound 
   one.press = function(){
@@ -55,7 +79,7 @@ function setup() {
   };
   a.press = function(){
     //Allow the music to start playing only once
-    if (!music.isPlaying) music.play(); 
+    if (!music.playing) music.play(); 
   };
   b.press = function(){
     music.pause();
@@ -66,6 +90,90 @@ function setup() {
   d.press = function(){
     music.playFrom(10);
   };
+  e.press = function(){
+    music.fadeOut(3);
+  };
+  f.press = function(){
+    music.fadeIn(3);
+  };
+
+  //You can also generate sound effects from scratch using Ga's
+  //versatile `soundEffect` function.
+
+  //First, define your sounds as re-usable functions
+
+  //The shoot sound
+  function shootSound() {
+    g.soundEffect(
+      1046.5,           //frequency
+      0,                //attack
+      0.3,              //decay
+      "sawtooth",       //waveform
+      1,                //Volume
+      -0.8,             //pan
+      0,                //wait before playing
+      1200,             //pitch bend amount
+      false,            //reverse bend
+      0,                //random pitch range
+      25,               //dissonance
+      [0.2, 0.2, 2000], //echo: [delay, feedback, filter]
+      undefined         //reverb: [duration, decay, reverse?]
+    );
+  }
+
+  //The jump sound
+  function jumpSound() {
+    g.soundEffect(
+      523.25,       //frequency
+      0.05,         //attack
+      0.2,          //decay
+      "sine",       //waveform
+      3,            //volume
+      0.8,          //pan
+      0,            //wait before playing
+      600,          //pitch bend amount
+      true,         //reverse
+      100,          //random pitch range
+      0,            //dissonance
+      undefined,    //echo: [delay, feedback, filter]
+      undefined     //reverb: [duration, decay, reverse?]
+    );
+  }
+
+  //The explosion sound
+  function explosionSound() {
+    g.soundEffect(
+      16,          //frequency
+      0,           //attack
+      1,           //decay
+      "sawtooth",  //waveform
+      1,           //volume
+      0,           //pan
+      0,           //wait before playing
+      0,           //pitch bend amount
+      false,       //reverse
+      0,           //random pitch range
+      50,          //dissonance
+      undefined,   //echo: [delay, feedback, filter]
+      undefined    //reverb: [duration, decay, reverse?]
+    );
+  }
+
+  //The bonus points sound
+  function bonusSound() {
+    //D
+    g.soundEffect(587.33, 0, 0.2, "square", 1, 0, 0);
+    //A
+    g.soundEffect(880, 0, 0.2, "square", 1, 0, 0.1);
+    //High D
+    g.soundEffect(1174.66, 0, 0.3, "square", 1, 0, 0.2);
+  }
+ 
+  //Program keyboard keys to play the sounds.
+  gee.press = function(){ shootSound() };
+  h.press = function(){ jumpSound() };
+  i.press = function(){ explosionSound() };
+  j.press = function(){ bonusSound() };
 
   //Ga doesn't have multi-line support for text (yet!) so let's
   //do it caveman-style for now:
@@ -81,6 +189,13 @@ function setup() {
   g.text("b - Pause", f, c, 10, 90);
   g.text("c - Restart", f, c, 10, 110);
   g.text("d - Go to 10 sec. mark", f, c, 10, 130);
+  g.text("e - Fade out", f, c, 10, 150);
+  g.text("f - Fade in", f, c, 10, 170);
+  g.text("Generated sound effects:", f, c, 10, 210);
+  g.text("g - Shoot sound", f, c, 10, 230);
+  g.text("h - Jump sound", f, c, 10, 250);
+  g.text("i - Explosion sound", f, c, 10, 270);
+  g.text("j - Bonus sound", f, c, 10, 290);
 
   //g.state = play;    
 }
