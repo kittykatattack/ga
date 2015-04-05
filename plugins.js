@@ -3861,6 +3861,7 @@ GA.plugins = function(ga) {
   ------
   An array to store all the tweens in the game
   */
+  /*
 
   ga.tweens = [];
 
@@ -4030,9 +4031,11 @@ GA.plugins = function(ga) {
     //Return the tween object
     return o;
   }
+  */
 
   /* High level tween functions */
 
+  /*
   //`fadeOut`
   ga.fadeOut = function(sprite, frames) {
     if (frames === undefined) frames = 60;
@@ -4285,13 +4288,14 @@ GA.plugins = function(ga) {
 
     return o;
   }
-
+  */
   /*
   removeTween
   -----------
   A utility to remove tweens from the game
 
   */
+ /*
   ga.removeTween = function(tweenObject) {
 
     //Remove the tween if `tweenObject` doesn't have any nested
@@ -4308,6 +4312,7 @@ GA.plugins = function(ga) {
       });
     }
   }
+  */
 
   /*
   followCurve

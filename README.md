@@ -51,7 +51,7 @@ the best place to start.
     7. [Using a texture atlas](#textureatlas)
       1. [Preparing the images](#preparingimages)
       2. [loading the texture atlas](#loadingatlas)
-  2. [Alien Armada](#alianarmada)
+  2. [Alien Armada](#alienarmada)
     1. [Load and use a custom font](#customfonts)
     2. [Scale and center the game in the browser](#scalebrowser)
     3. [A loading progress bar](#progressbar)
