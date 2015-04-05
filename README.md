@@ -105,9 +105,6 @@ Here's Ga's core feature list:
   touch. Assign your own custom `press`, `release` and `tap` methods
   or use any of the pointer's built-in properties: `isUp`, `isDown`,
   `tapped`, `x` and `y`. Define as many pointers as you need for multi-touch.
-- Import and play sounds using a built-in WebAudio API sound manager.
-  Control sounds with `play`, `pause`, `stop`, `restart`, and
-  `playFrom` methods. Change a sound's `volume` and `pan`.
 - Conveniently position sprites relative to other sprites using
   `putTop`, `putRight`, `putBottom`, `putLeft` and `putCenter`.
 - A universal asset loader to pre-load images, fonts, sounds and JSON
@@ -143,6 +140,11 @@ huge number of useful tools for making games. You can use as many or
 as few of these tools as you want to. Here are some of the goodies
 you'll find in `plugins.js`:
 
+- Import and play sounds using a built-in WebAudio API sound manager.
+  Control sounds with `play`, `pause`, `stop`, `restart`,
+  `playFrom`, `fadeIn` and `fadeOut` methods. Change a sound's `volume` and `pan`.
+- Generate your own custom sound effects from pure code with
+  the versatile `soundEffect` method.
 - Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
