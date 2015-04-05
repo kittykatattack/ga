@@ -278,10 +278,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //An array to store the tweening functions.
   ga.tweens = [];
-  
+
   //An array to store the particles.
   ga.particles = [];
-  
+
   //Set the game `state`.
   ga.state = undefined;
 
@@ -330,7 +330,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //scaleX = window.innerWidth / g.canvas.width,
           //scaleY = window.innerHeight / g.canvas.height,
           scaleToFit = Math.min(scaleX, scaleY);
-    
+
       g.canvas.style.transformOrigin = "0 0";
       g.canvas.style.transform = "scale(" + scaleToFit + ")";
 
@@ -344,12 +344,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ### Core game engine methods
   This next sections contains all the important methods that the game engine needs to do its work.
   */
-  
+
   //### gameLoop
   //The engine's game loop. Ga uses a fixed timestep for logic update
   //and rendering. This is mainly for simplicity. I'll probably
   //migrate to a "fixed timestep / variable rendering" with
-  //interpolation in the 
+  //interpolation in the
   //next major update. For a working example, see:
   //jsbin.com/tolime/1/edit
   //If the `fps` isn't set, the maximum framerate is used.
@@ -369,7 +369,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Calculate the time that has elapsed since the last frame
       var current = Date.now(),
           elapsed = current - ga._startTime;
-      
+
       if (elapsed > 1000) elapsed = ga._frameDuration;
 
       //For interpolation:
@@ -380,7 +380,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Update the frame if the lag counter is greater than or
       //equal to the frame duration
-      while (ga._lag >= ga._frameDuration){  
+      while (ga._lag >= ga._frameDuration){
 
         //Capture the sprites' previous positions for rendering
         //interpolation
@@ -458,7 +458,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         particle.update();
       }
     }
-    
+
     //Update the pointer for drag and drop.
     if(ga.dragAndDrop) {
       ga.pointer.updateDragAndDrop();
@@ -558,7 +558,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
   });
 
-  
+
 
   /*
   Chapter 2: Sprites
@@ -833,7 +833,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             //its local x value and its parent's global x value
             return this.x + this.parent.gx;
           } else {
-            return this.x;  
+            return this.x;
           }
         },
         enumerable: true, configurable: true
@@ -1063,7 +1063,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       } else {
         sprites[0].parent.removeChild(sprites[0]);
       }
-    } 
+    }
 
     //Remove sprites in an array of sprites
     else {
@@ -1209,8 +1209,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           if (child.y + child.height > o._newHeight) {
             o._newHeight = child.y + child.height;
           }
-        }); 
-        
+        });
+
         //Apply the `_newWidth` and `_newHeight` to this sprite's width
         //and height
         o.width = o._newWidth;
@@ -1269,9 +1269,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Draw the rectangle around the context's center `0` point.
       ctx.rect(
-        -o.width * o.pivotX, 
-        -o.height * o.pivotY, 
-        o.width, 
+        -o.width * o.pivotX,
+        -o.height * o.pivotY,
+        o.width,
         o.height
       );
       if (o.mask === true) {
@@ -1322,9 +1322,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.fillStyle = o.fillStyle;
       ctx.beginPath();
       ctx.arc(
-        o.radius + (-o.diameter * o.pivotX),  
-        o.radius + (-o.diameter * o.pivotY), 
-        o.radius, 
+        o.radius + (-o.diameter * o.pivotX),
+        o.radius + (-o.diameter * o.pivotY),
+        o.radius,
         0, 2*Math.PI, false
       );
       if (o.mask === true) {
@@ -1431,7 +1431,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Measure the width and height of the text
       if (o.width === 0) o.width = ctx.measureText(o.content).width;
-      if (o.height === 0) o.height = ctx.measureText("M").width;      
+      if (o.height === 0) o.height = ctx.measureText("M").width;
       ctx.translate(-o.width * o.pivotX, -o.height * o.pivotY)
       ctx.font = o.font;
       ctx.textBaseline = o.textBaseline;
@@ -1485,7 +1485,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //(The last `spacing` argument should be included if there's any
   //default spacing (padding) around tileset images.)
   ga.filmstrip = function(imageName, frameWidth, frameHeight, spacing){
-    var image = g.assets[imageName],
+    var image = ga.assets[imageName].source,
         positions = [],
 
         //Find out how many columns and rows there are in the image.
@@ -1527,9 +1527,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   ga.sprite = function(source) {
     var o = {};
 
-    //This next part is complicated. The code has to figure out what
-    //the source is referring to, and then assign its properties
-    //correctly to the sprite's properties. Read carefully!
     //If no `source` is provided, alert the user.
     if (source === undefined) throw new Error("Sprites require a source");
 
@@ -1538,33 +1535,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.frames = [];
     o.loop = true;
     o._currentFrame = 0;
-    o.setTexture(source);
 
+    //This next part is complicated. The code has to figure out what
+    //the source is referring to, and then assign its properties
+    //correctly to the sprite's properties. Read carefully!
     o.setTexture = function(source) {
-    //If the source is just an ordinary string, use it to create the
-    //sprite.
-    if (!source.image) {
+      //If the source is just an ordinary string, use it to create the
+      //sprite.
+      if (!source.image) {
+        //If the source isn't an array, then it must be a single image.
+        if(!(source instanceof Array)) {
+          //Is the string referring to a tileset frame from a Texture Packer JSON
+          //file, or is it referring to a JavaScript Image object? Let's find out.
 
-      //If the source isn't an array, then it must be a single image.
-      if(!(source instanceof Array)) {
-
-        //Is the string referring to a tileset frame from a Texture Packer JSON
-        //file, or is it referring to a JavaScript Image object? Let's find out.
-        if (ga.assets[source] instanceof Image) {
-
-          //Cool, it's just an ordinary Image object. That's easy.
-          o.source = ga.assets[source];
-          o.sourceX =  0;
-          o.sourceY =  0;
-          o.width = o.source.width;
-          o.height = o.source.height;
-          o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.height;
-        }
-
-        //No, it's not an Image object. So it must be a tileset frame
-        //from a texture atlas.
-        else {
+          //No, it's not an Image object. So it must be a tileset frame
+          //from a texture atlas.
 
           //Use the texture atlas's properties to assign the sprite's
           //properties.
@@ -1576,73 +1561,55 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           o.height = o.tilesetFrame.frame.h;
           o.sourceWidth = o.tilesetFrame.frame.w;
           o.sourceHeight = o.tilesetFrame.frame.h;
-        }
 
-      //The source is an array. But what kind of array? Is it an array
-      //Image objects or an array of texture atlas frame ids?
-      } else {
-        if (ga.assets[source[0]] && ga.assets[source[0]].source) {
-
-          //The source is an array of frames on a texture atlas tileset.
-          o.frames = source;
-          o.source = ga.assets[source[0]].source;
-          o.sourceX = ga.assets[source[0]].frame.x;
-          o.sourceY = ga.assets[source[0]].frame.y;
-          o.width = ga.assets[source[0]].frame.w;
-          o.height = ga.assets[source[0]].frame.h;
-          o.sourceWidth = ga.assets[source[0]].frame.w;
-          o.sourceHeight = ga.assets[source[0]].frame.h;
-        }
-
-        //It must be an array of image objects
-        else {
-          o.frames = source;
-          o.source = ga.assets[source[0]];
-          o.sourceX = 0;
-          o.sourceY = 0;
-          o.width = o.source.width;
-          o.height = o.source.height;
-          o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.height;
+        //The source is an array. But what kind of array? Is it an array
+        //Image objects or an array of texture atlas frame ids?
+        } else {
+            //The source is an array of frames on a texture atlas tileset.
+            o.frames = source;
+            o.source = ga.assets[source[0]].source;
+            o.sourceX = ga.assets[source[0]].frame.x;
+            o.sourceY = ga.assets[source[0]].frame.y;
+            o.width = ga.assets[source[0]].frame.w;
+            o.height = ga.assets[source[0]].frame.h;
+            o.sourceWidth = ga.assets[source[0]].frame.w;
+            o.sourceHeight = ga.assets[source[0]].frame.h;
         }
       }
-    }
-
-    //If the source contains an `image` sub-property, this must
-    //be a `frame` object that's defining the rectangular area of an inner sub-image
-    //Use that sub-image to make the sprite. If it doesn't contain a
-    //`data` property, then it must be a single frame.
-    else if(source.image && !source.data) {
-
-      //Throw an error if the source is not an image file.
-      if (!(ga.assets[source.image] instanceof Image)) {
-        throw new Error(source.image + " is not an image file");
+      //If the source contains an `image` sub-property, this must
+      //be a `frame` object that's defining the rectangular area of an inner sub-image
+      //Use that sub-image to make the sprite. If it doesn't contain a
+      //`data` property, then it must be a single frame.
+      else if(source.image && !source.data) {
+        //Throw an error if the source is not an image file.
+        if (!(ga.assets[source.image].source instanceof Image)) {
+          throw new Error(source.image + " is not an image file");
+        }
+        o.source = ga.assets[source.image].source;
+        o.sourceX = source.x;
+        o.sourceY = source.y;
+        o.width = source.width;
+        o.height = source.height;
+        o.sourceWidth = source.width;
+        o.sourceHeight = source.height;
       }
-      o.source = ga.assets[source.image];
-      o.sourceX = source.x;
-      o.sourceY = source.y;
-      o.width = source.width;
-      o.height = source.height;
-      o.sourceWidth = source.width;
-      o.sourceHeight = source.height;
-    }
 
-    //If the source contains an `image` sub-property
-    //and a `data` property, then it contains multiple frames
-    else if(source.image && source.data) {
-      o.source = ga.assets[source.image];
-      o.frames = source.data;
+      //If the source contains an `image` sub-property
+      //and a `data` property, then it contains multiple frames
+      else if(source.image && source.data) {
+        o.source = ga.assets[source.image].source;
+        o.frames = source.data;
 
-      //Set the sprite to the first frame
-      o.sourceX = o.frames[0][0];
-      o.sourceY = o.frames[0][1];
-      o.width = source.width;
-      o.height = source.height;
-      o.sourceWidth = source.width;
-      o.sourceHeight = source.height;
-    }
+        //Set the sprite to the first frame
+        o.sourceX = o.frames[0][0];
+        o.sourceY = o.frames[0][1];
+        o.width = source.width;
+        o.height = source.height;
+        o.sourceWidth = source.width;
+        o.sourceHeight = source.height;
+      }
     };
-    
+
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {
       if (o.frames.length > 0) {
@@ -1650,32 +1617,21 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //If each frame is an array, then the frames were made from an
         //ordinary Image object using the `frames` method.
         if (o.frames[0] instanceof Array) {
-          o.sourceX = o.frames[frameNumber][0];
-          o.sourceY = o.frames[frameNumber][1];
+           o.sourceX = o.frames[frameNumber][0];
+           o.sourceY = o.frames[frameNumber][1];
         }
 
         //If each frame isn't an array, and it has a sub-object called `frame`,
         //then the frame must be a texture atlas id name.
         //In that case, get the source position from the `frame` object.
-        else if (g.assets[o.frames[frameNumber]].frame) {
-          o.sourceX = g.assets[o.frames[frameNumber]].frame.x;
-          o.sourceY = g.assets[o.frames[frameNumber]].frame.y;
-          o.sourceWidth = g.assets[o.frames[frameNumber]].frame.w;
-          o.sourceHeight = g.assets[o.frames[frameNumber]].frame.h;
-          o.width = g.assets[o.frames[frameNumber]].frame.w;
-          o.height = g.assets[o.frames[frameNumber]].frame.h;
-        }
-
-        //If neither of the above are true, then each frame must be
-        //an individual Image object.
-        else {
-          o.source = g.assets[o.frames[frameNumber]];
-          o.sourceX = 0;
-          o.sourceY = 0;
-          o.width = o.source.width;
-          o.height = o.source.height;
-          o.sourceWidth = o.source.width;
-          o.sourceHeight = o.source.height;
+        else if (ga.assets[o.frames[frameNumber]].frame) {
+          o.source = ga.assets[o.frames[frameNumber]].source;
+          o.sourceX = ga.assets[o.frames[frameNumber]].frame.x;
+          o.sourceY = ga.assets[o.frames[frameNumber]].frame.y;
+          o.sourceWidth = ga.assets[o.frames[frameNumber]].frame.w;
+          o.sourceHeight = ga.assets[o.frames[frameNumber]].frame.h;
+          o.width = ga.assets[o.frames[frameNumber]].frame.w;
+          o.height = ga.assets[o.frames[frameNumber]].frame.h;
         }
 
         //Set the `_currentFrame` value.
@@ -1684,9 +1640,16 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         throw new Error("Frame number " + frameNumber + "doesn't exist");
       }
     };
+    o.setTexture(source);
 
-    //Add a getter for the `_currentFrames` property.
+    //Set the sprite's getters
+    o.x = 0;
+    o.y = 0;
+
+    //If the sprite has more than one frame, add a state player
     if (o.frames.length > 0) {
+      ga.addStatePlayer(o);
+      //Add a getter for the `_currentFrames` property.
       Object.defineProperty(o, "currentFrame", {
         get: function() {
           return o._currentFrame;
@@ -1697,13 +1660,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //Add the sprite to the stage
     ga.stage.addChild(o);
-
-    //Set the sprite's getters
-    o.x = 0;
-    o.y = 0;
-
-    //If the sprite has more than one frame, add a state player
-    if (o.frames.length > 0) ga.addStatePlayer(o);
 
     //A `render` method that describes how to draw the sprite
     o.render = function(ctx) {
@@ -2075,14 +2031,14 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           sprite.renderX + (sprite.width * sprite.pivotX),
           sprite.renderY + (sprite.height * sprite.pivotY)
         );
-      /* 
+      /*
         var cos = Math.cos(sprite.rotation),
             sin = Math.sin(sprite.rotation),
             scaleX = sprite.scaleX,
             scaleY = sprite.scaleY,
             translateX = sprite.renderX + (sprite.width * sprite.pivotX),
             translateY = sprite.renderY + (sprite.height * sprite.pivotY);
-        
+
         ctx.setTransform(
           scaleX + cos,
           sin, -sin,
@@ -2091,8 +2047,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           translateY
         );
         */
-        //(scaleX+cos, skewX+sin, skewY-sin, scaleY-cos, translateX, translateY); 
-        
+        //(scaleX+cos, skewX+sin, skewY-sin, scaleY-cos, translateX, translateY);
+
         //Set the alpha
         ctx.globalAlpha = sprite.alpha;
 
@@ -2108,7 +2064,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           ctx.shadowOffsetX = sprite.shadowOffsetX;
           ctx.shadowOffsetY = sprite.shadowOffsetY;
           ctx.shadowBlur = sprite.shadowBlur;
-        } 
+        }
 
         //Add an optional blend mode
         if (sprite.blendMode) ctx.globalCompositeOperation = sprite.blendMode;
@@ -2203,19 +2159,22 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
           //Create a new image and add a loadHandler
           var image = new Image();
-          image.addEventListener("load", self.loadHandler.bind(self), false);
+          image.addEventListener("load", function() {
+            //Get the image file name.
+            image.name = source;
+            self[image.name] = {
+              //If you just want the file name and the extension, you can
+              //get it like this:
+              //image.name = source.split("/").pop();
+              //Assign the image as a property of the assets object so
+              //we can access it like this: `assets["images/imageName.png"]`.
+              source: image,
+              frame: {x: 0, y: 0, w: image.width, h: image.height}
+            };
+            self.loadHandler();
+          }, false);
 
-          //Get the image file name.
-          image.name = source;
-          //If you just want the file name and the extension, you can
-          //get it like this:
-          //image.name = source.split("/").pop();
-          //Assign the image as a property of the assets object so
-          //we can access it like this: `assets["images/imageName.png"]`.
-          
-          self[image.name] = image;
           //Set the image's src property so we can start loading the image.
-
           image.src = source;
         }
 
@@ -2229,7 +2188,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           //Append an `@afont-face` style rule to the head of the HTML
           //document. It's kind of a hack, but until HTML5 has a
           //proper font loading API, it will do for now.
-          //
           var newStyle = document.createElement('style');
           var fontFace =  "@font-face {font-family: '" + fontFamily + "'; src: url('" + source + "');}";
           newStyle.appendChild(document.createTextNode(fontFace));
@@ -2272,7 +2230,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           xhr.addEventListener("readystatechange", function() {
 
             //Check to make sure the file has loaded properly.
-            if (xhr.status === 200 && xhr.readyState === 4) {
+            if (/*xhr.status === 200 &&*/ xhr.readyState === 4) {
 
               //Convert the JSON data file into an ordinary object.
               file = JSON.parse(xhr.responseText);
@@ -2326,7 +2284,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         //Assign the image as a property of the `assets` object so
         //we can access it like this:
         //`assets["images/imageName.png"]`.
-        self[baseUrl+json.meta.image] = image;
+        self[baseUrl+json.meta.image] = {
+          source: image,
+          frame: {x: 0, y: 0, w: image.width, h: image.height}
+        };
 
         //Loop through all the frames.
         Object.keys(json.frames).forEach(function(tilesetImage){
@@ -2360,7 +2321,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       if (self.toLoad === self.loaded) {
 
         //If it has, run the callback function that was assigned to the `whenLoaded` property
-        console.log("Assets finished loading");
 
         //Reset `loaded` and `toLoaded` so we can load more assets
         //later if we want to.
@@ -2431,7 +2391,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.press = undefined;
     o.release = undefined;
     o.tap = undefined;
-    
+
     //A `dragSprite` property to help with drag and drop.
     o.dragSprite = null;
 
@@ -2475,7 +2435,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Call the `press` method if it's been assigned by the user
       if (o.press) o.press();
-      
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2494,10 +2454,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Capture the current time.
       o.downTime = Date.now();
-      
+
       //Call the `press` method if it's been assigned by the user.
       if (o.press) o.press();
-      
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2517,10 +2477,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
       o.isUp = true;
       o.isDown = false;
-      
+
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
-      
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
@@ -2534,16 +2494,16 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //If it's less than 200 milliseconds, it must be a tap or click.
       if (o.elapsedTime <= 200) {
         o.tapped = true;
-        
+
         //Call the `tapped` method if it's been assigned by the user.
         if (o.tap) o.tap();
       }
       o.isUp = true;
       o.isDown = false;
-      
+
       //Call the `release` method if it's been assigned by the user.
       if (o.release) o.release();
-      
+
       //Prevent the canvas from being selected.
       event.preventDefault();
     };
