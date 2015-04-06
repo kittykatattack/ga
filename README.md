@@ -85,7 +85,8 @@ Here's Ga's core feature list:
   loop at any time.
 - Tileset (spritesheet) support using `frame` and `filmstrip` methods to make
   sprites using tileset frames.
-- Built-in texture atlas support for the popular Texture Packer format.
+- Built-in texture atlas support for the popular Texture Packer
+- format. Use a sprite's `setTexture` method if you want to change a sprite's image source while the game is running 
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
@@ -104,9 +105,6 @@ Here's Ga's core feature list:
   touch. Assign your own custom `press`, `release` and `tap` methods
   or use any of the pointer's built-in properties: `isUp`, `isDown`,
   `tapped`, `x` and `y`. Define as many pointers as you need for multi-touch.
-- Import and play sounds using a built-in WebAudio API sound manager.
-  Control sounds with `play`, `pause`, `stop`, `restart`, and
-  `playFrom` methods. Change a sound's `volume` and `pan`.
 - Conveniently position sprites relative to other sprites using
   `putTop`, `putRight`, `putBottom`, `putLeft` and `putCenter`.
 - A universal asset loader to pre-load images, fonts, sounds and JSON
@@ -142,6 +140,11 @@ huge number of useful tools for making games. You can use as many or
 as few of these tools as you want to. Here are some of the goodies
 you'll find in `plugins.js`:
 
+- Import and play sounds using a built-in WebAudio API sound manager.
+  Control sounds with `play`, `pause`, `stop`, `restart`,
+  `playFrom`, `fadeIn` and `fadeOut` methods. Change a sound's `volume` and `pan`.
+- Generate your own custom sound effects from pure code with
+  the versatile `soundEffect` method.
 - Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
   `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
@@ -173,6 +176,7 @@ you'll find in `plugins.js`:
   with moving sprites.
 - Create a `worldCamera` that follows sprites around a scrolling game
   world.
+- Use `scaleToWindow` to make the game automatically scale to its maximum size and align itself for the best fit inside the browser window. Use `enterFullscreen` to make the browser enter full screen mode, and `exitFullscreen` to exit full screen mode.
 
 To use the plugins, just copy/paste the code you want to use from `plugins.js` into your game. 
 Or, if you're not worried about the extra size, 
@@ -2144,7 +2148,7 @@ if(alienTimer === alienFrequency) {
   var alien = g.sprite(alienFrames);
 
   //Define some states on the alien that correspond
-  //to the its two frames.
+  //to its two frames.
   alien.states = {
     normal: 0,
     destroyed: 1

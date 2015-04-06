@@ -57,6 +57,10 @@ The code in this `plugins.js` file is organized into chapters.
 Use your text editor's search features to find what you're looking for.
 Here's the table of contents to get you started:
 
+### Prologue: Polyfills
+
+- Necessary polyfills for some of the API's used in this file. 
+
 ### Chapter 1: Utilities
 
 `move`: Make a sprite or group move (or an array of them) by updating its velocity.
@@ -67,7 +71,7 @@ Here's the table of contents to get you started:
 `fadeIn`: Fade in a sprite.
 `fadeOut`: Fade out a sprite.
 `fade`: Fades in or out.
-`pulse`: Uses the `fade` method to make a sprite's alpha ocillate.
+`pulse`: Uses the `fade` method to make a sprite's alpha oscillate.
 `follow`: Make a sprite follow another sprite at a fixed speed.
 `rotateSprite`: Make a sprite rotate around the center of another sprite.
 `rotatePoint`: Make any x/y point rotate around any other point.
@@ -134,9 +138,246 @@ Here's the table of contents to get you started:
 
 `makeTiledWorld`: Creates a game world using Tiled Editor's JSON export data.
 
-### Chapter 7: Resources
+### Chapter 7: The fullscreen module
+
+`requestFullscreen`: Used by `enableFullscreen` to launch fullscreen mode.
+`exitFullscreen`: used by `enableFullscreen` to exit fullsrcreen mode.
+`alignFullscreen`: Used by `enableFullscreen` to scale and center the canvas in fullscreen mode.
+`enableFullscreen`: Enables fullscreen mode when the user clicks or touches the canvas.
+
+### Chapter 8: UNDER CONSTRUCTION: The new tweening module
+
+### Chapter 9: Sound
+
+`ga.actx`: The audio context.
+`makeSound`: a method for loading and controling sound files.
+`sound`: a method that returns a sound file object.
+`soundEffect`: a versatile method for generating sound effects from pure code.
+`impulseResponse`: A helper method for adding reverb to sounds.
 
 */
+
+/*
+Prologue
+--------
+
+Some necessary polyfills for some of the newer APIs used in this file
+*/
+
+/*
+### Fixing the WebAudio API.
+The WebAudio API is so new that it's API is not consistently implemented properly across
+all modern browsers. Thankfully, Chris Wilson's Audio Context Monkey Patch script
+normalizes the API for maximum compatibility.
+
+https://github.com/cwilso/AudioContext-MonkeyPatch/blob/gh-pages/AudioContextMonkeyPatch.js
+
+It's included here.
+Thank you, Chris!
+
+*/
+
+(function (global, exports, perf) {
+  'use strict';
+
+  function fixSetTarget(param) {
+    if (!param)	// if NYI, just return
+      return;
+    if (!param.setTargetAtTime)
+      param.setTargetAtTime = param.setTargetValueAtTime;
+  }
+
+  if (window.hasOwnProperty('webkitAudioContext') &&
+      !window.hasOwnProperty('AudioContext')) {
+    window.AudioContext = webkitAudioContext;
+
+    if (!AudioContext.prototype.hasOwnProperty('createGain'))
+      AudioContext.prototype.createGain = AudioContext.prototype.createGainNode;
+    if (!AudioContext.prototype.hasOwnProperty('createDelay'))
+      AudioContext.prototype.createDelay = AudioContext.prototype.createDelayNode;
+    if (!AudioContext.prototype.hasOwnProperty('createScriptProcessor'))
+      AudioContext.prototype.createScriptProcessor = AudioContext.prototype.createJavaScriptNode;
+
+    AudioContext.prototype.internal_createGain = AudioContext.prototype.createGain;
+    AudioContext.prototype.createGain = function() {
+      var node = this.internal_createGain();
+      fixSetTarget(node.gain);
+      return node;
+    };
+
+    AudioContext.prototype.internal_createDelay = AudioContext.prototype.createDelay;
+    AudioContext.prototype.createDelay = function(maxDelayTime) {
+      var node = maxDelayTime ? this.internal_createDelay(maxDelayTime) : this.internal_createDelay();
+      fixSetTarget(node.delayTime);
+      return node;
+    };
+
+    AudioContext.prototype.internal_createBufferSource = AudioContext.prototype.createBufferSource;
+    AudioContext.prototype.createBufferSource = function() {
+      var node = this.internal_createBufferSource();
+      if (!node.start) {
+        node.start = function ( when, offset, duration ) {
+          if ( offset || duration )
+            this.noteGrainOn( when, offset, duration );
+          else
+            this.noteOn( when );
+        }
+      }
+      if (!node.stop)
+        node.stop = node.noteOff;
+      fixSetTarget(node.playbackRate);
+      return node;
+    };
+
+    AudioContext.prototype.internal_createDynamicsCompressor = AudioContext.prototype.createDynamicsCompressor;
+    AudioContext.prototype.createDynamicsCompressor = function() {
+      var node = this.internal_createDynamicsCompressor();
+      fixSetTarget(node.threshold);
+      fixSetTarget(node.knee);
+      fixSetTarget(node.ratio);
+      fixSetTarget(node.reduction);
+      fixSetTarget(node.attack);
+      fixSetTarget(node.release);
+      return node;
+    };
+
+    AudioContext.prototype.internal_createBiquadFilter = AudioContext.prototype.createBiquadFilter;
+    AudioContext.prototype.createBiquadFilter = function() {
+      var node = this.internal_createBiquadFilter();
+      fixSetTarget(node.frequency);
+      fixSetTarget(node.detune);
+      fixSetTarget(node.Q);
+      fixSetTarget(node.gain);
+      return node;
+    };
+
+    if (AudioContext.prototype.hasOwnProperty( 'createOscillator' )) {
+      AudioContext.prototype.internal_createOscillator = AudioContext.prototype.createOscillator;
+      AudioContext.prototype.createOscillator = function() {
+        var node = this.internal_createOscillator();
+        if (!node.start)
+          node.start = node.noteOn;
+        if (!node.stop)
+          node.stop = node.noteOff;
+        fixSetTarget(node.frequency);
+        fixSetTarget(node.detune);
+        return node;
+      };
+    }
+  }
+}(window));
+
+//### Fixing the Fullscreen API.
+//The Fullscreen API is also in flux and has a quirky browser
+//implementations. Here's a fix for it, thanks to Norman Paschke:
+//https://github.com/neovov/Fullscreen-API-Polyfill/blob/master/fullscreen-api-polyfill.js
+
+(function (doc) {
+	// Use JavaScript script mode
+	"use strict";
+
+	/*global Element */
+
+	var pollute = true,
+		api,
+		vendor,
+		apis = {
+			// http://dvcs.w3.org/hg/fullscreen/raw-file/tip/Overview.html
+			w3: {
+				enabled: "fullscreenEnabled",
+				element: "fullscreenElement",
+				request: "requestFullscreen",
+				exit:    "exitFullscreen",
+				events: {
+					change: "fullscreenchange",
+					error:  "fullscreenerror"
+				}
+			},
+			webkit: {
+				enabled: "webkitIsFullScreen",
+				element: "webkitCurrentFullScreenElement",
+				request: "webkitRequestFullScreen",
+				exit:    "webkitCancelFullScreen",
+				events: {
+					change: "webkitfullscreenchange",
+					error:  "webkitfullscreenerror"
+				}
+			},
+			moz: {
+				enabled: "mozFullScreen",
+				element: "mozFullScreenElement",
+				request: "mozRequestFullScreen",
+				exit:    "mozCancelFullScreen",
+				events: {
+					change: "mozfullscreenchange",
+					error:  "mozfullscreenerror"
+				}
+			},
+			ms: {
+				enabled: "msFullscreenEnabled",
+				element: "msFullscreenElement",
+				request: "msRequestFullscreen",
+				exit:    "msExitFullscreen",
+				events: {
+					change: "MSFullscreenChange",
+					error:  "MSFullscreenError"
+				}
+			}
+		},
+		w3 = apis.w3;
+
+	// Loop through each vendor's specific API
+	for (vendor in apis) {
+		// Check if document has the "enabled" property
+		if (apis[vendor].enabled in doc) {
+			// It seems this browser support the fullscreen API
+			api = apis[vendor];
+			break;
+		}
+	}
+
+	function dispatch( type, target ) {
+		var event = doc.createEvent( "Event" );
+
+		event.initEvent( type, true, false );
+		target.dispatchEvent( event );
+	} // end of dispatch()
+
+	function handleChange( e ) {
+		// Recopy the enabled and element values
+		doc[w3.enabled] = doc[api.enabled];
+		doc[w3.element] = doc[api.element];
+
+		dispatch( w3.events.change, e.target );
+	} // end of handleChange()
+
+	function handleError( e ) {
+		dispatch( w3.events.error, e.target );
+	} // end of handleError()
+
+	// Pollute only if the API doesn't already exists
+	if (pollute && !(w3.enabled in doc) && api) {
+		// Add listeners for fullscreen events
+		doc.addEventListener( api.events.change, handleChange, false );
+		doc.addEventListener( api.events.error,  handleError,  false );
+
+		// Copy the default value
+		doc[w3.enabled] = doc[api.enabled];
+		doc[w3.element] = doc[api.element];
+
+		// Match the reference for exitFullscreen
+		doc[w3.exit] = doc[api.exit];
+
+		// Add the request method to the Element's prototype
+		Element.prototype[w3.request] = function () {
+			return this[api.request].apply( this, arguments );
+		};
+	}
+
+	// Return the API found (or undefined if the Fullscreen API is unavailable)
+	return api;
+
+}(document));
 
 GA = GA || {};
 GA.plugins = function(ga) {
@@ -529,7 +770,7 @@ GA.plugins = function(ga) {
     //Decide whether to center the canvas vertically or horizontally.
     //Wide canvases should be centered vertically, and 
     //square or tall canvases should be centered horizontally
-    if (this.canvas.width > this.canvas.height) {
+    if (ga.canvas.width > ga.canvas.height) {
       if (ga.canvas.width * scale < window.innerWidth) {
         center = "horizontally";
       } else { 
@@ -574,6 +815,11 @@ GA.plugins = function(ga) {
     ga.pointer.scale = scale;
     ga.scale = scale;
 
+    //It's important to set `canvasHasBeenScaled` to `true` so that
+    //the scale values aren't overridden by Ga's check for fullscreen
+    //mode in the `update` function (in the `ga.js` file.)
+    ga.canvas.scaled = true;
+
     //Fix some quirkiness in scaling for Safari
     var ua = navigator.userAgent.toLowerCase(); 
     if (ua.indexOf("safari") != -1) { 
@@ -586,7 +832,9 @@ GA.plugins = function(ga) {
       }
     }
   };
-  
+
+
+
   //### scaleToFit - DEPRICATED - DO NOT USE!
   /*
   Center and scale Ga inside the HTML page. The `dimension` can be either "width" or "height"
@@ -1169,9 +1417,9 @@ GA.plugins = function(ga) {
     remove: function() {
 
       //Remove the progress bar
-      g.remove(this.frontBar);
-      g.remove(this.backBar);
-      g.remove(this.percentage);
+      ga.remove(this.frontBar);
+      ga.remove(this.backBar);
+      ga.remove(this.percentage);
     }
   };
 
@@ -1239,6 +1487,9 @@ GA.plugins = function(ga) {
   the particle and finely adjusting each parameter, you can use this 
   all-purpose `particleEffect` function to simulate everything from liquid to fire. 
   */
+  
+  //First, you need an array to store the particles.
+  ga.particles = [];
 
   ga.particleEffect = function(
     x, 
@@ -1344,7 +1595,7 @@ GA.plugins = function(ga) {
 
       //The particle's `update` method is called on each frame of the
       //game loop
-      particle.update = function() {
+      particle.updateParticle = function() {
 
         //Add gravity
         particle.vy += gravity;
@@ -1380,6 +1631,24 @@ GA.plugins = function(ga) {
       ga.particles.push(particle);
     }
   }
+
+  //`updateParticles` loops through all the sprites in `ga.particles`
+  //and runs their `updateParticles` functions.
+  ga.updateParticles = function() {
+    
+    //Update all the particles in the game.
+    if (ga.particles.length > 0) {
+      for(var i = ga.particles.length - 1; i >= 0; i--) {
+        var particle = ga.particles[i];
+        particle.updateParticle();
+      }
+    }
+  }
+
+  //Push `updateParticles` into the `ga.updateFunctions` array so that
+  //it runs inside Ga's game loop. (See the `ga.update` method in the 
+  //`ga.js` file to see how this works.
+  ga.updateFunctions.push(ga.updateParticles);
   
   /*
   emitter
@@ -3498,10 +3767,1652 @@ GA.plugins = function(ga) {
   };
 
   /*
-  Chapter 7: Resources
+  Chapter 7: The fullscreen module
   ---------------------------------
+  
+  Ga has a very simple way of running a game fullscreen:
+
+      g.enableFullscreen();
+
+  Add that to your game code just after the `start` method. As soon as the user
+  clicks or touches the game canvas, the game will enter fullscreen mode. The
+  game will be aligned and centered in the screen. 
+  
+  To exit fullscreen mode, the user can press `esc` on the keyboard. Or, you can 
+  define your own custom exit keys by providing ascii key code numbers as 
+  `enableFullScreen`'s arguments, like this:
+
+      g.enableFullscreen(88, 120);
+
+  In this case pressing lowercase `x` (88) or uppercase `X` (120) will exit fullscreen 
+  mode. If you choose to use fullscreen mode, make sure you inform your users
+  of the keys they need to press to exit it! 
+  
+  Or, preferably, don't use fullscreen mode at all. Many users will panic when your
+  game takes over their entire screen, and may not intuitively understand how to 
+  exit fullscreen mode. So, instead, consider using Ga's more user-friendly
+  `scaleToWindow` method (listed in the code above.) `scaleToWindow` scales the game
+  to the maximum browser window size and center aligns it for the best fit, without
+  removing the browser's UI.
+
+  An important note about fullscreen mode: The WHATWG spec only allows fullscreen mode
+  to be activated if a user interacts with an HTML element (https://fullscreen.spec.whatwg.org).
+  That means you can't use any of Ga's button `press` or `release` actions to 
+  launch fullscreen mode. That's because buttons are canvas based code objects, not HTML
+  elements. You'll see in the code below that fullscreen mode is launched using an 
+  event listener attached directly to Ga's canvas.
+
+  (A Fullscreen API polyfill exists at the head of the `ga.js` file)
+
   */
 
+  //`fullscreenScale` is used to track the size of the scaled canvas
+  //Ga's update loop need to know this so that it can dynmaically
+  //adjust `ga.scale` and `ga.pointer.scale` depending on whether
+  //fullscreen mode is active. 
+  ga.fullscreenScale = 1;
 
+  //`requestFullscreen` is used by `enableFullscreen` to launch
+  //fullscreen mode.
+  ga.requestFullScreen = function() {
+    if (!document.fullscreenEnabled) {
+      ga.canvas.requestFullscreen();
+    }
+  };
+
+  //`exitFullscreen` is used by `enableFullscreen` to exit
+  //fullscreen mode.
+  ga.exitFullScreen = function() {
+    if (document.fullscreenEnabled) {
+      document.exitFullscreen();
+    }
+  };
+
+  //`alignFullscreen` is called by `enableFullscreen` to center and
+  //align the canvas vertically or horizontally inside the users
+  //screen. It also sets `ga.fullscreenScale` that Ga's `update` loop
+  //uses to changed the values of `ga.scale` and `ga.pointer.scale`
+  //when fullscreen mode is entered or exited.
+  ga.alignFullscreen = function() {
+    var scaleX, scaleY;
+    
+    //Scale the canvas to the correct size.
+    //Figure out the scale amount on each axis.
+    scaleX = screen.width / ga.canvas.width;
+    scaleY = screen.height / ga.canvas.height;
+
+    //Set the scale based on whichever value is less: `scaleX` or `scaleY`.
+    ga.fullscreenScale = Math.min(scaleX, scaleY);
+
+    //To center the canvas we need to inject some CSS
+    //and into the HTML document's `<style>` tag. Some
+    //browsers require an existing `<style>` tag to do this, so
+    //if no `<style>` tag already exists, let's create one and
+    //append it to the `<body>:
+    var styleSheets = document.styleSheets;
+    if (styleSheets.length === 0) {
+      var divNode = document.createElement("div");
+      divNode.innerHTML = "<style></style>";
+      document.body.appendChild(divNode);
+    }
+    
+    //Unfortunately we also need to do some browser detection
+    //to inject the full screen CSS with the correct vendor 
+    //prefix. So, let's find out what the `userAgent` is.
+    //`ua` will be an array containing lower-case browser names.
+    var ua = navigator.userAgent.toLowerCase(); 
+
+    //Now Decide whether to center the canvas vertically or horizontally.
+    //Wide canvases should be centered vertically, and 
+    //square or tall canvases should be centered horizontally.
+
+    if (ga.canvas.width > ga.canvas.height) {
+
+      //Center vertically.
+      //Add CSS to the stylesheet to center the canvas vertically.
+      //You need a version for each browser vendor, plus a generic
+      //version
+      //(Unfortunately the CSS string cannot include line breaks, so
+      //it all has to be on one long line.)
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("explorer") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {position: fixed; width: 100%; height: auto; top: 0; right: 0; bottom: 0; left: 0; margin: auto; object-fit: contain;}", 0);
+      }
+    } else {
+
+      //Center horizontally.
+      if (ua.indexOf("safari") !== -1 || ua.indexOf("chrome") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-webkit-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("firefox") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-moz-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("opera") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-o-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else if (ua.indexOf("msie") !== -1) {
+        document.styleSheets[0].insertRule("canvas:-ms-full-screen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+      else {
+        document.styleSheets[0].insertRule("canvas:fullscreen {height: 100%; margin: 0 auto; object-fit: contain;}", 0);
+      }
+    }
+  };
+
+  //### enableFullscreen
+  /*
+  Use `enterFullscreen` to make the browser display the game full screen.
+  It automatically centers the game canvas for the best fit. Optionally supply any number of ascii
+  keycodes as arguments to represent the keyboard keys that should exit fullscreen mode.
+  */
+  ga.enableFullscreen = function(exitKeyCodes) {
+
+    //Get an array of the optional exit key codes.
+    if (exitKeyCodes) exitKeyCodes = Array.prototype.slice.call(arguments);
+
+    //Center and align the fullscreen element.
+    ga.alignFullscreen();
+
+    //Add mouse and touch listeners to the canvas to enable
+    //fullscreen mode.
+    ga.canvas.addEventListener("mouseup", ga.requestFullScreen, false);
+    ga.canvas.addEventListener("touchend", ga.requestFullScreen, false);
+
+    if (exitKeyCodes) {
+      exitKeyCodes.forEach(function(keyCode) {
+        window.addEventListener(
+          "keyup",
+          function(event){
+            if (event.keyCode === keyCode) {
+              ga.exitFullScreen();
+            }
+            event.preventDefault();
+          }, 
+          false
+        );
+      });
+    }
+  }
+
+  //This next function checks to see if the game is in 
+  //full screen mode. If it is, the game's scale is set
+  //to `fullscreen.scale`. If not, and the canvas hasn't already
+  //been scaled, the scale reverts back to 1.   
+  ga.scaleFullscreen = function() {
+    if(document.fullscreenEnabled) {
+      ga.scale = ga.fullscreenScale;
+      ga.pointer.scale = ga.fullscreenScale;
+    } else {
+      if (!ga.canvas.scaled) {
+        ga.scale = 1;
+        ga.pointer.scale = 1;
+      }
+    }
+  }
+
+  //Push `scaleFullscreen` into the `updateFunctions` array so that
+  //it will be updated by Ga's `update` function on each frame of the
+  //game loop.
+  ga.updateFunctions.push(ga.scaleFullscreen);
+
+  /*
+  Chapter 8: The tweening module
+  ---------------------------------
+  
+  tweens
+  ------
+  An array to store all the tweens in the game
+  */
+  /*
+
+  ga.tweens = [];
+
+  //Easing functions
+  //Bezier curve
+  ga.cubicBezier = function(t, a, b, c, d) {
+    var t2 = t * t;
+    var t3 = t2 * t;
+    return a  
+      + (-a * 3 + t * (3 * a - a * t)) * t
+      + (3 * b + t * (-6 * b + b * 3 * t)) * t 
+      + (c * 3 - c * 3 * t) * t2 + d * t3;
+  }
+
+  var ease = {
+
+    //Linear
+    linear: function(x) {return x;},
+
+    //Smoothstep
+    smoothstep: function(x) {return x * x * (3 - 2 * x);},
+    smoothstepSquared: function(x) {return Math.pow((x * x * (3 - 2 * x)), 2);},
+    smoothstepCubed: function(x) {return Math.pow((x * x * (3 - 2 * x)), 3);},
+
+    //Acceleration
+    acceleration: function(x) {return x * x;},
+    accelerationCubed: function(x) {return Math.pow(x * x, 3);},
+
+    //Deceleration
+    deceleration: function(x) {return 1 - Math.pow(1 - x, 2);},
+    decelerationCubed: function(x) {return 1 - Math.pow(1 - x, 3);},
+
+    //Sine
+    sine: function(x) {return Math.sin(x * Math.PI / 2);},
+    sineSquared: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
+    sineCubed: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
+    inverseSine: function(x) {return 1 - Math.sin((1 - x) * Math.PI / 2);},
+    inverseSineSquared: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 2);},
+    inverseSineCubed: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 3);},
+
+    //Spline
+    spline: function(t, p0, p1, p2, p3) {
+      return 0.5 * (
+        (2 * p1) +
+        (-p0 + p2) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+        (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t
+      );
+    }
+  };
+
+  ga.tweenProperty = function(
+    sprite,                  //Sprite object
+    property,                //String property
+    startValue,              //Tween start value
+    endValue,                //Tween end value
+    totalFrames,             //Duration in frames
+    type,                    //The easing type
+    yoyo,                    //Yoyo?
+    delayBeforeRepeat        //Delay in milliseconds before repeating
+  ) {
+
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 60;
+    if (type === undefined) type = ["smoothstep"];
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+    //Create the tween object
+    var o = {};
+
+    //If the tween is a spline, set the
+    //start and end magnitude values
+    if (type[0] === "spline") {
+      o.startMagnitude = type[1];
+      o.endMagnitude = type[2];
+    }
+
+    //Use `o.start` to make a new tween using the current
+    //end point values
+    o.start = function(startValue, endValue) {
+
+      //Clone the start and end values so that any possible references to sprite
+      //properties are converted to ordinary numbers 
+      o.startValue = JSON.parse(JSON.stringify(startValue));
+      o.endValue = JSON.parse(JSON.stringify(endValue));
+      o.playing = true;
+      o.totalFrames = totalFrames;
+      o.frameCounter = 0;
+
+      //Add the tween to the global `tweens` array. The `tweens` array is
+      //updated on each frame
+      tweens.push(o);
+    };
+
+    //Call `o.start` to start the tween
+    o.start(startValue, endValue);
+
+    //The `update` method will be called on each frame by the game loop.
+    //This is what makes the tween move
+    o.update = function() {
+      
+      var time, curvedTime;
+
+      if (o.playing) {
+
+        //If the elapsed frames are less than the total frames,
+        //use the tweening formulas to move the sprite
+        if (o.frameCounter < o.totalFrames) {
+
+          //Find the normalized value
+          var normalizedTime = o.frameCounter / o.totalFrames;
+
+          //Select the correct easing function from the 
+          //`ease` object’s library of easing functions
+
+          //If it's not a spline, use one of the ordinary easing functions
+          if (type[0] !== "spline") {
+            curvedTime = ease[type](normalizedTime);
+          } 
+          
+          //If it's a spline, use the `spline` function and apply the
+          //2 additional `type` array values as the spline's start and
+          //end points
+          else {
+            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
+          }
+
+          //Interpolate the sprite's property based on the curve
+          sprite[property] = (o.endValue * curvedTime) + (o.startValue * (1 - curvedTime));
+
+          o.frameCounter += 1;
+        }
+
+        //When the tween has finished playing, run the end tasks
+        else {
+          o.end(); 
+        }
+      }
+    };
+      
+    //The `end` method will be called when the tween is finished
+    o.end = function() {
+
+      //Set `playing` to `false`
+      o.playing = false;
+
+      //Call the tween's `onComplete` method, if it's been assigned
+      if (o.onComplete) o.onComplete();
+
+      //Remove the tween from the `tweens` array
+      tweens.splice(tweens.indexOf(o), 1);
+
+      //If the tween's `yoyo` property is `true`, create a new tween
+      //using the same values, but use the current tween's `startValue`
+      //as the next tween's `endValue` 
+      if (yoyo) {
+        ga.wait(delayBeforeRepeat, function() {
+          o.start(o.endValue, o.startValue);
+        });
+      }
+    };
+
+    //Pause and play methods
+    o.play = function() {o.playing = true;};
+    o.pause = function() {o.playing = false;};
+    
+    //Return the tween object
+    return o;
+  }
+  */
+
+  /* High level tween functions */
+
+  /*
+  //`fadeOut`
+  ga.fadeOut = function(sprite, frames) {
+    if (frames === undefined) frames = 60;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, 0, frames, ["sine"]
+    );
+  }
+
+  //`fadeIn`
+  ga.fadeIn = function(sprite, frames) {
+    if (frames === undefined) frames = 60;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, 1, frames, ["sine"]
+    );
+  }
+
+  //`pulse`
+  //Fades the sprite in and out at a steady rate.
+  //Set the `minAlpha` to something greater than 0 if you
+  //don't want the sprite to fade away completely
+  ga.pulse = function(sprite, frames, minAlpha) {
+    if (frames === undefined) frames = 60;
+    if (minAlpha === undefined) minAlpha = 0;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, minAlpha, frames, ["smoothstep"], true
+    );
+  }
+
+  //`makeTween` is a general function for making complex tweens
+  //out of multiple `tweenProperty` functions. It's one argument,
+  //`tweensToAdd` is an array containing multiple `tweenProperty` calls
+
+  ga.makeTween = function(tweensToAdd) {
+
+    //Create an object to manage the tweens
+    var o = {};
+
+    //Create a `tweens` array to store the new tweens
+    o.tweens = [];
+
+    //Make a new tween for each array
+    tweensToAdd.forEach(function(tweenPropertyArguments) {
+      
+      //Use the tween property arguments to make a new tween
+      var newTween = tweenProperty(tweenPropertyArguments);
+
+      //Push the new tween into this object's internal `tweens` array
+      o.tweens.push(newTween);
+    });
+
+    //Add a counter to keep track of the
+    //number of tweens that have completed their actions
+    var completionCounter = 0;
+    
+    //`o.completed` will be called each time one of the tweens
+    //finishes
+    o.completed = function() {
+
+      //Add 1 to the `completionCounter`
+      completionCounter += 1;
+
+      //If all tweens have finished, call the user-defined `onComplete`
+      //method, if it's been assigned. Reset the `completionCounter`
+      if (completionCounter === o.tweens.length) {
+        if (o.onComplete) o.onComplete();
+        completionCounter = 0;
+      }
+    }; 
+
+    //Add `onComplete` methods to all tweens
+    o.tweens.forEach(function(tween) {
+      tween.onComplete = function() {o.completed();};
+    });
+    
+    //Add pause and play methods to control all the tweens
+    o.pause = function() {
+      o.tweens.forEach(function(tween) {
+        tween.playing = false;
+      });
+    };
+    o.play = function() {
+      o.tweens.forEach(function(tween) {
+        tween.playing = true;
+      });
+    };
+
+    //Return the tween object
+    return o;
+  }
+
+  ga.slide = function(
+    sprite, endX, endY, 
+    frames, type, yoyo, delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (frames === undefined) frames = 60;
+    if (type === undefined) type = ["smoothstep"];
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    return makeTween([ 
+
+      //Create the x axis tween
+      [sprite, "x", sprite.x, endX, frames, type, yoyo, delayBeforeRepeat],
+
+      //Create the y axis tween
+      [sprite, "y", sprite.y, endY, frames, type, yoyo, delayBeforeRepeat]
+
+    ]);
+  }
+
+  ga.breathe = function(
+    sprite, endScaleX, endScaleY, 
+    frames, yoyo, delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (frames === undefined) frames = 60;
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    return makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, endScaleX, 
+        frames, ["smoothstepSquared"], yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, endScaleY, 
+        frames, ["smoothstepSquared"], yoyo, delayBeforeRepeat
+      ]
+    ]);
+  }
+
+  ga.scale = function(sprite, endScaleX, endScaleY, frames) {
+    
+    //Set defaults
+    if (frames === undefined) frames = 60;
+
+    return makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, endScaleX, 
+        frames, ["smoothstep"], false
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, endScaleY, 
+        frames, ["smoothstep"], false
+      ]
+    ]);
+  }
+
+  ga.strobe = function(
+    sprite, scaleFactor, startMagnitude, endMagnitude, 
+    frames, yoyo, delayBeforeRepeat
+  ) {
+    
+    //Set defaults
+    if (scaleFactor === undefined) scaleFactor = 1.3;
+    if (startMagnitude === undefined) startMagnitude = 10;
+    if (endMagnitude === undefined) endMagnitude = 20;
+    if (frames === undefined) frames = 10;
+    if (yoyo === undefined) yoyo = true;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    return makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, scaleFactor, frames, 
+        ["spline", startMagnitude, endMagnitude], yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, scaleFactor, frames, 
+        ["spline", startMagnitude, endMagnitude], 
+        yoyo, delayBeforeRepeat
+      ]
+    ]);
+  }
+
+  ga.wobble = function(
+    sprite, 
+    scaleFactorX, 
+    scaleFactorY, 
+    frames,
+    xStartMagnitude, 
+    xEndMagnitude,
+    yStartMagnitude, 
+    yEndMagnitude,
+    friction,
+    yoyo,
+    delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (scaleFactorX === undefined) scaleFactorX = 1.2;
+    if (scaleFactorY === undefined) scaleFactorY = 1.2;
+    if (frames === undefined) frames = 10;
+    if (xStartMagnitude === undefined) xStartMagnitude = 10;
+    if (xEndMagnitude === undefined) xEndMagnitude = 10;
+    if (yStartMagnitude === undefined) yStartMagnitude = -10;
+    if (yEndMagnitude === undefined) yEndMagnitude = -10;
+    if (friction === undefined) friction = 0.98;
+    if (yoyo === undefined) yoyo = true;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    var o = makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, scaleFactorX, frames, 
+        ["spline", xStartMagnitude, xEndMagnitude], 
+        yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, scaleFactorY, frames, 
+        ["spline", yStartMagnitude, yEndMagnitude], 
+        yoyo, delayBeforeRepeat
+      ]
+    ]);
+
+    //Add some friction to the `endValue` at the end of each tween 
+    o.tweens.forEach(function(tween) {
+      tween.onComplete = function() {
+
+        //Add friction if the `endValue` is greater than 1
+        if (tween.endValue > 1) {
+          tween.endValue *= friction;
+
+          //Set the `endValue` to 1 when the effect is finished and 
+          //remove the tween from the global `tweens` array
+          if (tween.endValue <= 1) {
+            tween.endValue = 1; 
+            removeTween(tween);
+          }
+        }
+      };
+    });
+
+    return o;
+  }
+  */
+  /*
+  removeTween
+  -----------
+  A utility to remove tweens from the game
+
+  */
+ /*
+  ga.removeTween = function(tweenObject) {
+
+    //Remove the tween if `tweenObject` doesn't have any nested
+    //tween objects
+    if(!tweenObject.tweens) {
+      tweenObject.pause();
+      tweens.splice(tweens.indexOf(tweenObject), 1);
+    
+    //Otherwise, remove the nested tween objects
+    } else {
+      tweenObject.pause();
+      tweenObject.tweens.forEach(function(element) {
+        tweens.splice(tweens.indexOf(element), 1);
+      });
+    }
+  }
+  */
+
+  /*
+  followCurve
+  ------------
+  */
+
+  ga.followCurve = function(
+    sprite,
+    pointsArray,
+    totalFrames, 
+    type,
+    yoyo, 
+    delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (type === undefined) type = ["smoothstep"];
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    //Create the tween object
+    var o = {};
+
+    if(type[0] === "spline" ){
+      o.startMagnitude = type[1];
+      o.endMagnitude = type[2];
+    }
+
+    //Use `tween.start` to make a new tween using the current
+    //end point values
+    o.start = function(pointsArray){
+      o.playing = true;
+      o.totalFrames = totalFrames;
+      o.frameCounter = 0;
+
+      //Clone the points array
+      o.pointsArray = JSON.parse(JSON.stringify(pointsArray));
+
+      //Add the tween to the global `tweens` array. The global `tweens` array is
+      //updated on each frame
+      tweens.push(o);
+    };
+
+    //Call `tween.start` to start the first tween
+    o.start(pointsArray);
+
+    //The `update` method will be called on each frame by the game loop.
+    //This is what makes the tween move
+    o.update = function() {
+      
+      var normalizedTime, curvedTime, 
+          p = o.pointsArray;
+
+      if (o.playing) {
+
+        //If the elapsed frames are less than the total frames,
+        //use the tweening formulas to move the sprite
+        if (o.frameCounter < o.totalFrames) {
+
+          //Find the normalized value
+          normalizedTime = o.frameCounter / o.totalFrames;
+
+          //Select the correct easing function
+          
+          //If it's not a spline, use one of the ordinary tween
+          //functions
+          if (type[0] !== "spline") {
+            curvedTime = ease[type](normalizedTime);
+          } 
+          
+          //If it's a spline, use the `spine` function and apply the
+          //2 additional `type` array values as the spline's start and
+          //end points
+          else {
+            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
+          }
+
+          //Apply the Bezier curve to the sprite's position 
+          sprite.x = ga.cubicBezier(curvedTime, p[0][0], p[1][0], p[2][0], p[3][0]);
+          sprite.y = ga.cubicBezier(curvedTime, p[0][1], p[1][1], p[2][1], p[3][1]);
+          
+          //Add one to the `elapsedFrames`
+          o.frameCounter += 1;
+        }
+
+        //When the tween has finished playing, run the end tasks
+        else {
+         o.end(); 
+        }
+      }
+    };
+      
+    //The `end` method will be called when the tween is finished
+    o.end = function() {
+
+      //Set `playing` to `false`
+      o.playing = false;
+
+      //Call the tween's `onComplete` method, if it's been
+      //assigned
+      if (o.onComplete) o.onComplete();
+
+      //Remove the tween from the global `tweens` array
+      tweens.splice(tweens.indexOf(o), 1);
+
+      //If the tween's `yoyo` property is `true`, reverse the array and
+      //use it to create a new tween
+      if (yoyo) {
+        ga.wait(delayBeforeRepeat, function() {
+          o.pointsArray = o.pointsArray.reverse();
+          o.start(o.pointsArray);
+        });
+      }
+    };
+
+    //Pause and play methods
+    o.pause = function() {
+      o.playing = false;
+    };
+    o.play = function() {
+      o.playing = true;
+    };
+    
+    //Return the tween object
+    return o;
+  };
+
+
+  ga.walkPath = function(
+    sprite,                   //The sprite
+    originalPathArray,        //A 2D array of waypoints
+    totalFrames,              //The duration, in frames
+    type,                     //The easing type
+    loop,                     //Should the animation loop?
+    yoyo,                     //Should the direction reverse?
+    delayBetweenSections      //Delay, in milliseconds, between sections
+  ) {
+    
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 300;
+    if (type === undefined) type = ["smoothstep"];
+    if (loop === undefined) loop = false;
+    if (yoyo === undefined) yoyo = false;
+    if (delayBetweenSections === undefined) delayBetweenSections = 0;
+
+    //Clone the path array so that any possible references to sprite
+    //properties are converted into ordinary numbers 
+    var pathArray = JSON.parse(JSON.stringify(originalPathArray));
+
+    //Figure out the duration, in frames, of each path section by 
+    //dividing the `totalFrames` by the length of the `pathArray`
+    var frames = totalFrames / pathArray.length;
+    
+    //Set the current point to 0, which will be the first waypoint
+    var currentPoint = 0;
+
+    //Make the first path using the internal `makePath` function (below)
+    var tween = makePath(currentPoint);
+
+    //The `makePath` function creates a single tween between two points and
+    //then schedules the next path to be made after it
+
+    function makePath(currentPoint) {
+
+      //Use the `makeTween` function to tween the sprite's
+      //x and y position
+      var tween = makeTween([ 
+
+        //Create the x axis tween between the first x value in the
+        //current point and the x value in the following point
+        [
+          sprite, 
+          "x", 
+          pathArray[currentPoint][0], 
+          pathArray[currentPoint + 1][0], 
+          frames, 
+          type
+        ],
+
+        //Create the y axis tween in the same way
+        [
+          sprite, 
+          "y", 
+          pathArray[currentPoint][1], 
+          pathArray[currentPoint + 1][1], 
+          frames, 
+          type
+        ]
+      ]);
+
+      //When the tween is complete, advance the `currentPoint` by one.
+      //Add an optional delay between path segments, and then make the
+      //next connecting path
+      tween.onComplete = function() {
+
+        //Advance to the next point
+        currentPoint += 1;
+
+        //If the sprite hasn't reached the end of the
+        //path, tween the sprite to the next point
+        if (currentPoint < pathArray.length - 1) {
+          ga.wait(delayBetweenSections, function() {
+            tween = makePath(currentPoint);
+          });
+        } 
+        
+        //If we've reached the end of the path, optionally
+        //loop and yoyo it
+        else {
+
+          //Reverse the path if `loop` is `true`
+          if (loop) {
+
+            //Reverse the array if `yoyo` is `true`
+            if (yoyo) pathArray.reverse();
+
+            //Optionally wait before restarting
+            ga.wait(delayBetweenSections, function() {
+
+              //Reset the `currentPoint` to 0 so that we can
+              //restart at the first point
+              currentPoint = 0;
+
+              //Set the sprite to the first point
+              sprite.x = pathArray[0][0];
+              sprite.y = pathArray[0][1];
+
+              //Make the first new path
+              tween = makePath(currentPoint);
+
+              //... and so it continues!
+            });
+          }
+        }
+      };
+
+      //Return the path tween to the main function
+      return tween;
+    }
+
+    //Pass the tween back to the main program
+    return tween;
+  };
+
+  ga.walkCurve = function(
+    sprite,                  //The sprite
+    pathArray,               //2D array of Bezier curves
+    totalFrames,             //The duration, in frames
+    type,                    //The easing type
+    loop,                    //Should the animation loop?
+    yoyo,                    //Should the direction reverse?
+    delayBeforeContinue      //Delay, in milliseconds, between sections
+  ) {
+
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 300;
+    if (type === undefined) type = ["smoothstep"];
+    if (loop === undefined) loop = false;
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeContinue === undefined) delayBeforeContinue = 0;
+
+    //Divide the `totalFrames` into sections for each part of the path
+    var frames = totalFrames / pathArray.length;
+    
+    //Set the current curve to 0, which will be the first one
+    var currentCurve = 0;
+
+    //Make the first path
+    var tween = makePath(currentCurve);
+
+    function makePath(currentCurve) {
+
+      //Use the custom `followCurve` function to make
+      //a sprite follow a curve
+      var tween = followCurve(
+        sprite, 
+        pathArray[currentCurve],
+        frames,
+        type
+      );
+
+      //When the tween is complete, advance the `currentCurve` by one.
+      //Add an optional delay between path segments, and then make the
+      //next path
+      tween.onComplete = function() {
+        currentCurve += 1;
+        if (currentCurve < pathArray.length) {
+          ga.wait(delayBeforeContinue, function() {
+            tween = makePath(currentCurve);
+          });
+        } 
+        
+        //If we've reached the end of the path, optionally
+        //loop and reverse it
+        else {
+          if (loop) {
+            if (yoyo) {
+
+              //Reverse order of the curves in the `pathArray` 
+              pathArray.reverse();
+
+              //Reverse the order of the points in each curve
+              pathArray.forEach(function(curveArray) {
+                curveArray.reverse();
+              });
+            }
+
+            //After an optional delay, reset the sprite to the
+            //beginning of the path and make the next new path
+            ga.wait(delayBeforeContinue, function() {
+              currentCurve = 0;
+              sprite.x = pathArray[0][0];
+              sprite.y = pathArray[0][1];
+              tween = makePath(currentCurve);
+            });
+          }
+        }
+      };
+
+      //Return the path tween to the main function
+      return tween;
+    }
+    
+    //Pass the tween back to the main program
+    return tween;
+  };
+
+  /*
+  Chapter 9: Sound
+  ----------------
+  */
+
+  //Create an audio context.
+  ga.actx = new AudioContext();
+
+  /*
+
+  ###makeSound
+
+  `makeSound` is the function you want to use to load and play sound files.
+  It creates and returns and WebAudio sound object with lots of useful methods you can
+  use to control the sound. 
+  You can use it to load a sound like this:
+
+      var anySound = makeSound("sounds/anySound.mp3", loadHandler);
+
+  The code above will load the sound and then call the `loadHandler`
+  when the sound has finished loading. 
+  (However, it's more convenient to load the sound file by pre-loading it in Ga's
+  assets array, so I don't recommend loading sounds
+  like this unless you need more low-level control.)
+
+  After the sound has been loaded you can access and use it like this:
+
+      function loadHandler() {
+        anySound.loop = true;
+        anySound.pan = 0.8;
+        anySound.volume = 0.5;
+        anySound.play();
+        anySound.pause();
+        anySound.playFrom(second);
+        anySound.restart();
+        anySound.setReverb(2, 2, false);
+        anySound.setEcho(0.2, 0.2, 0);
+        anySound.playbackRate = 0.5;
+        anySound.fadeOut(timeInSeconds);
+        anySound.fadeIn(timeInSeconds);
+        anySound.fade(targetVolume, timeInSeconds);
+      }
+  */
+
+  ga.makeSound = function(source, loadHandler) {
+
+    //The sound object that this function returns.
+    var o = {};
+
+    //The audio context
+    var actx = ga.actx
+
+    //Set the default properties.
+    o.volumeNode = ga.actx.createGain();
+
+    //Create the pan node using the effcient `createStereoPanner`
+    //method, if it's available.
+    if (!actx.createStereoPanner) {
+      o.panNode = actx.createPanner();
+    } else {
+      o.panNode = actx.createStereoPanner();
+    }
+    o.delayNode = actx.createDelay();
+    o.feedbackNode = actx.createGain();
+    o.filterNode = actx.createBiquadFilter();
+    o.convolverNode = actx.createConvolver();
+    o.soundNode = null;
+    o.buffer = null;
+    o.source = null;
+    o.loop = false;
+    o.playing = false;
+
+    //The function that should run when the sound is loaded.
+    o.loadHandler = undefined;
+
+    //Values for the `pan` and `volume` getters/setters.
+    o.panValue = 0;
+    o.volumeValue = 1;
+
+    //Values to help track and set the start and pause times.
+    o.startTime = 0;
+    o.startOffset = 0;
+
+    //Set the playback rate.
+    o.playbackRate = 1;
+
+    //Echo properties.
+    o.echo = false;
+    o.delayValue = 0.3;
+    o.feebackValue = 0.3;
+    o.filterValue = 0;
+
+    //Reverb properties
+    o.reverb = false;
+    o.reverbImpulse = null;
+    
+    //The sound object's methods.
+    o.play = function() {
+
+      //Set the start time (it will be `0` when the sound
+      //first starts.
+      o.startTime = actx.currentTime;
+
+      //Create a sound node.
+      o.soundNode = actx.createBufferSource();
+
+      //Set the sound node's buffer property to the loaded sound.
+      o.soundNode.buffer = o.buffer;
+
+      //Set the playback rate
+      o.soundNode.playbackRate.value = this.playbackRate;
+
+      //Connect the sound to the pan, connect the pan to the
+      //volume, and connect the volume to the destination.
+      o.soundNode.connect(o.volumeNode);
+
+      //If there's no reverb, bypass the convolverNode
+      if (o.reverb === false) {
+        o.volumeNode.connect(o.panNode);
+      } 
+
+      //If there is reverb, connect the `convolverNode` and apply
+      //the impulse response
+      else {
+        o.volumeNode.connect(o.convolverNode);
+        o.convolverNode.connect(o.panNode);
+        o.convolverNode.buffer = o.reverbImpulse;
+      }
+      
+      //Connect the `panNode` to the destination to complete the chain.
+      o.panNode.connect(actx.destination);
+
+      //Add optional echo.
+      if (o.echo) {
+
+        //Set the values.
+        o.feedbackNode.gain.value = o.feebackValue;
+        o.delayNode.delayTime.value = o.delayValue;
+        o.filterNode.frequency.value = o.filterValue;
+
+        //Create the delay loop, with optional filtering.
+        o.delayNode.connect(o.feedbackNode);
+        if (o.filterValue > 0) {
+          o.feedbackNode.connect(o.filterNode);
+          o.filterNode.connect(o.delayNode);
+        } else {
+          o.feedbackNode.connect(o.delayNode);
+        }
+
+        //Capture the sound from the main node chain, send it to the
+        //delay loop, and send the final echo effect to the `panNode` which
+        //will then route it to the destination.
+        o.volumeNode.connect(o.delayNode);
+        o.delayNode.connect(o.panNode);
+      }
+
+      //Will the sound loop? This can be `true` or `false`.
+      o.soundNode.loop = o.loop;
+
+      //Finally, use the `start` method to play the sound.
+      //The start time will either be `0`,
+      //or a later time if the sound was paused.
+      o.soundNode.start(
+        0, o.startOffset % o.buffer.duration
+      );
+
+      //Set `playing` to `true` to help control the
+      //`pause` and `restart` methods.
+      o.playing = true;
+    };
+
+    o.pause = function() {
+      //Pause the sound if it's playing, and calculate the
+      //`startOffset` to save the current position.
+      if (o.playing) {
+        o.soundNode.stop(0);
+        o.startOffset += actx.currentTime - o.startTime;
+        o.playing = false;
+      }
+    };
+
+    o.restart = function() {
+      //Stop the sound if it's playing, reset the start and offset times,
+      //then call the `play` method again.
+      if (o.playing) {
+        o.soundNode.stop(0);
+      }
+      o.startOffset = 0;
+      o.play();
+    };
+
+    o.playFrom = function(value) {
+      if (o.playing) {
+        o.soundNode.stop(0);
+      }
+      o.startOffset = value;
+      o.play();
+    };
+
+    o.setEcho = function(delayValue, feedbackValue, filterValue) {
+      if (delayValue === undefined) delayValue = 0.3;
+      if (feedbackValue === undefined) feedbackValue = 0.3;
+      if (filterValue === undefined) filterValue = 0;
+      o.delayValue = delayValue;
+      o.feebackValue = feedbackValue;
+      o.filterValue = filterValue;
+      o.echo = true;
+    };
+
+    o.setReverb = function(duration, decay, reverse) {
+      if (duration === undefined) duration = 2;
+      if (decay === undefined) decay = 2;
+      if (reverse === undefined) reverse = false;
+      o.reverbImpulse = ga.impulseResponse(duration, decay, reverse, actx);
+      o.reverb = true;
+    };
+
+    //A general purpose `fade` method for fading sounds in or out.
+    //The first argument is the volume that the sound should
+    //fade to, and the second value is the duration, in seconds,
+    //that the fade should last.
+    o.fade = function(endValue, durationInSeconds) {
+      if (o.playing) {
+        o.volumeNode.gain.linearRampToValueAtTime(
+          o.volumeNode.gain.value, actx.currentTime
+        );
+        o.volumeNode.gain.linearRampToValueAtTime(
+          endValue, actx.currentTime + durationInSeconds
+        );
+      }
+    };
+
+    //Fade a sound in, from an intial volume level of zero.
+    o.fadeIn = function(durationInSeconds) {
+      
+      //Set the volume to 0 so that you can fade
+      //in from silence
+      o.volumeNode.gain.value = 0;
+      o.fade(1, durationInSeconds);
+    
+    };
+
+    //Fade a sound out, from its current volume level to zero.
+    o.fadeOut = function(durationInSeconds) {
+      o.fade(0, durationInSeconds);
+    };
+    
+    //Volume and pan getters/setters.
+    Object.defineProperties(o, {
+      volume: {
+        get: function() {
+          return o.volumeValue;
+        },
+        set: function(value) {
+          o.volumeNode.gain.value = value;
+          o.volumeValue = value;
+        },
+        enumerable: true, configurable: true
+      },
+
+      //The pan node uses the high-effciency stereo panner, if it's
+      //available. But, because this is a new addition to the 
+      //WebAudio spec, it might not be available on all browsers.
+      //So the code checks for this and uses the older 3D panner
+      //if 2D isn't available.
+      pan: {
+        get: function() {
+          if (!actx.createStereoPanner) {
+            return o.panValue;
+          } else {
+            return o.panNode.pan.value;
+          }
+        },
+        set: function(value) {
+          if (!actx.createStereoPanner) {
+            //Panner objects accept x, y and z coordinates for 3D
+            //sound. However, because we're only doing 2D left/right
+            //panning we're only interested in the x coordinate,
+            //the first one. However, for a natural effect, the z
+            //value also has to be set proportionately.
+            var x = value,
+                y = 0,
+                z = 1 - Math.abs(x);
+            o.panNode.setPosition(x, y, z);
+            o.panValue = value;
+          } else {
+            o.panNode.pan.value = value;
+          }
+        },
+        enumerable: true, configurable: true
+      }
+    });
+
+    //The `load` method. It will call the `loadHandler` passed
+    //that was passed as an argument when the sound has loaded.
+    o.load = function() {
+      var xhr = new XMLHttpRequest();
+
+      //Use xhr to load the sound file.
+      xhr.open("GET", source, true);
+      xhr.responseType = "arraybuffer";
+      xhr.addEventListener("load", function() {
+
+        //Decode the sound and store a reference to the buffer.
+        actx.decodeAudioData(
+          xhr.response,
+          function(buffer) {
+            o.buffer = buffer;
+            o.hasLoaded = true;
+
+            //This next bit is optional, but important.
+            //If you have a load manager in your game, call it here so that
+            //the sound is registered as having loaded.
+            if (loadHandler) {
+              loadHandler();
+            }
+          },
+
+          //Throw an error if the sound can't be decoded.
+          function(error) {
+            throw new Error("Audio could not be decoded: " + error);
+          }
+        );
+      });
+
+      //Send the request to load the file.
+      xhr.send();
+    };
+
+    //Load the sound.
+    o.load();
+
+    //Return the sound object.
+    return o;
+  };
+
+  //### sound
+  //A convenience method that lets you access loaded sounds by their file names.
+  ga.sound = function(soundFileName){
+    return ga.assets[soundFileName];
+  };  
+  
+  /*
+  ###soundEffect
+
+  The `soundEffect` function lets you generate your sounds and musical notes from scratch
+  (Reverb effect requires the `impulseResponse` function that you'll see further ahead in this file)
+
+  To create a custom sound effect, define all the parameters that characterize your sound. Here's how to
+  create a laser shooting sound:
+
+      soundEffect(
+        1046.5,           //frequency
+        0,                //attack
+        0.3,              //decay
+        "sawtooth",       //waveform
+        1,                //Volume
+        -0.8,             //pan
+        0,                //wait before playing
+        1200,             //pitch bend amount
+        false,            //reverse bend
+        0,                //random pitch range
+        25,               //dissonance
+        [0.2, 0.2, 2000], //echo: [delay, feedback, filter]
+        undefined         //reverb: [duration, decay, reverse?]
+      );
+
+  Experiment by changing these parameters to see what kinds of effects you can create, and build
+  your own library of custom sound effects for games.
+  */
+  ga.soundEffect = function(
+    frequencyValue,      //The sound's fequency pitch in Hertz
+    attack,              //The time, in seconds, to fade the sound in
+    decay,               //The time, in seconds, to fade the sound out
+    type,                //waveform type: "sine", "triangle", "square", "sawtooth"
+    volumeValue,         //The sound's maximum volume
+    panValue,            //The speaker pan. left: -1, middle: 0, right: 1
+    wait,                //The time, in seconds, to wait before playing the sound
+    pitchBendAmount,     //The number of Hz in which to bend the sound's pitch down
+    reverse,             //If `reverse` is true the pitch will bend up
+    randomValue,         //A range, in Hz, within which to randomize the pitch
+    dissonance,          //A value in Hz. It creates 2 dissonant frequencies above and below the target pitch
+    echo,                //An array: [delayTimeInSeconds, feedbackTimeInSeconds, filterValueInHz]
+    reverb               //An array: [durationInSeconds, decayRateInSeconds, reverse]
+  ) {
+
+    //Set the default values
+    if (frequencyValue === undefined) frequencyValue = 200;
+    if (attack === undefined) attack = 0;
+    if (decay === undefined) decay = 1;
+    if (type === undefined) type = "sine";
+    if (volumeValue === undefined) volumeValue = 1;
+    if (panValue === undefined) panValue = 0;
+    if (wait === undefined) wait = 0;
+    if (pitchBendAmount === undefined) pitchBendAmount = 0;
+    if (reverse === undefined) reverse = false;
+    if (randomValue === undefined) randomValue = 0;
+    if (dissonance === undefined) dissonance = 0;
+    if (echo === undefined) echo = undefined;
+    if (reverb === undefined) reverb = undefined;
+
+    //The audio context
+    var actx = ga.actx;
+
+    //Create an oscillator, gain and pan nodes, and connect them
+    //together to the destination
+    var oscillator, volume, pan;
+    oscillator = actx.createOscillator();
+    volume = actx.createGain();
+    if (!actx.createStereoPanner) {
+      pan = actx.createPanner();
+    } else {
+      pan = actx.createStereoPanner();
+    }
+    oscillator.connect(volume);
+    volume.connect(pan);
+    pan.connect(actx.destination);
+
+    //Set the supplied values
+    volume.gain.value = volumeValue;
+    if (!actx.createStereoPanner) {
+      pan.setPosition(panValue, 0, 1 - Math.abs(panValue));
+    } else {
+      pan.pan.value = panValue; 
+    }
+    oscillator.type = type;
+
+    //Optionally randomize the pitch. If the `randomValue` is greater
+    //than zero, a random pitch is selected that's within the range
+    //specified by `frequencyValue`. The random pitch will be either
+    //above or below the target frequency.
+    var frequency;
+    var randomInt = function(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min
+    };
+    if (randomValue > 0) {
+      frequency = randomInt(
+        frequencyValue - randomValue / 2,
+        frequencyValue + randomValue / 2
+      );
+    } else {
+      frequency = frequencyValue;
+    }
+    oscillator.frequency.value = frequency;
+
+    //Apply effects
+    if (attack > 0) fadeIn(volume);
+    fadeOut(volume);
+    if (pitchBendAmount > 0) pitchBend(oscillator);
+    if (echo) addEcho(volume);
+    if (reverb) addReverb(volume);
+    if (dissonance > 0) addDissonance();
+
+    //Play the sound
+    play(oscillator);
+
+    //The helper functions:
+    
+    function addReverb(volumeNode) {
+      var convolver = actx.createConvolver();
+      convolver.buffer = ga.impulseResponse(reverb[0], reverb[1], reverb[2], actx);
+      volumeNode.connect(convolver);
+      convolver.connect(pan);
+    }
+
+    function addEcho(volumeNode) {
+
+      //Create the nodes
+      var feedback = actx.createGain(),
+          delay = actx.createDelay(),
+          filter = actx.createBiquadFilter();
+
+      //Set their values (delay time, feedback time and filter frequency)
+      delay.delayTime.value = echo[0];
+      feedback.gain.value = echo[1];
+      if (echo[2]) filter.frequency.value = echo[2];
+
+      //Create the delay feedback loop, with
+      //optional filtering
+      delay.connect(feedback);
+      if (echo[2]) {
+        feedback.connect(filter);
+        filter.connect(delay);
+      } else {
+        feedback.connect(delay);
+      }
+
+      //Connect the delay loop to the oscillator's volume
+      //node, and then to the destination
+      volumeNode.connect(delay);
+
+      //Connect the delay loop to the main sound chain's
+      //pan node, so that the echo effect is directed to
+      //the correct speaker
+      delay.connect(pan);
+    }
+
+    //The `fadeIn` function
+    function fadeIn(volumeNode) {
+
+      //Set the volume to 0 so that you can fade
+      //in from silence
+      volumeNode.gain.value = 0;
+
+      volumeNode.gain.linearRampToValueAtTime(
+        0, actx.currentTime + wait
+      );
+      volumeNode.gain.linearRampToValueAtTime(
+        volumeValue, actx.currentTime + wait + attack
+      );
+    }
+
+    //The `fadeOut` function
+    function fadeOut(volumeNode) {
+      volumeNode.gain.linearRampToValueAtTime(
+        volumeValue, actx.currentTime + attack + wait
+      );
+      volumeNode.gain.linearRampToValueAtTime(
+        0, actx.currentTime + wait + attack + decay
+      );
+    }
+
+    //The `pitchBend` function
+    function pitchBend(oscillatorNode) {
+
+      //If `reverse` is true, make the note drop in frequency. Useful for
+      //shooting sounds
+
+      //Get the frequency of the current oscillator
+      var frequency = oscillatorNode.frequency.value;
+
+      //If `reverse` is true, make the sound drop in pitch
+      if (!reverse) {
+        oscillatorNode.frequency.linearRampToValueAtTime(
+          frequency, 
+          actx.currentTime + wait
+        );
+        oscillatorNode.frequency.linearRampToValueAtTime(
+          frequency - pitchBendAmount, 
+          actx.currentTime + wait + attack + decay
+        );
+      }
+
+      //If `reverse` is false, make the note rise in pitch. Useful for
+      //jumping sounds
+      else {
+        oscillatorNode.frequency.linearRampToValueAtTime(
+          frequency, 
+          actx.currentTime + wait
+        );
+        oscillatorNode.frequency.linearRampToValueAtTime(
+          frequency + pitchBendAmount, 
+          actx.currentTime + wait + attack + decay
+        );
+      }
+    }
+
+    //The `addDissonance` function
+    function addDissonance() {
+
+      //Create two more oscillators and gain nodes
+      var d1 = actx.createOscillator(),
+          d2 = actx.createOscillator(),
+          d1Volume = actx.createGain(),
+          d2Volume = actx.createGain();
+
+      //Set the volume to the `volumeValue`
+      d1Volume.gain.value = volumeValue;
+      d2Volume.gain.value = volumeValue;
+
+      //Connect the oscillators to the gain and destination nodes
+      d1.connect(d1Volume);
+      d1Volume.connect(actx.destination);
+      d2.connect(d2Volume);
+      d2Volume.connect(actx.destination);
+
+      //Set the waveform to "sawtooth" for a harsh effect
+      d1.type = "sawtooth";
+      d2.type = "sawtooth";
+
+      //Make the two oscillators play at frequencies above and
+      //below the main sound's frequency. Use whatever value was
+      //supplied by the `dissonance` argument
+      d1.frequency.value = frequency + dissonance;
+      d2.frequency.value = frequency - dissonance;
+
+      //Fade in/out, pitch bend and play the oscillators
+      //to match the main sound
+      if (attack > 0) {
+        fadeIn(d1Volume);
+        fadeIn(d2Volume);
+      }
+      if (decay > 0) {
+        fadeOut(d1Volume);
+        fadeOut(d2Volume);
+      }
+      if (pitchBendAmount > 0) {
+        pitchBend(d1);
+        pitchBend(d2);
+      }
+      if (echo) {
+        addEcho(d1Volume);
+        addEcho(d2Volume);
+      }
+      if (reverb) {
+        addReverb(d1Volume);
+        addReverb(d2Volume);
+      }
+      play(d1);
+      play(d2);
+    }
+
+    //The `play` function
+    function play(node) {
+      node.start(actx.currentTime + wait);
+    }
+  };
+
+  /*
+  impulseResponse
+  ---------------
+
+  The `makeSound` and `soundEffect` functions uses `impulseResponse`  to help create an optional reverb effect.  
+  It simulates a model of sound reverberation in an acoustic space which 
+  a convolver node can blend with the source sound. Make sure to include this function along with `makeSound`
+  and `soundEffect` if you need to use the reverb feature.
+  */
+  ga.impulseResponse = function(duration, decay, reverse, actx) {
+
+    //The length of the buffer.
+    var length = actx.sampleRate * duration;
+
+    //Create an audio buffer (an empty sound container) to store the reverb effect.
+    var impulse = actx.createBuffer(2, length, actx.sampleRate);
+
+    //Use `getChannelData` to initialize empty arrays to store sound data for
+    //the left and right channels.
+    var left = impulse.getChannelData(0),
+        right = impulse.getChannelData(1);
+
+    //Loop through each sample-frame and fill the channel
+    //data with random noise.
+    for (var i = 0; i < length; i++){
+
+      //Apply the reverse effect, if `reverse` is `true`.
+      var n;
+      if (reverse) {
+        n = length - i;
+      } else {
+        n = i;
+      }
+
+      //Fill the left and right channels with random white noise which
+      //decays exponentially.
+      left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+      right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+    }
+
+    //Return the `impulse`.
+    return impulse;
+  };
 //plugins ends
 };

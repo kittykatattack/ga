@@ -81,118 +81,11 @@ Table of contents
 `makeKeys`: Used by Ga to create built-in references to the arrow keys and space bar.
 `byLayer`: An array sort method that's called when a sprite's `layer` property is changed.
 
-*Chapter 5: Sound*
-
-`ga.makeSound`: creates and returns a WebAudio sound sprite.
-`ga.sound`: Access sound files by their file names.
-
 */
 
 /*
-Prologue: Fixing the WebAudio API
+Prologue: Some necessary polyfills
 --------------------------
-
-The WebAudio API is so new that it's API is not consistently implemented properly across
-all modern browsers. Thankfully, Chris Wilson's Audio Context Monkey Patch script
-normalizes the API for maximum compatibility.
-
-https://github.com/cwilso/AudioContext-MonkeyPatch/blob/gh-pages/AudioContextMonkeyPatch.js
-
-It's included here.
-Thank you, Chris!
-
-*/
-
-(function (global, exports, perf) {
-  'use strict';
-
-  function fixSetTarget(param) {
-    if (!param)	// if NYI, just return
-      return;
-    if (!param.setTargetAtTime)
-      param.setTargetAtTime = param.setTargetValueAtTime;
-  }
-
-  if (window.hasOwnProperty('webkitAudioContext') &&
-      !window.hasOwnProperty('AudioContext')) {
-    window.AudioContext = webkitAudioContext;
-
-    if (!AudioContext.prototype.hasOwnProperty('createGain'))
-      AudioContext.prototype.createGain = AudioContext.prototype.createGainNode;
-    if (!AudioContext.prototype.hasOwnProperty('createDelay'))
-      AudioContext.prototype.createDelay = AudioContext.prototype.createDelayNode;
-    if (!AudioContext.prototype.hasOwnProperty('createScriptProcessor'))
-      AudioContext.prototype.createScriptProcessor = AudioContext.prototype.createJavaScriptNode;
-
-    AudioContext.prototype.internal_createGain = AudioContext.prototype.createGain;
-    AudioContext.prototype.createGain = function() {
-      var node = this.internal_createGain();
-      fixSetTarget(node.gain);
-      return node;
-    };
-
-    AudioContext.prototype.internal_createDelay = AudioContext.prototype.createDelay;
-    AudioContext.prototype.createDelay = function(maxDelayTime) {
-      var node = maxDelayTime ? this.internal_createDelay(maxDelayTime) : this.internal_createDelay();
-      fixSetTarget(node.delayTime);
-      return node;
-    };
-
-    AudioContext.prototype.internal_createBufferSource = AudioContext.prototype.createBufferSource;
-    AudioContext.prototype.createBufferSource = function() {
-      var node = this.internal_createBufferSource();
-      if (!node.start) {
-        node.start = function ( when, offset, duration ) {
-          if ( offset || duration )
-            this.noteGrainOn( when, offset, duration );
-          else
-            this.noteOn( when );
-        }
-      }
-      if (!node.stop)
-        node.stop = node.noteOff;
-      fixSetTarget(node.playbackRate);
-      return node;
-    };
-
-    AudioContext.prototype.internal_createDynamicsCompressor = AudioContext.prototype.createDynamicsCompressor;
-    AudioContext.prototype.createDynamicsCompressor = function() {
-      var node = this.internal_createDynamicsCompressor();
-      fixSetTarget(node.threshold);
-      fixSetTarget(node.knee);
-      fixSetTarget(node.ratio);
-      fixSetTarget(node.reduction);
-      fixSetTarget(node.attack);
-      fixSetTarget(node.release);
-      return node;
-    };
-
-    AudioContext.prototype.internal_createBiquadFilter = AudioContext.prototype.createBiquadFilter;
-    AudioContext.prototype.createBiquadFilter = function() {
-      var node = this.internal_createBiquadFilter();
-      fixSetTarget(node.frequency);
-      fixSetTarget(node.detune);
-      fixSetTarget(node.Q);
-      fixSetTarget(node.gain);
-      return node;
-    };
-
-    if (AudioContext.prototype.hasOwnProperty( 'createOscillator' )) {
-      AudioContext.prototype.internal_createOscillator = AudioContext.prototype.createOscillator;
-      AudioContext.prototype.createOscillator = function() {
-        var node = this.internal_createOscillator();
-        if (!node.start)
-          node.start = node.noteOn;
-        if (!node.stop)
-          node.stop = node.noteOff;
-        fixSetTarget(node.frequency);
-        fixSetTarget(node.detune);
-        return node;
-      };
-    }
-  }
-}(window));
-
 
 /*
 Chapter 1: The game engine
@@ -262,9 +155,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //Make the keyboard keys (arrow keys and space bar.)
   ga.key = makeKeys();
 
-  //Create an audio context.
-  ga.actx = new AudioContext();
-
   //An array to hold all the button sprites.
   ga.buttons = [];
 
@@ -278,10 +168,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //An array to store the tweening functions.
   ga.tweens = [];
-
-  //An array to store the particles.
-  ga.particles = [];
-
+  
   //Set the game `state`.
   ga.state = undefined;
 
@@ -316,6 +203,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //`true` by default
   ga.interpolation = true;
 
+  //An array that stores functions which should be run inside
+  //Ga's core `update` game loop. Just push any function you write
+  //into this array, and ga will run it in a continuous loop.
+  ga.updateFunctions = [];
+
   /*
   The canvas's x and y scale. These are set by getters and setter in
   the code ahead. The scale is used in the `makeInteractive`
@@ -338,6 +230,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       g.scale = scaleToFit;
 
   */
+  //The game's screen's scale.  
   ga.scale = 1;
 
   /*
@@ -444,18 +337,12 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     }
 
     //Update all the tween functions in the game.
+    //Note: this bit of code is going to be replaced very soon with the new
+    //tween engine
     if (ga.tweens.length > 0) {
       for(var j = ga.tweens.length - 1; j >= 0; j--) {
         var tween = ga.tweens[j];
         tween.update();
-      }
-    }
-
-    //Update all the particles in the game.
-    if (ga.particles.length > 0) {
-      for(var k = ga.particles.length - 1; k >= 0; k--) {
-        var particle = ga.particles[k];
-        particle.update();
       }
     }
 
@@ -470,6 +357,25 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ga.state();
     }
 
+    /*
+    Loop through all the functions in the `updateFunctions` array
+    and run any functions it contains. You can add any of your
+    own custom functions to this array like this:
+        
+        var customFunction = function() {console.log("I'm in the game loop!);}
+        ga.updateFunctions.push(customFunction);
+
+    See the see the code in the `particleEffect` and `enableFullscreen`
+    section of the `plugins.js` file to see typical examples of how code can be
+    added to the game loop like this.
+    */
+
+    if (ga.updateFunctions.length !== 0) {
+      for (var l = 0; l < ga.updateFunctions.length; l++) {
+        var updateFunction = ga.updateFunctions[l];
+        updateFunction();
+      }
+    }
   }
 
   //### start
@@ -1576,6 +1482,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             o.sourceHeight = ga.assets[source[0]].frame.h;
         }
       }
+      
       //If the source contains an `image` sub-property, this must
       //be a `frame` object that's defining the rectangular area of an inner sub-image
       //Use that sub-image to make the sprite. If it doesn't contain a
@@ -1610,6 +1517,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     };
 
+    //Use `setTexture` to change a sprite's source image 
+    //while the game is running
+    o.setTexture(source);
+    
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {
       if (o.frames.length > 0) {
@@ -1640,7 +1551,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
         throw new Error("Frame number " + frameNumber + "doesn't exist");
       }
     };
-    o.setTexture(source);
 
     //Set the sprite's getters
     o.x = 0;
@@ -1649,6 +1559,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //If the sprite has more than one frame, add a state player
     if (o.frames.length > 0) {
       ga.addStatePlayer(o);
+
       //Add a getter for the `_currentFrames` property.
       Object.defineProperty(o, "currentFrame", {
         get: function() {
@@ -1724,8 +1635,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //the button has been pressed down.
     o.pressed = false;
 
+    //`enabled` is a Boolean which, if false, deactivates the button.
+    o.enabled = true;
+
     //`hoverOver` is a Boolean which checkes whether the pointer
-    //has hoverd over the button.
+    //has hovered over the button.
     o.hoverOver = false;
 
     //Add the button into the global `buttons` array so that it
@@ -1736,94 +1650,98 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Ga's game loop.
     o.update = function(pointer, canvas) {
 
-      //Figure out if the pointer is touching the button.
-      var hit = ga.pointer.hitTestSprite(o);
+      //Only update the button if it's enabled.
+      if(o.enabled) {
 
-      //1. Figure out the current state.
-      if (pointer.isUp) {
+        //Figure out if the pointer is touching the button.
+        var hit = ga.pointer.hitTestSprite(o);
 
-        //Up state.
-        o.state = "up";
+        //1. Figure out the current state.
+        if (pointer.isUp) {
 
-        //Show the first frame, if this is a button.
-        if (o.subtype === "button") o.show(0);
-      }
+          //Up state.
+          o.state = "up";
 
-      //If the pointer is touching the button, figure out
-      //if the over or down state should be displayed.
-      if (hit) {
-
-        //Over state.
-        o.state = "over";
-
-        //Show the second frame if this sprite has
-        //3 frames and it's button.
-        if (o.frames && o.frames.length === 3 && o.subtype === "button") {
-          o.show(1);
+          //Show the first frame, if this is a button.
+          if (o.subtype === "button") o.show(0);
         }
 
-        //Down state.
-        if (pointer.isDown) {
-          o.state = "down";
+        //If the pointer is touching the button, figure out
+        //if the over or down state should be displayed.
+        if (hit) {
 
-          //Show the third frame if this sprite is a button and it
-          //has only three frames, or show the second frame if it
-          //only has two frames.
-          if(o.subtype === "button") {
-            if (o.frames.length === 3) {
-              o.show(2);
-            } else {
-              o.show(1);
+          //Over state.
+          o.state = "over";
+
+          //Show the second frame if this sprite has
+          //3 frames and it's button.
+          if (o.frames && o.frames.length === 3 && o.subtype === "button") {
+            o.show(1);
+          }
+
+          //Down state.
+          if (pointer.isDown) {
+            o.state = "down";
+
+            //Show the third frame if this sprite is a button and it
+            //has only three frames, or show the second frame if it
+            //only has two frames.
+            if(o.subtype === "button") {
+              if (o.frames.length === 3) {
+                o.show(2);
+              } else {
+                o.show(1);
+              }
             }
           }
         }
-      }
 
-      //Run the correct button action.
-      //a. Run the `press` method if the button state is "down" and
-      //the button hasn't already been pressed.
-      if (o.state === "down") {
-        if (!o.pressed) {
-          if (o.press) o.press();
-          o.pressed = true;
-          o.action = "pressed";
-        }
-      }
-
-      //b. Run the `release` method if the button state is "over" and
-      //the button has been pressed.
-      if (o.state === "over") {
-        if (o.pressed) {
-          if (o.release) o.release();
-          o.pressed = false;
-          o.action = "released";
-
-          //If the pointer was tapped and the user assigned a `tap`
-          //method, call the `tap` method
-          if (ga.pointer.tapped && o.tap) o.tap();
+        //Run the correct button action.
+        //a. Run the `press` method if the button state is "down" and
+        //the button hasn't already been pressed.
+        if (o.state === "down") {
+          if (!o.pressed) {
+            if (o.press) o.press();
+            o.pressed = true;
+            o.action = "pressed";
+          }
         }
 
-        //Run the `over` method if it has been assigned
-        if (!o.hoverOver) {
-          if (o.over) o.over();
-          o.hoverOver = true;
-        }
-      }
+        //b. Run the `release` method if the button state is "over" and
+        //the button has been pressed.
+        if (o.state === "over") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
 
-      //c. Check whether the pointer has been released outside
-      //the button's area. If the button state is "up" and it's
-      //already been pressed, then run the `release` method.
-      if (o.state === "up") {
-        if (o.pressed) {
-          if (o.release) o.release();
-          o.pressed = false;
-          o.action = "released";
+            //If the pointer was tapped and the user assigned a `tap`
+            //method, call the `tap` method
+            if (ga.pointer.tapped && o.tap) o.tap();
+          }
+
+          //Run the `over` method if it has been assigned
+          if (!o.hoverOver) {
+            if (o.over) o.over();
+            o.hoverOver = true;
+          }
         }
 
-        //Run the `out` method if it has been assigned
-        if (o.hoverOver) {
-          if (o.out) o.out();
-          o.hoverOver = false;
+        //c. Check whether the pointer has been released outside
+        //the button's area. If the button state is "up" and it's
+        //already been pressed, then run the `release` method.
+        if (o.state === "up") {
+          if (o.pressed) {
+            if (o.release) o.release();
+            o.pressed = false;
+            o.action = "released";
+          }
+
+          //Run the `out` method if it has been assigned
+          if (o.hoverOver) {
+            if (o.out) o.out();
+            o.hoverOver = false;
+          }
         }
       }
     };
@@ -2399,6 +2317,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.dragOffsetX = 0;
     o.dragOffsetY = 0;
 
+
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
 
@@ -2750,192 +2669,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       return 1;
     }
   }
-
-
-  /*
-  Chapter 5: Sound
-  ----------------
-
-  ###makeSound
-  `makeSound` creates and returns and WebAudio sound sprite. It's
-  called by `assets.load` when sounds are loaded into the Ga engine.
-  After the sound is loaded you can access and use it like this:
-
-      var anySound = g.sound("sounds/anyLoadedSound.wav");
-      anySound.loop = true;
-      anySound.pan = 0.8;
-      anySound.volume = 0.5;
-      anySound.play();
-      anySound.pause();
-      anySound.playFrom(second);
-      anySound.restart();
-
-  */
-
-  ga.makeSound = function(source, loadHandler) {
-    var o = {};
-
-    //Set the default properties.
-    //The `ga.actx` audio context is created when Ga is initialized.
-    o.actx = ga.actx;
-    o.volumeNode = o.actx.createGain();
-    o.panNode = o.actx.createPanner();
-    o.panNode.panningModel = "equalpower";
-    o.soundNode = undefined;
-    o.buffer = undefined;
-    o.source = undefined;
-    o.loop = false;
-    o.isPlaying = false;
-
-    //The function that should run when the sound is loaded.
-    o.loadHandler = undefined;
-
-    //Values for the `pan` and `volume` getters/setters.
-    o.panValue = 0;
-    o.volumeValue = 1;
-
-    //Values to help track and set the start and pause times.
-    o.startTime = 0;
-    o.startOffset = 0;
-
-    //The sound object's methods.
-    o.play = function() {
-
-      //Set the start time (it will be `0` when the sound
-      //first starts.
-      o.startTime = o.actx.currentTime;
-
-      //Create a sound node.
-      o.soundNode = o.actx.createBufferSource();
-
-      //Set the sound node's buffer property to the loaded sound.
-      o.soundNode.buffer = o.buffer;
-
-      //Connect the sound to the pan, connect the pan to the
-      //volume, and connect the volume to the destination.
-      o.soundNode.connect(o.panNode);
-      o.panNode.connect(o.volumeNode);
-      o.volumeNode.connect(o.actx.destination);
-
-      //Will the sound loop? This can be `true` or `false`.
-      o.soundNode.loop = o.loop;
-
-      //Finally, use the `start` method to play the sound.
-      //The start time will either be `0`,
-      //or a later time if the sound was paused.
-      o.soundNode.start(
-        0, o.startOffset % o.buffer.duration
-      );
-
-      //Set `isPlaying` to `true` to help control the
-      //`pause` and `restart` methods.
-      o.isPlaying = true;
-    };
-    o.pause = function() {
-      //Pause the sound if it's playing, and calculate the
-      //`startOffset` to save the current position.
-      if (o.isPlaying) {
-        o.soundNode.stop(0);
-        o.startOffset += o.actx.currentTime - o.startTime;
-        o.isPlaying = false;
-      }
-    };
-    o.restart = function() {
-      //Stop the sound if it's playing, reset the start and offset times,
-      //then call the `play` method again.
-      if (o.isPlaying) {
-        o.soundNode.stop(0);
-      }
-      o.startOffset = 0;
-      o.play();
-    };
-    o.playFrom = function(value) {
-      if (o.isPlaying) {
-        o.soundNode.stop(0);
-      }
-      o.startOffset = value;
-      o.play();
-    };
-
-    //Volume and pan getters/setters.
-    Object.defineProperties(o, {
-      volume: {
-        get: function() {
-          return o.volumeValue;
-        },
-        set: function(value) {
-          o.volumeNode.gain.value = value;
-          o.volumeValue = value;
-        },
-        enumerable: true, configurable: true
-      },
-      pan: {
-        get: function() {
-          return o.panValue;
-        },
-        set: function(value) {
-          //Panner objects accept x, y and z coordinates for 3D
-          //sound. However, because we're only doing 2D left/right
-          //panning we're only interested in the x coordinate,
-          //the first one. However, for a natural effect, the z
-          //value also has to be set proportionately.
-          var x = value,
-              y = 0,
-              z = 1 - Math.abs(x);
-          o.panNode.setPosition(x, y, z);
-          o.panValue = value;
-        },
-        enumerable: true, configurable: true
-      }
-    });
-    //The `load` method. It will call the `loadHandler` passed
-    //that was passed as an argument when the sound has loaded.
-    o.load = function() {
-      var xhr = new XMLHttpRequest();
-
-      //Use xhr to load the sound file.
-      xhr.open("GET", source, true);
-      xhr.responseType = "arraybuffer";
-      xhr.addEventListener("load", function() {
-
-        //Decode the sound and store a reference to the buffer.
-        o.actx.decodeAudioData(
-          xhr.response,
-          function(buffer) {
-            o.buffer = buffer;
-            o.hasLoaded = true;
-
-            //This next bit is optional, but important.
-            //If you have a load manager in your game, call it here so that
-            //the sound is registered as having loaded.
-            if (loadHandler) {
-              loadHandler();
-            }
-          },
-
-          //Throw an error if the sound can't be decoded.
-          function(error) {
-            throw new Error("Audio could not be decoded: " + error);
-          }
-        );
-      });
-
-      //Send the request to load the file.
-      xhr.send();
-    };
-
-    //Load the sound.
-    o.load();
-
-    //Return the sound object.
-    return o;
-  };
-
-  //### sound
-  //A convenience method that lets you access loaded sounds by their file names.
-  ga.sound = function(soundFileName){
-    return ga.assets[soundFileName];
-  };
 
   //Make the `keyboard` and `makeDisplayObject` functions public.
   ga.keyboard = keyboard;
