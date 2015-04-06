@@ -168,7 +168,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //An array to store the tweening functions.
   ga.tweens = [];
-  
+
   //Set the game `state`.
   ga.state = undefined;
 
@@ -230,7 +230,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       g.scale = scaleToFit;
 
   */
-  //The game's screen's scale.  
+  //The game's screen's scale.
   ga.scale = 1;
 
   /*
@@ -361,7 +361,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     Loop through all the functions in the `updateFunctions` array
     and run any functions it contains. You can add any of your
     own custom functions to this array like this:
-        
+
         var customFunction = function() {console.log("I'm in the game loop!);}
         ga.updateFunctions.push(customFunction);
 
@@ -1482,7 +1482,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             o.sourceHeight = ga.assets[source[0]].frame.h;
         }
       }
-      
+
       //If the source contains an `image` sub-property, this must
       //be a `frame` object that's defining the rectangular area of an inner sub-image
       //Use that sub-image to make the sprite. If it doesn't contain a
@@ -1517,10 +1517,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     };
 
-    //Use `setTexture` to change a sprite's source image 
+    //Use `setTexture` to change a sprite's source image
     //while the game is running
     o.setTexture(source);
-    
+
     //Add a `gotoAndStop` method to go to a specific frame.
     o.gotoAndStop = function(frameNumber) {
       if (o.frames.length > 0) {
@@ -2321,13 +2321,13 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //The pointer's mouse `moveHandler`
     o.moveHandler = function(event) {
 
-      //Get the element that's firing the event.
-      var element = event.target;
-
       //Find the pointer’s x and y position (for mouse).
       //Subtract the element's top and left offset from the browser window.
-      o._x = (event.pageX - element.offsetLeft);
-      o._y = (event.pageY - element.offsetTop);
+      o._x = (event.pageX - event.target.offsetLeft);
+      o._y = (event.pageY - event.target.offsetTop);
+
+      //Prevent the canvas from being selected.
+      event.preventDefault();
     };
 
     //The pointer's `touchmoveHandler`.
@@ -2343,6 +2343,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //The pointer's `downHandler`.
     o.downHandler = function(event) {
+      //Find the pointer’s x and y position (for mouse).
+      o._x = (event.pageX - event.target.offsetLeft);
+      o._y = (event.pageY - event.target.offsetTop);
 
       //Set the down states.
       o.isDown = true;
@@ -2404,29 +2407,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       event.preventDefault();
     };
 
-    //The pointer's `touchendHandler`.
-    o.touchendHandler = function(event) {
-
-      //Figure out how much time the pointer has been down.
-      o.elapsedTime = Math.abs(o.downTime - Date.now());
-
-      //If it's less than 200 milliseconds, it must be a tap or click.
-      if (o.elapsedTime <= 200) {
-        o.tapped = true;
-
-        //Call the `tapped` method if it's been assigned by the user.
-        if (o.tap) o.tap();
-      }
-      o.isUp = true;
-      o.isDown = false;
-
-      //Call the `release` method if it's been assigned by the user.
-      if (o.release) o.release();
-
-      //Prevent the canvas from being selected.
-      event.preventDefault();
-    };
-
     //Bind the events to the handlers.
     //Mouse events.
     ga.canvas.addEventListener(
@@ -2453,7 +2433,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     //Add a `touchend` event to the `window` object as well to
     //catch a mouse button release outside of the canvas area.
     window.addEventListener(
-      "touchend", o.touchendHandler.bind(o), false
+      "touchend", o.upHandler.bind(o), false
     );
 
     //Disable the default pan and zoom actions on the `canvas`.
@@ -2505,7 +2485,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
             var sprite = ga.draggableSprites[i];
 
             //Check for a collision with the pointer using `hitTestPoint`.
-            if (o.hitTestSprite(sprite) && sprite.draggable) {
+            if (sprite.draggable && o.hitTestSprite(sprite)) {
 
               //Calculate the difference between the pointer's
               //position and the sprite's position.
@@ -2549,7 +2529,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       //Change the mouse arrow pointer to a hand if it's over a
       //sprite.
       ga.draggableSprites.some(function(sprite) {
-        if (o.hitTestSprite(sprite) && sprite.draggable) {
+        if (sprite.draggable && o.hitTestSprite(sprite)) {
           ga.canvas.style.cursor = "pointer";
           return true;
         } else {
