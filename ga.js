@@ -2148,7 +2148,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
           xhr.addEventListener("readystatechange", function() {
 
             //Check to make sure the file has loaded properly.
-            if (/*xhr.status === 200 &&*/ xhr.readyState === 4) {
+            if (xhr.status === 200 && xhr.readyState === 4) {
 
               //Convert the JSON data file into an ordinary object.
               file = JSON.parse(xhr.responseText);
