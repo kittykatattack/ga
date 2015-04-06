@@ -2343,6 +2343,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
     //The pointer's `downHandler`.
     o.downHandler = function(event) {
+
       //Find the pointer’s x and y position (for mouse).
       o._x = (event.pageX - event.target.offsetLeft);
       o._y = (event.pageY - event.target.offsetTop);
