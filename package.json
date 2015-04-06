@@ -1,0 +1,27 @@
+{
+  "name": "Ga!",
+  "version": "0.0.0",
+  "description": "The world's tiniest, cutest and funnest game engine",
+  "main": "ga.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Javascript",
+    "Game Engine"
+  ],
+  "author": "Rex van der Spuy",
+  "license": "Ga is vehemently unlicenesed",
+  "bugs": "https://github.com/kittykatattack/ga/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kittykatattack/ga.git"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-uglify": "^0.8.0"
+  }
+}
