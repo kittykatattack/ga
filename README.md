@@ -251,9 +251,11 @@ Please help! If you find something that's bad, please help to fix it.
 If you find something good, please help to make it better.  Ga welcomes any and all contributions!  
 +1 Bonus Points for removing code and simplifying the architecture. +2 Bonus
 Points for making the code easier to understand. The aim of this
-project is to help discover the least amount of code required to make
-the widest variety of games possible using the fewest number of
-components. Sound like fun??
+project is to discover the smallest universal set of reusable
+components required to make
+the widest variety of games possible with the least amount of code.
+We're searching for the primary colors, or fundamental alphabet of game
+design. Sound like fun??
 
 **Coding style**: Unconventionally, Ga
 uses **functional composition** patterns (the [module
