@@ -227,9 +227,10 @@ The Ga repository doesn't include the minified and compressed version
 of the source code, because you should probably optimize that yourself. I recommend
 first minifying the code using with [Google Closure
 Compiler](http://closure-compiler.appspot.com/home) (Simple mode only) or
-[UglifyJS2](https://github.com/mishoo/UglifyJS2). 
+[UglifyJS2](https://github.com/mishoo/UglifyJS2). Google Closure will
+give you best minification, and Ga's source code is optimized for it.
 
-Then, zip it.
+Then, zip it. I recommend [gzip](http://www.gzip.org).
 
 For more aggressive optimization, you could further try running the
 minified code through
@@ -247,8 +248,20 @@ Contributions and Licencing
 ---------------------------
 It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
 Please help! If you find something that's bad, please help to fix it.
-If you find something good, please help to make it better.
-Ga welcomes any and all contributions!
+If you find something good, please help to make it better.  Ga welcomes any and all contributions!  
++1 Bonus Points for removing code and simplifying the architecture. +2 Bonus
+Points for making the code easier to understand. The aim of this
+project is to help discover the least amount of code required to make
+the widest variety of games possible using the fewest number of
+components. Sound like fun??
+
+**Coding style**: Unconventionally, Ga
+uses **functional composition** patterns (the [module
+pattern](http://toddmotto.com/mastering-the-module-pattern/) and
+[mixins](http://raganwald.com/2014/04/10/mixins-forwarding-delegation.html))
+for object creation instead of inheritance. Why? It's really
+just an experiment in coding like that. It also means the code
+becomes a little more compact.
 
 Licensing? Ga is vehemently *unlicenesed*.
 That means its freer than free.

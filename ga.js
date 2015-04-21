@@ -336,16 +336,6 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       }
     }
 
-    //Update all the tween functions in the game.
-    //Note: this bit of code is going to be replaced very soon with the new
-    //tween engine
-    if (ga.tweens.length > 0) {
-      for(var j = ga.tweens.length - 1; j >= 0; j--) {
-        var tween = ga.tweens[j];
-        tween.update();
-      }
-    }
-
     //Update the pointer for drag and drop.
     if(ga.dragAndDrop) {
       ga.pointer.updateDragAndDrop();
@@ -692,6 +682,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       yOffset = yOffset || 0;
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.y + a.halfHeight - b.halfHeight) + yOffset;
+      
+      //Compensate for the parent's position
+      o.compensateForParentPosition(a, b);
     };
 
     //Position `b` above `a`.
@@ -700,6 +693,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       yOffset = yOffset || 0;
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.x - b.height) + yOffset;
+      
+      //Compensate for the parent's position
+      o.compensateForParentPosition(a, b);
     };
 
     //Position `b` to the right of `a`.
@@ -708,6 +704,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       yOffset = yOffset || 0;
       b.x = (a.x + a.width) + xOffset;
       b.y = (a.y + a.halfHeight - b.halfHeight) + yOffset;
+
+      //Compensate for the parent's position
+      o.compensateForParentPosition(a, b);
     };
 
     //Position `b` below `a`.
@@ -716,15 +715,31 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       yOffset = yOffset || 0;
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
       b.y = (a.y + a.height) + yOffset;
+      
+      //Compensate for the parent's position
+      o.compensateForParentPosition(a, b);
     };
 
-    //Position `b` to the left of `a`
+    //Position `b` to the left of `a`.
     o.putLeft = function(b, xOffset, yOffset) {
       xOffset = xOffset || 0;
       yOffset = yOffset || 0;
       b.x = (a.x - b.width) + xOffset;
       b.y = (a.y + a.halfHeight - b.halfHeight) + yOffset;
+      
+      //Compensate for the parent's position
+      o.compensateForParentPosition(a, b);
     };
+
+    //`compensateForParentPosition` is a helper funtion for the above
+    //`put` methods that subracts the parent's global position from
+    //the nested child's position.
+    o.compensateForParentPosition = function(a, b) {
+      if (b.parent.gx !== 0 || b.parent.gy !== 0) {
+        b.x -= a.gx;
+        b.y -= a.gy;
+      }
+    }
 
     //Getters and setters for the sprite's internal properties.
     Object.defineProperties(o, {

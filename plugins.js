@@ -83,13 +83,24 @@ Here's the table of contents to get you started:
 `scaleToWindow`: Automatically scales and centers the game to the maximum browser window area.
 `shake`: Make a sprite or group shake. You can use it for a screen shake effect.
 
-### Chapter 2: Tween methods for sprite and scene transitions
+### Chapter 2: The tweening module 
 
-`slide`: Ease a sprite into a new position.
-`yoyo`: Ease a sprite back and forth between two points, with optional delay.
+`tweens`: An array to store all of Ga's current tweens.
+`ease`: An object that stores references to useful easing functions.
+`tweenProperty`: A generic low-level method that tweens any sprite property.
+`slide`: Make a sprite slide from one x/y position to another.
 `fadeIn`: Fade a sprite in.
-`fadeOut`: Fade a sprite out.`
-`removeTween`: Compeletely remove a tween from Ga's global `tweens` array.
+`fadeOut`: Fade a sprite out.
+`pulse`: Make a sprite fade in and out in a loop.
+`makeTween`: A low-level function to help construct complex tweens.
+`scale`: Smoothly change the scale of a sprite.
+`breathe`: A breathing effect that changes the sprite's scale in a continuous loop.
+`strobe`: A psychedelic flashing scale effect.
+`wobble`: Make a sprite wobble like a plate of jelly.
+`removeTween`: A universal method for remove a tween from Ga's engine.
+`followCurve`: Make a sprite follow a bezier curve that you can specify.
+`followPath`: Make a sprite follow a path of connected waypoints.
+`walkCurve`: Make a sprite follow a path of connected curves.
 
 ### Chapter 3: Sprite creation tools
 
@@ -145,9 +156,7 @@ Here's the table of contents to get you started:
 `alignFullscreen`: Used by `enableFullscreen` to scale and center the canvas in fullscreen mode.
 `enableFullscreen`: Enables fullscreen mode when the user clicks or touches the canvas.
 
-### Chapter 8: UNDER CONSTRUCTION: The new tweening module
-
-### Chapter 9: Sound
+### Chapter 8: Sound
 
 `ga.actx`: The audio context.
 `makeSound`: a method for loading and controling sound files.
@@ -914,292 +923,864 @@ GA.plugins = function(ga) {
   }
 
   /*
-  Chapter 2: Tween methods for sprite and scene transitions
+  Chapter 2: The tweening module
   ---------------------------------------------------------
 
-  Ga has four special tween functions to help you manage scene
+  Ga has some special tween functions to help you manage scene
   or sprite transitions:
 
-      slide
-      yoyo
-      fadeIn
-      fadeOut
+      `slide`: Make a sprite slide from one x/y position to another.
+      `fadeIn`: Fade a sprite in.
+      `fadeOut`: Fade a sprite out.
+      `pulse`: Make a sprite fade in and out in a loop.
+      `scale`: Smoothly change the scale of a sprite.
+      `breathe`: A breathing effect that changes the sprite's scale in a loop.
+      `strobe`: A psychedelic flashing scale effect.
+      `wobble`: Make a sprite wobble like a plate of jelly.
 
-  They're special because they don't need to run inside a looping game
-  state (like `play`) to work. That makes them easy to launch with callback functions.
-  `slide` eases a sprite from its start position to a destination x
-  and y point at a certain speed. It returns a tween object. You can
-  attach an `onComplete` method to the tween object to do something
+  All these methods return a `tween` object. You
+  attach an `onComplete` method to the `tween` object to do something
   when the tween has finished. It also has a Boolean `playing`
   property that tells you whether or not the tween is playing. Use
   `tween.pause()` and `tween.play()` to pause and play the tweens at
   any time. You can completely remove a tween with
-  `ga.removeTween(tweenObject).
-  `yoyo` is the same as `slide`, but the tween will bounce back and
-  forth between its start and end points, forever. You can give it an
+  `ga.removeTween(tweenObject)`.
+
+  Most of these methods have a `yoyo` Boolean argument that, if `true`,
+  will make the sprite bounce back and
+  forth between its start and end points, forever. You can give supply an
   optional `delay` argument that defines how long, in milliseconds, the
-  tween should hold its position until it bounces back again.
-  `fadeIn` and `fadeOut` work the same way, and change the sprite's
-  `alpha` property.
+  tween should hold its position until it bounces back again. 
+
   All of these special tweens are managed in Ga's `tweens` array. Ga's game loop
   calls each tween object's `update` function each frame.
+
+  See the `tweening.html` file in the `examples` folder for a demonstration of how
+  to use these tweening methods.
+
   */
 
-  //### slide
-  //Use `slide` to ease a sprite to a new position.
-  //`slide` arguments:
-  //sprite, destinationX, destinationY, speed
-  ga.slide = function(sprite, endX, endY, speed) {
-    var tween = {};
-    tween.startX = sprite.x;
-    tween.startY = sprite.y;
-    tween.playing = true;
-    tween.update = function() {
-      if (tween.playing) {
-        var vx = endX - sprite.x,
-            vy = endY - sprite.y,
-            distance = Math.sqrt(vx * vx + vy * vy);
+  /*
+  tweens
+  ------
+  An array to store all the tweens in the game
+  */
 
-        if (distance >= 0.5) {
-          sprite.x += vx * speed;
-          sprite.y += vy * speed;
-        } else {
-          sprite.x = endX;
-          sprite.y = endY;
-          tween.playing = false;
-          if (tween.onComplete) tween.onComplete();
-          //Remove the tween from Ga's `tweens` array.
-          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
-        }
+  ga.tweens = [];
+
+  /*
+  updateTweens
+  ------------
+  */
+  //`updateTweens` loops through all the sprites in `ga.particles`
+  //and runs their `updateParticles` functions.
+  ga.updateTweens = function() {
+    
+    //Update all the particles in the game.
+    if (ga.tweens.length > 0) {
+      for(var i = ga.tweens.length - 1; i >= 0; i--) {
+        var tween = ga.tweens[i];
+        if (tween) tween.update();
       }
-    };
-    tween.pause = function() {
-      tween.playing = false;
-    };
-    tween.play = function() {
-      tween.playing = true;
-    };
-    //Add the tween to Ga's `tweens` array. The `tweens` array is
-    //updated on each frame.
-    ga.tweens.push(tween);
-    //Return the tween object
-    return tween;
-  };
-
-  //### yoyo
-  //`yoyo` arguments:
-  //sprite, destinationX, destinationY, speed, delayInMilliseconds
-  ga.yoyo = function(sprite, endX, endY, speed, delay) {
-    if (delay === undefined) delay = 0;
-    var yoyo = {};
-    function repeat(sprite, endX, endY, speed, delay) {
-      yoyo.tween = ga.slide(sprite, endX, endY, speed);
-      yoyo.tween.onComplete = function() {
-        ga.wait(delay, function() {
-          repeat(sprite, yoyo.tween.startX, yoyo.tween.startY, speed, delay);
-        });
-      };
-    };
-    repeat(sprite, endX, endY, speed, delay);
-    //Define the `playing` property
-    Object.defineProperty(yoyo, "playing", {
-      get: function() {
-        //Return the `tween` object's `playing` value
-        return yoyo.tween.playing;
-      },
-      enumerable: false, configurable: false
-    });
-    //Pause and play the yoyo's tween
-    yoyo.pause = function() {
-      yoyo.tween.playing = false;
-    };
-    yoyo.play = function() {
-      yoyo.tween.playing = true;
-    };
-    return yoyo;
-  };
-
-
-  //### fadeOut
-  //`fadeOut` arguments:
-  //sprite, speed
-  ga.fadeOut = function(sprite, speed, finalValue) {
-    finalValue = finalValue || 0;
-    var tween = {};
-    tween.playing = true;
-    tween.update = function() {
-      if (tween.playing) {
-        //Important! Use the sprite's `_alpha` property for this
-        //instead of its relative `alpha` property. That's because we
-        //want to tween the alpha property without taking into account
-        //the sprite's parent's alpha as well.
-        if (sprite._alpha > finalValue) {
-          sprite._alpha -= speed;
-          if (sprite._alpha < finalValue) sprite._alpha = finalValue;
-        } else {
-          tween.playing = false;
-          if (tween.onComplete) tween.onComplete();
-          //Remove the tween from Ga's `tweens` array.
-          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
-        }
-      }
-    };
-    tween.pause = function() {
-      tween.playing = false;
-    };
-    tween.play = function() {
-      tween.playing = true;
-    };
-    //Add the tween to Ga's `tweens` array. The `tweens` array is
-    //updated on each frame.
-    ga.tweens.push(tween);
-    //Return the tween object
-    return tween;
-  };
-
-  //### fadeIn
-  //`fadeIn` arguemnts:
-  //sprite, speed
-  ga.fadeIn = function(sprite, speed, finalValue) {
-    finalValue = finalValue || 1;
-    var tween = {};
-    tween.playing = true;
-    tween.update = function() {
-      if (tween.playing) {
-        //Important! Use the sprite's `_alpha` property for this
-        //instead of its relative `alpha` property. That's because we
-        //want to tween the alpha property without taking into account
-        //the sprite's parent's alpha as well.
-        if (sprite._alpha < finalValue) {
-          sprite._alpha += speed;
-          if (sprite._alpha > finalValue) sprite._alpha = finalValue;
-        } else {
-          tween.playing = false;
-          if (tween.onComplete) tween.onComplete();
-          //Remove the tween from Ga's `tweens` array.
-          ga.tweens.splice(ga.tweens.indexOf(tween), 1);
-        }
-      }
-    };
-    tween.pause = function() {
-      tween.playing = false;
-    };
-    tween.play = function() {
-      tween.playing = true;
-    };
-    //Add the tween to Ga's `tweens` array. The `tweens` array is
-    //updated on each frame.
-    ga.tweens.push(tween);
-    //Return the tween object
-    return tween;
-  };
-  
-  //### fade
-  //Use `fade` to fade-in or fade-out any spirte.
-  //It's usually used along with the `pulse` effect (below.)
-  //`fade` arguments:
-  //sprite, speed, finalValue
-  ga.fade = function(sprite, speed, finalValue) {
-    finalValue = finalValue || 0;
-    var tween = {};
-    tween.playing = true;
-    tween.update = function() {
-      if (tween.playing) {
-        //Fade out
-        if (finalValue < sprite._alpha) {
-          //Important! Use the sprite's `_alpha` property for this
-          //instead of its relative `alpha` property. That's because we
-          //want to tween the alpha property without taking into account
-          //the sprite's parent's alpha as well.
-          if (sprite._alpha > finalValue) {
-            sprite._alpha -= speed;
-            if (sprite._alpha < finalValue) sprite._alpha = finalValue;
-          } else {
-            tween.playing = false;
-            if (tween.onComplete) tween.onComplete();
-            //Remove the tween from Ga's `tweens` array.
-            ga.tweens.splice(ga.tweens.indexOf(tween), 1);
-          }
-        }
-        else {
-          //Fade in
-          if (sprite._alpha < finalValue) {
-            sprite._alpha += speed;
-            if (sprite._alpha > finalValue) sprite._alpha = finalValue;
-          } else {
-            tween.playing = false;
-            if (tween.onComplete) tween.onComplete();
-            //Remove the tween from Ga's `tweens` array.
-            ga.tweens.splice(ga.tweens.indexOf(tween), 1);
-          }
-        }
-      }
-    };
-    tween.pause = function() {
-      tween.playing = false;
-    };
-    tween.play = function() {
-      tween.playing = true;
-    };
-    //Add the tween to Ga's `tweens` array. The `tweens` array is
-    //updated on each frame.
-    ga.tweens.push(tween);
-    //Return the tween object
-    return tween;
-  };
-
-  //### pulse
-  //Oscilates a sprite's alpha between 1 and 10
-  //`pulse` arguments:
-  //sprite, speedOfFade, finalAlphaValue, delayTimeInMillisecionds
-
-  ga.pulse = function(sprite, speed, finalAlpha, delay) {
-    if (delay === undefined) delay = 0;
-    var pulse = {};
-    function repeat(sprite, speed, finalAlpha, delay) {
-      pulse.tween = ga.fade(sprite, speed, finalAlpha);
-      pulse.tween.onComplete = function() {
-        ga.wait(delay, function() {
-          if(sprite._alpha < 1) {
-            repeat(sprite, speed, 1, delay);
-          } else {
-            repeat(sprite, speed, 0, delay);
-          }
-        });
-      };
-    };
-    repeat(sprite, finalAlpha, speed, delay);
-    //Define the `playing` property
-    Object.defineProperty(pulse, "playing", {
-      get: function() {
-        //Return the `tween` object's `playing` value
-        return pulse.tween.playing;
-      },
-      enumerable: false, configurable: false
-    });
-    //Pause and play the pulse's tween
-    pulse.pause = function() {
-      pulse.tween.playing = false;
-    };
-    pulse.play = function() {
-      pulse.tween.playing = true;
-    };
-    return pulse;
-  };
-
-  //### removeTween
-  ga.removeTween = function(tweenObject) {
-    //Remove the tween if tweenObject doesn't have a nested
-    //tween object
-    if(!tweenObject.tween) {
-      tweenObject.pause();
-      ga.tweens.splice(ga.tweens.indexOf(tweenObject), 1);
-    //Otherwise, remove the nested tween object
-    } else {
-      tweenObject.tween.pause();
-      ga.tweens.splice(ga.tweens.indexOf(tweenObject.tween), 1);
     }
   }
+
+  //Push `updateTweens` into the `ga.updateFunctions` array so that
+  //it runs inside Ga's game loop. (See the `ga.update` method in the 
+  //`ga.js` file to see how this works.
+  ga.updateFunctions.push(ga.updateTweens);
+
+  //Easing functions
+  //Bezier curve
+  ga.cubicBezier = function(t, a, b, c, d) {
+    var t2 = t * t;
+    var t3 = t2 * t;
+    return a  
+      + (-a * 3 + t * (3 * a - a * t)) * t
+      + (3 * b + t * (-6 * b + b * 3 * t)) * t 
+      + (c * 3 - c * 3 * t) * t2 + d * t3;
+  }
+
+  var ease = {
+
+    //Linear
+    linear: function(x) {return x;},
+
+    //Smoothstep
+    smoothstep: function(x) {return x * x * (3 - 2 * x);},
+    smoothstepSquared: function(x) {return Math.pow((x * x * (3 - 2 * x)), 2);},
+    smoothstepCubed: function(x) {return Math.pow((x * x * (3 - 2 * x)), 3);},
+
+    //Acceleration
+    acceleration: function(x) {return x * x;},
+    accelerationCubed: function(x) {return Math.pow(x * x, 3);},
+
+    //Deceleration
+    deceleration: function(x) {return 1 - Math.pow(1 - x, 2);},
+    decelerationCubed: function(x) {return 1 - Math.pow(1 - x, 3);},
+
+    //Sine
+    sine: function(x) {return Math.sin(x * Math.PI / 2);},
+    sineSquared: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
+    sineCubed: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
+    inverseSine: function(x) {return 1 - Math.sin((1 - x) * Math.PI / 2);},
+    inverseSineSquared: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 2);},
+    inverseSineCubed: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 3);},
+
+    //Spline
+    spline: function(t, p0, p1, p2, p3) {
+      return 0.5 * (
+        (2 * p1) +
+        (-p0 + p2) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
+        (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t
+      );
+    }
+  };
+
+  ga.tweenProperty = function(
+    sprite,                  //Sprite object
+    property,                //String property
+    startValue,              //Tween start value
+    endValue,                //Tween end value
+    totalFrames,             //Duration in frames
+    type,                    //The easing type
+    yoyo,                    //Yoyo?
+    delayBeforeRepeat        //Delay in milliseconds before repeating
+  ) {
+
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 60;
+    if (type === undefined) type = "smoothstep";
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+    //Create the tween object
+    var o = {};
+
+    //If the tween is a bounce type (a spline), set the
+    //start and end magnitude values
+    var typeArray = type.split(" ");
+    if (typeArray[0] === "bounce") {
+      o.startMagnitude = parseInt(typeArray[1]);
+      o.endMagnitude = parseInt(typeArray[2]);
+    }
+    /*
+    if (type[0] === "spline") {
+      o.startMagnitude = type[1];
+      o.endMagnitude = type[2];
+    }
+    */
+
+    //Use `o.start` to make a new tween using the current
+    //end point values
+    o.start = function(startValue, endValue) {
+
+      //Clone the start and end values so that any possible references to sprite
+      //properties are converted to ordinary numbers 
+      o.startValue = JSON.parse(JSON.stringify(startValue));
+      o.endValue = JSON.parse(JSON.stringify(endValue));
+      o.playing = true;
+      o.totalFrames = totalFrames;
+      o.frameCounter = 0;
+
+      //Add the tween to the global `tweens` array. The `tweens` array is
+      //updated on each frame
+      ga.tweens.push(o);
+    };
+
+    //Call `o.start` to start the tween
+    o.start(startValue, endValue);
+
+    //The `update` method will be called on each frame by the game loop.
+    //This is what makes the tween move
+    o.update = function() {
+      
+      var time, curvedTime;
+
+      if (o.playing) {
+
+        //If the elapsed frames are less than the total frames,
+        //use the tweening formulas to move the sprite
+        if (o.frameCounter < o.totalFrames) {
+
+          //Find the normalized value
+          var normalizedTime = o.frameCounter / o.totalFrames;
+
+          //Select the correct easing function from the 
+          //`ease` object’s library of easing functions
+
+          //If it's not a spline, use one of the ordinary easing functions
+          if (typeArray[0] !== "bounce") {
+            curvedTime = ease[type](normalizedTime);
+          } 
+          
+          //If it's a spline, use the `spline` function and apply the
+          //2 additional `type` array values as the spline's start and
+          //end points
+          else {
+            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
+          }
+
+          //Interpolate the sprite's property based on the curve
+          sprite[property] = (o.endValue * curvedTime) + (o.startValue * (1 - curvedTime));
+
+          o.frameCounter += 1;
+        }
+
+        //When the tween has finished playing, run the end tasks
+        else {
+          o.end(); 
+        }
+      }
+    };
+      
+    //The `end` method will be called when the tween is finished
+    o.end = function() {
+
+      //Set `playing` to `false`
+      o.playing = false;
+
+      //Call the tween's `onComplete` method, if it's been assigned
+      if (o.onComplete) o.onComplete();
+
+      //Remove the tween from the `tweens` array
+      ga.tweens.splice(ga.tweens.indexOf(o), 1);
+
+      //If the tween's `yoyo` property is `true`, create a new tween
+      //using the same values, but use the current tween's `startValue`
+      //as the next tween's `endValue` 
+      if (yoyo) {
+        ga.wait(delayBeforeRepeat, function() {
+          o.start(o.endValue, o.startValue);
+        });
+      }
+    };
+
+    //Pause and play methods
+    o.play = function() {o.playing = true;};
+    o.pause = function() {o.playing = false;};
+    
+    //Return the tween object
+    return o;
+  }
+
+  /* High level tween functions */
+
+  //`fadeOut`
+  ga.fadeOut = function(sprite, frames) {
+    if (frames === undefined) frames = 60;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, 0, frames, "sine"
+    );
+  }
+
+  //`fadeIn`
+  ga.fadeIn = function(sprite, frames) {
+    if (frames === undefined) frames = 60;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, 1, frames, "sine"
+    );
+  }
+
+  //`pulse`
+  //Fades the sprite in and out at a steady rate.
+  //Set the `minAlpha` to something greater than 0 if you
+  //don't want the sprite to fade away completely
+  ga.pulse = function(sprite, frames, minAlpha) {
+    if (frames === undefined) frames = 60;
+    if (minAlpha === undefined) minAlpha = 0;
+    return ga.tweenProperty(
+      sprite, "alpha", sprite.alpha, minAlpha, frames, "smoothstep", true
+    );
+  }
+
+  //`makeTween` is a general function for making complex tweens
+  //out of multiple `tweenProperty` functions. It's one argument,
+  //`tweensToAdd` is an array containing multiple `tweenProperty` calls
+
+  ga.makeTween = function(tweensToAdd) {
+
+    //Create an object to manage the tweens
+    var o = {};
+
+    //Create a `tweens` array to store the new tweens
+    o.tweens = [];
+
+    //Make a new tween for each array
+    tweensToAdd.forEach(function(tweenPropertyArguments) {
+      
+      //Use the tween property arguments to make a new tween
+      var newTween = ga.tweenProperty(
+        tweenPropertyArguments[0],
+        tweenPropertyArguments[1],
+        tweenPropertyArguments[2],
+        tweenPropertyArguments[3],
+        tweenPropertyArguments[4],
+        tweenPropertyArguments[5],
+        tweenPropertyArguments[6],
+        tweenPropertyArguments[7]
+      );
+
+      //Push the new tween into this object's internal `tweens` array
+      o.tweens.push(newTween);
+    });
+
+    //Add a counter to keep track of the
+    //number of tweens that have completed their actions
+    var completionCounter = 0;
+    
+    //`o.completed` will be called each time one of the tweens
+    //finishes
+    o.completed = function() {
+
+      //Add 1 to the `completionCounter`
+      completionCounter += 1;
+
+      //If all tweens have finished, call the user-defined `onComplete`
+      //method, if it's been assigned. Reset the `completionCounter`
+      if (completionCounter === o.tweens.length) {
+        if (o.onComplete) o.onComplete();
+        completionCounter = 0;
+      }
+    }; 
+
+    //Add `onComplete` methods to all tweens
+    o.tweens.forEach(function(tween) {
+      tween.onComplete = function() {o.completed();};
+    });
+    
+    //Add pause and play methods to control all the tweens
+    o.pause = function() {
+      o.tweens.forEach(function(tween) {
+        tween.playing = false;
+      });
+    };
+    o.play = function() {
+      o.tweens.forEach(function(tween) {
+        tween.playing = true;
+      });
+    };
+
+    //Return the tween object
+    return o;
+  }
+
+  ga.slide = function(
+    sprite, endX, endY, 
+    frames, type, yoyo, delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (frames === undefined) frames = 60;
+    if (type === undefined) type = "smoothstep";
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    return ga.makeTween([ 
+
+      //Create the x axis tween
+      [sprite, "x", sprite.x, endX, frames, type, yoyo, delayBeforeRepeat],
+
+      //Create the y axis tween
+      [sprite, "y", sprite.y, endY, frames, type, yoyo, delayBeforeRepeat]
+
+    ]);
+  }
+
+  ga.breathe = function(
+    sprite, endScaleX, endScaleY, 
+    frames, yoyo, delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (frames === undefined) frames = 60;
+    if (yoyo === undefined) yoyo = true;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    return ga.makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, endScaleX, 
+        frames, "smoothstepSquared", yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, endScaleY, 
+        frames, "smoothstepSquared", yoyo, delayBeforeRepeat
+      ]
+    ]);
+  }
+
+  ga.scale = function(sprite, endScaleX, endScaleY, frames) {
+    
+    //Set defaults
+    if (frames === undefined) frames = 60;
+
+    return ga.makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, endScaleX, 
+        frames, "smoothstep", false
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, endScaleY, 
+        frames, "smoothstep", false
+      ]
+    ]);
+  }
+
+  ga.strobe = function(
+    sprite, scaleFactor, startMagnitude, endMagnitude, 
+    frames, yoyo, delayBeforeRepeat
+  ) {
+    
+    //Set defaults
+    if (scaleFactor === undefined) scaleFactor = 1.3;
+    if (startMagnitude === undefined) startMagnitude = 10;
+    if (endMagnitude === undefined) endMagnitude = 20;
+    if (frames === undefined) frames = 10;
+    if (yoyo === undefined) yoyo = true;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    var bounce = "bounce " + startMagnitude + " " + endMagnitude; 
+
+    return ga.makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, scaleFactor, frames, 
+        bounce, yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, scaleFactor, frames, 
+        bounce, yoyo, delayBeforeRepeat
+      ]
+    ]);
+  }
+
+  ga.wobble = function(
+    sprite, 
+    scaleFactorX, 
+    scaleFactorY, 
+    frames,
+    xStartMagnitude, 
+    xEndMagnitude,
+    yStartMagnitude, 
+    yEndMagnitude,
+    friction,
+    yoyo,
+    delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (scaleFactorX === undefined) scaleFactorX = 1.2;
+    if (scaleFactorY === undefined) scaleFactorY = 1.2;
+    if (frames === undefined) frames = 10;
+    if (xStartMagnitude === undefined) xStartMagnitude = 10;
+    if (xEndMagnitude === undefined) xEndMagnitude = 10;
+    if (yStartMagnitude === undefined) yStartMagnitude = -10;
+    if (yEndMagnitude === undefined) yEndMagnitude = -10;
+    if (friction === undefined) friction = 0.98;
+    if (yoyo === undefined) yoyo = true;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    var bounceX = "bounce " + xStartMagnitude + " " + xEndMagnitude,
+        bounceY = "bounce " + yStartMagnitude + " " + yEndMagnitude; 
+
+    var o = ga.makeTween([ 
+
+      //Create the scaleX tween
+      [
+        sprite, "scaleX", sprite.scaleX, scaleFactorX, frames, 
+        bounceX, yoyo, delayBeforeRepeat
+      ],
+
+      //Create the scaleY tween
+      [
+        sprite, "scaleY", sprite.scaleY, scaleFactorY, frames, 
+        bounceY, yoyo, delayBeforeRepeat
+      ]
+    ]);
+
+    //Add some friction to the `endValue` at the end of each tween 
+    o.tweens.forEach(function(tween) {
+      tween.onComplete = function() {
+
+        //Add friction if the `endValue` is greater than 1
+        if (tween.endValue > 1) {
+          tween.endValue *= friction;
+
+          //Set the `endValue` to 1 when the effect is finished and 
+          //remove the tween from the global `tweens` array
+          if (tween.endValue <= 1) {
+            tween.endValue = 1; 
+            ga.removeTween(tween);
+          }
+        }
+      };
+    });
+
+    return o;
+  }
+  /*
+  removeTween
+  -----------
+  A utility to remove tweens from the game
+
+  */
+  ga.removeTween = function(tweenObject) {
+
+    //Remove the tween if `tweenObject` doesn't have any nested
+    //tween objects
+    if(!tweenObject.tweens) {
+      tweenObject.pause();
+      ga.tweens.splice(ga.tweens.indexOf(tweenObject), 1);
+    
+    //Otherwise, remove the nested tween objects
+    } else {
+      tweenObject.pause();
+      tweenObject.tweens.forEach(function(element) {
+        ga.tweens.splice(ga.tweens.indexOf(element), 1);
+      });
+    }
+  }
+
+  /*
+  followCurve
+  ------------
+  */
+
+  ga.followCurve = function(
+    sprite,
+    pointsArray,
+    totalFrames, 
+    type,
+    yoyo, 
+    delayBeforeRepeat
+  ) {
+
+    //Set defaults
+    if (type === undefined) type = "smoothstep";
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
+    //Create the tween object
+    var o = {};
+
+    //If the tween is a bounce type (a spline), set the
+    //start and end magnitude values
+    var typeArray = type.split(" ");
+    if (typeArray[0] === "bounce") {
+      o.startMagnitude = parseInt(typeArray[1]);
+      o.endMagnitude = parseInt(typeArray[2]);
+    }
+
+    //Use `tween.start` to make a new tween using the current
+    //end point values
+    o.start = function(pointsArray){
+      o.playing = true;
+      o.totalFrames = totalFrames;
+      o.frameCounter = 0;
+
+      //Clone the points array
+      o.pointsArray = JSON.parse(JSON.stringify(pointsArray));
+
+      //Add the tween to the global `tweens` array. The global `tweens` array is
+      //updated on each frame
+      tweens.push(o);
+    };
+
+    //Call `tween.start` to start the first tween
+    o.start(pointsArray);
+
+    //The `update` method will be called on each frame by the game loop.
+    //This is what makes the tween move
+    o.update = function() {
+      
+      var normalizedTime, curvedTime, 
+          p = o.pointsArray;
+
+      if (o.playing) {
+
+        //If the elapsed frames are less than the total frames,
+        //use the tweening formulas to move the sprite
+        if (o.frameCounter < o.totalFrames) {
+
+          //Find the normalized value
+          normalizedTime = o.frameCounter / o.totalFrames;
+
+          //Select the correct easing function
+          
+          //If it's not a spline, use one of the ordinary tween
+          //functions
+          if (typeArray[0] !== "bounce") {
+            curvedTime = ease[type](normalizedTime);
+          } 
+          
+          //If it's a bounce type, use the `spine` function and apply the
+          //2 additional `type` array values as the spline's start and
+          //end points
+          else {
+            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
+          }
+
+          //Apply the Bezier curve to the sprite's position 
+          sprite.x = ga.cubicBezier(curvedTime, p[0][0], p[1][0], p[2][0], p[3][0]);
+          sprite.y = ga.cubicBezier(curvedTime, p[0][1], p[1][1], p[2][1], p[3][1]);
+          
+          //Add one to the `elapsedFrames`
+          o.frameCounter += 1;
+        }
+
+        //When the tween has finished playing, run the end tasks
+        else {
+         o.end(); 
+        }
+      }
+    };
+      
+    //The `end` method will be called when the tween is finished
+    o.end = function() {
+
+      //Set `playing` to `false`
+      o.playing = false;
+
+      //Call the tween's `onComplete` method, if it's been
+      //assigned
+      if (o.onComplete) o.onComplete();
+
+      //Remove the tween from the global `tweens` array
+      tweens.splice(tweens.indexOf(o), 1);
+
+      //If the tween's `yoyo` property is `true`, reverse the array and
+      //use it to create a new tween
+      if (yoyo) {
+        ga.wait(delayBeforeRepeat, function() {
+          o.pointsArray = o.pointsArray.reverse();
+          o.start(o.pointsArray);
+        });
+      }
+    };
+
+    //Pause and play methods
+    o.pause = function() {
+      o.playing = false;
+    };
+    o.play = function() {
+      o.playing = true;
+    };
+    
+    //Return the tween object
+    return o;
+  };
+
+
+  ga.walkPath = function(
+    sprite,                   //The sprite
+    originalPathArray,        //A 2D array of waypoints
+    totalFrames,              //The duration, in frames
+    type,                     //The easing type
+    loop,                     //Should the animation loop?
+    yoyo,                     //Should the direction reverse?
+    delayBetweenSections      //Delay, in milliseconds, between sections
+  ) {
+    
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 300;
+    if (type === undefined) type = "smoothstep";
+    if (loop === undefined) loop = false;
+    if (yoyo === undefined) yoyo = false;
+    if (delayBetweenSections === undefined) delayBetweenSections = 0;
+
+    //Clone the path array so that any possible references to sprite
+    //properties are converted into ordinary numbers 
+    var pathArray = JSON.parse(JSON.stringify(originalPathArray));
+
+    //Figure out the duration, in frames, of each path section by 
+    //dividing the `totalFrames` by the length of the `pathArray`
+    var frames = totalFrames / pathArray.length;
+    
+    //Set the current point to 0, which will be the first waypoint
+    var currentPoint = 0;
+
+    //Make the first path using the internal `makePath` function (below)
+    var tween = makePath(currentPoint);
+
+    //The `makePath` function creates a single tween between two points and
+    //then schedules the next path to be made after it
+
+    function makePath(currentPoint) {
+
+      //Use the `makeTween` function to tween the sprite's
+      //x and y position
+      var tween = makeTween([ 
+
+        //Create the x axis tween between the first x value in the
+        //current point and the x value in the following point
+        [
+          sprite, 
+          "x", 
+          pathArray[currentPoint][0], 
+          pathArray[currentPoint + 1][0], 
+          frames, 
+          type
+        ],
+
+        //Create the y axis tween in the same way
+        [
+          sprite, 
+          "y", 
+          pathArray[currentPoint][1], 
+          pathArray[currentPoint + 1][1], 
+          frames, 
+          type
+        ]
+      ]);
+
+      //When the tween is complete, advance the `currentPoint` by one.
+      //Add an optional delay between path segments, and then make the
+      //next connecting path
+      tween.onComplete = function() {
+
+        //Advance to the next point
+        currentPoint += 1;
+
+        //If the sprite hasn't reached the end of the
+        //path, tween the sprite to the next point
+        if (currentPoint < pathArray.length - 1) {
+          ga.wait(delayBetweenSections, function() {
+            tween = makePath(currentPoint);
+          });
+        } 
+        
+        //If we've reached the end of the path, optionally
+        //loop and yoyo it
+        else {
+
+          //Reverse the path if `loop` is `true`
+          if (loop) {
+
+            //Reverse the array if `yoyo` is `true`
+            if (yoyo) pathArray.reverse();
+
+            //Optionally wait before restarting
+            ga.wait(delayBetweenSections, function() {
+
+              //Reset the `currentPoint` to 0 so that we can
+              //restart at the first point
+              currentPoint = 0;
+
+              //Set the sprite to the first point
+              sprite.x = pathArray[0][0];
+              sprite.y = pathArray[0][1];
+
+              //Make the first new path
+              tween = makePath(currentPoint);
+
+              //... and so it continues!
+            });
+          }
+        }
+      };
+
+      //Return the path tween to the main function
+      return tween;
+    }
+
+    //Pass the tween back to the main program
+    return tween;
+  };
+
+  ga.walkCurve = function(
+    sprite,                  //The sprite
+    pathArray,               //2D array of Bezier curves
+    totalFrames,             //The duration, in frames
+    type,                    //The easing type
+    loop,                    //Should the animation loop?
+    yoyo,                    //Should the direction reverse?
+    delayBeforeContinue      //Delay, in milliseconds, between sections
+  ) {
+
+    //Set defaults
+    if (totalFrames === undefined) totalFrames = 300;
+    if (type === undefined) type = "smoothstep";
+    if (loop === undefined) loop = false;
+    if (yoyo === undefined) yoyo = false;
+    if (delayBeforeContinue === undefined) delayBeforeContinue = 0;
+
+    //Divide the `totalFrames` into sections for each part of the path
+    var frames = totalFrames / pathArray.length;
+    
+    //Set the current curve to 0, which will be the first one
+    var currentCurve = 0;
+
+    //Make the first path
+    var tween = makePath(currentCurve);
+
+    function makePath(currentCurve) {
+
+      //Use the custom `followCurve` function to make
+      //a sprite follow a curve
+      var tween = followCurve(
+        sprite, 
+        pathArray[currentCurve],
+        frames,
+        type
+      );
+
+      //When the tween is complete, advance the `currentCurve` by one.
+      //Add an optional delay between path segments, and then make the
+      //next path
+      tween.onComplete = function() {
+        currentCurve += 1;
+        if (currentCurve < pathArray.length) {
+          ga.wait(delayBeforeContinue, function() {
+            tween = makePath(currentCurve);
+          });
+        } 
+        
+        //If we've reached the end of the path, optionally
+        //loop and reverse it
+        else {
+          if (loop) {
+            if (yoyo) {
+
+              //Reverse order of the curves in the `pathArray` 
+              pathArray.reverse();
+
+              //Reverse the order of the points in each curve
+              pathArray.forEach(function(curveArray) {
+                curveArray.reverse();
+              });
+            }
+
+            //After an optional delay, reset the sprite to the
+            //beginning of the path and make the next new path
+            ga.wait(delayBeforeContinue, function() {
+              currentCurve = 0;
+              sprite.x = pathArray[0][0];
+              sprite.y = pathArray[0][1];
+              tween = makePath(currentCurve);
+            });
+          }
+        }
+      };
+
+      //Return the path tween to the main function
+      return tween;
+    }
+    
+    //Pass the tween back to the main program
+    return tween;
+  };
+
 
   /*
   Chapter 3: Sprite creation tools
@@ -3945,6 +4526,10 @@ GA.plugins = function(ga) {
     }
   }
 
+  ga.launchFullscreen = function(sprite) {
+    if (ga.hitTestPoint(ga.pointer.position, sprite)) ga.enableFullscreen();
+  }
+
   //This next function checks to see if the game is in 
   //full screen mode. If it is, the game's scale is set
   //to `fullscreen.scale`. If not, and the canvas hasn't already
@@ -3967,794 +4552,7 @@ GA.plugins = function(ga) {
   ga.updateFunctions.push(ga.scaleFullscreen);
 
   /*
-  Chapter 8: The tweening module
-  ---------------------------------
-  
-  tweens
-  ------
-  An array to store all the tweens in the game
-  */
-  /*
-
-  ga.tweens = [];
-
-  //Easing functions
-  //Bezier curve
-  ga.cubicBezier = function(t, a, b, c, d) {
-    var t2 = t * t;
-    var t3 = t2 * t;
-    return a  
-      + (-a * 3 + t * (3 * a - a * t)) * t
-      + (3 * b + t * (-6 * b + b * 3 * t)) * t 
-      + (c * 3 - c * 3 * t) * t2 + d * t3;
-  }
-
-  var ease = {
-
-    //Linear
-    linear: function(x) {return x;},
-
-    //Smoothstep
-    smoothstep: function(x) {return x * x * (3 - 2 * x);},
-    smoothstepSquared: function(x) {return Math.pow((x * x * (3 - 2 * x)), 2);},
-    smoothstepCubed: function(x) {return Math.pow((x * x * (3 - 2 * x)), 3);},
-
-    //Acceleration
-    acceleration: function(x) {return x * x;},
-    accelerationCubed: function(x) {return Math.pow(x * x, 3);},
-
-    //Deceleration
-    deceleration: function(x) {return 1 - Math.pow(1 - x, 2);},
-    decelerationCubed: function(x) {return 1 - Math.pow(1 - x, 3);},
-
-    //Sine
-    sine: function(x) {return Math.sin(x * Math.PI / 2);},
-    sineSquared: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
-    sineCubed: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
-    inverseSine: function(x) {return 1 - Math.sin((1 - x) * Math.PI / 2);},
-    inverseSineSquared: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 2);},
-    inverseSineCubed: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 3);},
-
-    //Spline
-    spline: function(t, p0, p1, p2, p3) {
-      return 0.5 * (
-        (2 * p1) +
-        (-p0 + p2) * t +
-        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
-        (-p0 + 3 * p1 - 3 * p2 + p3) * t * t * t
-      );
-    }
-  };
-
-  ga.tweenProperty = function(
-    sprite,                  //Sprite object
-    property,                //String property
-    startValue,              //Tween start value
-    endValue,                //Tween end value
-    totalFrames,             //Duration in frames
-    type,                    //The easing type
-    yoyo,                    //Yoyo?
-    delayBeforeRepeat        //Delay in milliseconds before repeating
-  ) {
-
-    //Set defaults
-    if (totalFrames === undefined) totalFrames = 60;
-    if (type === undefined) type = ["smoothstep"];
-    if (yoyo === undefined) yoyo = false;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-    //Create the tween object
-    var o = {};
-
-    //If the tween is a spline, set the
-    //start and end magnitude values
-    if (type[0] === "spline") {
-      o.startMagnitude = type[1];
-      o.endMagnitude = type[2];
-    }
-
-    //Use `o.start` to make a new tween using the current
-    //end point values
-    o.start = function(startValue, endValue) {
-
-      //Clone the start and end values so that any possible references to sprite
-      //properties are converted to ordinary numbers 
-      o.startValue = JSON.parse(JSON.stringify(startValue));
-      o.endValue = JSON.parse(JSON.stringify(endValue));
-      o.playing = true;
-      o.totalFrames = totalFrames;
-      o.frameCounter = 0;
-
-      //Add the tween to the global `tweens` array. The `tweens` array is
-      //updated on each frame
-      tweens.push(o);
-    };
-
-    //Call `o.start` to start the tween
-    o.start(startValue, endValue);
-
-    //The `update` method will be called on each frame by the game loop.
-    //This is what makes the tween move
-    o.update = function() {
-      
-      var time, curvedTime;
-
-      if (o.playing) {
-
-        //If the elapsed frames are less than the total frames,
-        //use the tweening formulas to move the sprite
-        if (o.frameCounter < o.totalFrames) {
-
-          //Find the normalized value
-          var normalizedTime = o.frameCounter / o.totalFrames;
-
-          //Select the correct easing function from the 
-          //`ease` object’s library of easing functions
-
-          //If it's not a spline, use one of the ordinary easing functions
-          if (type[0] !== "spline") {
-            curvedTime = ease[type](normalizedTime);
-          } 
-          
-          //If it's a spline, use the `spline` function and apply the
-          //2 additional `type` array values as the spline's start and
-          //end points
-          else {
-            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
-          }
-
-          //Interpolate the sprite's property based on the curve
-          sprite[property] = (o.endValue * curvedTime) + (o.startValue * (1 - curvedTime));
-
-          o.frameCounter += 1;
-        }
-
-        //When the tween has finished playing, run the end tasks
-        else {
-          o.end(); 
-        }
-      }
-    };
-      
-    //The `end` method will be called when the tween is finished
-    o.end = function() {
-
-      //Set `playing` to `false`
-      o.playing = false;
-
-      //Call the tween's `onComplete` method, if it's been assigned
-      if (o.onComplete) o.onComplete();
-
-      //Remove the tween from the `tweens` array
-      tweens.splice(tweens.indexOf(o), 1);
-
-      //If the tween's `yoyo` property is `true`, create a new tween
-      //using the same values, but use the current tween's `startValue`
-      //as the next tween's `endValue` 
-      if (yoyo) {
-        ga.wait(delayBeforeRepeat, function() {
-          o.start(o.endValue, o.startValue);
-        });
-      }
-    };
-
-    //Pause and play methods
-    o.play = function() {o.playing = true;};
-    o.pause = function() {o.playing = false;};
-    
-    //Return the tween object
-    return o;
-  }
-  */
-
-  /* High level tween functions */
-
-  /*
-  //`fadeOut`
-  ga.fadeOut = function(sprite, frames) {
-    if (frames === undefined) frames = 60;
-    return ga.tweenProperty(
-      sprite, "alpha", sprite.alpha, 0, frames, ["sine"]
-    );
-  }
-
-  //`fadeIn`
-  ga.fadeIn = function(sprite, frames) {
-    if (frames === undefined) frames = 60;
-    return ga.tweenProperty(
-      sprite, "alpha", sprite.alpha, 1, frames, ["sine"]
-    );
-  }
-
-  //`pulse`
-  //Fades the sprite in and out at a steady rate.
-  //Set the `minAlpha` to something greater than 0 if you
-  //don't want the sprite to fade away completely
-  ga.pulse = function(sprite, frames, minAlpha) {
-    if (frames === undefined) frames = 60;
-    if (minAlpha === undefined) minAlpha = 0;
-    return ga.tweenProperty(
-      sprite, "alpha", sprite.alpha, minAlpha, frames, ["smoothstep"], true
-    );
-  }
-
-  //`makeTween` is a general function for making complex tweens
-  //out of multiple `tweenProperty` functions. It's one argument,
-  //`tweensToAdd` is an array containing multiple `tweenProperty` calls
-
-  ga.makeTween = function(tweensToAdd) {
-
-    //Create an object to manage the tweens
-    var o = {};
-
-    //Create a `tweens` array to store the new tweens
-    o.tweens = [];
-
-    //Make a new tween for each array
-    tweensToAdd.forEach(function(tweenPropertyArguments) {
-      
-      //Use the tween property arguments to make a new tween
-      var newTween = tweenProperty(tweenPropertyArguments);
-
-      //Push the new tween into this object's internal `tweens` array
-      o.tweens.push(newTween);
-    });
-
-    //Add a counter to keep track of the
-    //number of tweens that have completed their actions
-    var completionCounter = 0;
-    
-    //`o.completed` will be called each time one of the tweens
-    //finishes
-    o.completed = function() {
-
-      //Add 1 to the `completionCounter`
-      completionCounter += 1;
-
-      //If all tweens have finished, call the user-defined `onComplete`
-      //method, if it's been assigned. Reset the `completionCounter`
-      if (completionCounter === o.tweens.length) {
-        if (o.onComplete) o.onComplete();
-        completionCounter = 0;
-      }
-    }; 
-
-    //Add `onComplete` methods to all tweens
-    o.tweens.forEach(function(tween) {
-      tween.onComplete = function() {o.completed();};
-    });
-    
-    //Add pause and play methods to control all the tweens
-    o.pause = function() {
-      o.tweens.forEach(function(tween) {
-        tween.playing = false;
-      });
-    };
-    o.play = function() {
-      o.tweens.forEach(function(tween) {
-        tween.playing = true;
-      });
-    };
-
-    //Return the tween object
-    return o;
-  }
-
-  ga.slide = function(
-    sprite, endX, endY, 
-    frames, type, yoyo, delayBeforeRepeat
-  ) {
-
-    //Set defaults
-    if (frames === undefined) frames = 60;
-    if (type === undefined) type = ["smoothstep"];
-    if (yoyo === undefined) yoyo = false;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-
-    return makeTween([ 
-
-      //Create the x axis tween
-      [sprite, "x", sprite.x, endX, frames, type, yoyo, delayBeforeRepeat],
-
-      //Create the y axis tween
-      [sprite, "y", sprite.y, endY, frames, type, yoyo, delayBeforeRepeat]
-
-    ]);
-  }
-
-  ga.breathe = function(
-    sprite, endScaleX, endScaleY, 
-    frames, yoyo, delayBeforeRepeat
-  ) {
-
-    //Set defaults
-    if (frames === undefined) frames = 60;
-    if (yoyo === undefined) yoyo = false;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-
-    return makeTween([ 
-
-      //Create the scaleX tween
-      [
-        sprite, "scaleX", sprite.scaleX, endScaleX, 
-        frames, ["smoothstepSquared"], yoyo, delayBeforeRepeat
-      ],
-
-      //Create the scaleY tween
-      [
-        sprite, "scaleY", sprite.scaleY, endScaleY, 
-        frames, ["smoothstepSquared"], yoyo, delayBeforeRepeat
-      ]
-    ]);
-  }
-
-  ga.scale = function(sprite, endScaleX, endScaleY, frames) {
-    
-    //Set defaults
-    if (frames === undefined) frames = 60;
-
-    return makeTween([ 
-
-      //Create the scaleX tween
-      [
-        sprite, "scaleX", sprite.scaleX, endScaleX, 
-        frames, ["smoothstep"], false
-      ],
-
-      //Create the scaleY tween
-      [
-        sprite, "scaleY", sprite.scaleY, endScaleY, 
-        frames, ["smoothstep"], false
-      ]
-    ]);
-  }
-
-  ga.strobe = function(
-    sprite, scaleFactor, startMagnitude, endMagnitude, 
-    frames, yoyo, delayBeforeRepeat
-  ) {
-    
-    //Set defaults
-    if (scaleFactor === undefined) scaleFactor = 1.3;
-    if (startMagnitude === undefined) startMagnitude = 10;
-    if (endMagnitude === undefined) endMagnitude = 20;
-    if (frames === undefined) frames = 10;
-    if (yoyo === undefined) yoyo = true;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-
-    return makeTween([ 
-
-      //Create the scaleX tween
-      [
-        sprite, "scaleX", sprite.scaleX, scaleFactor, frames, 
-        ["spline", startMagnitude, endMagnitude], yoyo, delayBeforeRepeat
-      ],
-
-      //Create the scaleY tween
-      [
-        sprite, "scaleY", sprite.scaleY, scaleFactor, frames, 
-        ["spline", startMagnitude, endMagnitude], 
-        yoyo, delayBeforeRepeat
-      ]
-    ]);
-  }
-
-  ga.wobble = function(
-    sprite, 
-    scaleFactorX, 
-    scaleFactorY, 
-    frames,
-    xStartMagnitude, 
-    xEndMagnitude,
-    yStartMagnitude, 
-    yEndMagnitude,
-    friction,
-    yoyo,
-    delayBeforeRepeat
-  ) {
-
-    //Set defaults
-    if (scaleFactorX === undefined) scaleFactorX = 1.2;
-    if (scaleFactorY === undefined) scaleFactorY = 1.2;
-    if (frames === undefined) frames = 10;
-    if (xStartMagnitude === undefined) xStartMagnitude = 10;
-    if (xEndMagnitude === undefined) xEndMagnitude = 10;
-    if (yStartMagnitude === undefined) yStartMagnitude = -10;
-    if (yEndMagnitude === undefined) yEndMagnitude = -10;
-    if (friction === undefined) friction = 0.98;
-    if (yoyo === undefined) yoyo = true;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-
-    var o = makeTween([ 
-
-      //Create the scaleX tween
-      [
-        sprite, "scaleX", sprite.scaleX, scaleFactorX, frames, 
-        ["spline", xStartMagnitude, xEndMagnitude], 
-        yoyo, delayBeforeRepeat
-      ],
-
-      //Create the scaleY tween
-      [
-        sprite, "scaleY", sprite.scaleY, scaleFactorY, frames, 
-        ["spline", yStartMagnitude, yEndMagnitude], 
-        yoyo, delayBeforeRepeat
-      ]
-    ]);
-
-    //Add some friction to the `endValue` at the end of each tween 
-    o.tweens.forEach(function(tween) {
-      tween.onComplete = function() {
-
-        //Add friction if the `endValue` is greater than 1
-        if (tween.endValue > 1) {
-          tween.endValue *= friction;
-
-          //Set the `endValue` to 1 when the effect is finished and 
-          //remove the tween from the global `tweens` array
-          if (tween.endValue <= 1) {
-            tween.endValue = 1; 
-            removeTween(tween);
-          }
-        }
-      };
-    });
-
-    return o;
-  }
-  */
-  /*
-  removeTween
-  -----------
-  A utility to remove tweens from the game
-
-  */
- /*
-  ga.removeTween = function(tweenObject) {
-
-    //Remove the tween if `tweenObject` doesn't have any nested
-    //tween objects
-    if(!tweenObject.tweens) {
-      tweenObject.pause();
-      tweens.splice(tweens.indexOf(tweenObject), 1);
-    
-    //Otherwise, remove the nested tween objects
-    } else {
-      tweenObject.pause();
-      tweenObject.tweens.forEach(function(element) {
-        tweens.splice(tweens.indexOf(element), 1);
-      });
-    }
-  }
-  */
-
-  /*
-  followCurve
-  ------------
-  */
-
-  ga.followCurve = function(
-    sprite,
-    pointsArray,
-    totalFrames, 
-    type,
-    yoyo, 
-    delayBeforeRepeat
-  ) {
-
-    //Set defaults
-    if (type === undefined) type = ["smoothstep"];
-    if (yoyo === undefined) yoyo = false;
-    if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
-
-    //Create the tween object
-    var o = {};
-
-    if(type[0] === "spline" ){
-      o.startMagnitude = type[1];
-      o.endMagnitude = type[2];
-    }
-
-    //Use `tween.start` to make a new tween using the current
-    //end point values
-    o.start = function(pointsArray){
-      o.playing = true;
-      o.totalFrames = totalFrames;
-      o.frameCounter = 0;
-
-      //Clone the points array
-      o.pointsArray = JSON.parse(JSON.stringify(pointsArray));
-
-      //Add the tween to the global `tweens` array. The global `tweens` array is
-      //updated on each frame
-      tweens.push(o);
-    };
-
-    //Call `tween.start` to start the first tween
-    o.start(pointsArray);
-
-    //The `update` method will be called on each frame by the game loop.
-    //This is what makes the tween move
-    o.update = function() {
-      
-      var normalizedTime, curvedTime, 
-          p = o.pointsArray;
-
-      if (o.playing) {
-
-        //If the elapsed frames are less than the total frames,
-        //use the tweening formulas to move the sprite
-        if (o.frameCounter < o.totalFrames) {
-
-          //Find the normalized value
-          normalizedTime = o.frameCounter / o.totalFrames;
-
-          //Select the correct easing function
-          
-          //If it's not a spline, use one of the ordinary tween
-          //functions
-          if (type[0] !== "spline") {
-            curvedTime = ease[type](normalizedTime);
-          } 
-          
-          //If it's a spline, use the `spine` function and apply the
-          //2 additional `type` array values as the spline's start and
-          //end points
-          else {
-            curvedTime = ease.spline(normalizedTime, o.startMagnitude, 0, 1, o.endMagnitude);
-          }
-
-          //Apply the Bezier curve to the sprite's position 
-          sprite.x = ga.cubicBezier(curvedTime, p[0][0], p[1][0], p[2][0], p[3][0]);
-          sprite.y = ga.cubicBezier(curvedTime, p[0][1], p[1][1], p[2][1], p[3][1]);
-          
-          //Add one to the `elapsedFrames`
-          o.frameCounter += 1;
-        }
-
-        //When the tween has finished playing, run the end tasks
-        else {
-         o.end(); 
-        }
-      }
-    };
-      
-    //The `end` method will be called when the tween is finished
-    o.end = function() {
-
-      //Set `playing` to `false`
-      o.playing = false;
-
-      //Call the tween's `onComplete` method, if it's been
-      //assigned
-      if (o.onComplete) o.onComplete();
-
-      //Remove the tween from the global `tweens` array
-      tweens.splice(tweens.indexOf(o), 1);
-
-      //If the tween's `yoyo` property is `true`, reverse the array and
-      //use it to create a new tween
-      if (yoyo) {
-        ga.wait(delayBeforeRepeat, function() {
-          o.pointsArray = o.pointsArray.reverse();
-          o.start(o.pointsArray);
-        });
-      }
-    };
-
-    //Pause and play methods
-    o.pause = function() {
-      o.playing = false;
-    };
-    o.play = function() {
-      o.playing = true;
-    };
-    
-    //Return the tween object
-    return o;
-  };
-
-
-  ga.walkPath = function(
-    sprite,                   //The sprite
-    originalPathArray,        //A 2D array of waypoints
-    totalFrames,              //The duration, in frames
-    type,                     //The easing type
-    loop,                     //Should the animation loop?
-    yoyo,                     //Should the direction reverse?
-    delayBetweenSections      //Delay, in milliseconds, between sections
-  ) {
-    
-    //Set defaults
-    if (totalFrames === undefined) totalFrames = 300;
-    if (type === undefined) type = ["smoothstep"];
-    if (loop === undefined) loop = false;
-    if (yoyo === undefined) yoyo = false;
-    if (delayBetweenSections === undefined) delayBetweenSections = 0;
-
-    //Clone the path array so that any possible references to sprite
-    //properties are converted into ordinary numbers 
-    var pathArray = JSON.parse(JSON.stringify(originalPathArray));
-
-    //Figure out the duration, in frames, of each path section by 
-    //dividing the `totalFrames` by the length of the `pathArray`
-    var frames = totalFrames / pathArray.length;
-    
-    //Set the current point to 0, which will be the first waypoint
-    var currentPoint = 0;
-
-    //Make the first path using the internal `makePath` function (below)
-    var tween = makePath(currentPoint);
-
-    //The `makePath` function creates a single tween between two points and
-    //then schedules the next path to be made after it
-
-    function makePath(currentPoint) {
-
-      //Use the `makeTween` function to tween the sprite's
-      //x and y position
-      var tween = makeTween([ 
-
-        //Create the x axis tween between the first x value in the
-        //current point and the x value in the following point
-        [
-          sprite, 
-          "x", 
-          pathArray[currentPoint][0], 
-          pathArray[currentPoint + 1][0], 
-          frames, 
-          type
-        ],
-
-        //Create the y axis tween in the same way
-        [
-          sprite, 
-          "y", 
-          pathArray[currentPoint][1], 
-          pathArray[currentPoint + 1][1], 
-          frames, 
-          type
-        ]
-      ]);
-
-      //When the tween is complete, advance the `currentPoint` by one.
-      //Add an optional delay between path segments, and then make the
-      //next connecting path
-      tween.onComplete = function() {
-
-        //Advance to the next point
-        currentPoint += 1;
-
-        //If the sprite hasn't reached the end of the
-        //path, tween the sprite to the next point
-        if (currentPoint < pathArray.length - 1) {
-          ga.wait(delayBetweenSections, function() {
-            tween = makePath(currentPoint);
-          });
-        } 
-        
-        //If we've reached the end of the path, optionally
-        //loop and yoyo it
-        else {
-
-          //Reverse the path if `loop` is `true`
-          if (loop) {
-
-            //Reverse the array if `yoyo` is `true`
-            if (yoyo) pathArray.reverse();
-
-            //Optionally wait before restarting
-            ga.wait(delayBetweenSections, function() {
-
-              //Reset the `currentPoint` to 0 so that we can
-              //restart at the first point
-              currentPoint = 0;
-
-              //Set the sprite to the first point
-              sprite.x = pathArray[0][0];
-              sprite.y = pathArray[0][1];
-
-              //Make the first new path
-              tween = makePath(currentPoint);
-
-              //... and so it continues!
-            });
-          }
-        }
-      };
-
-      //Return the path tween to the main function
-      return tween;
-    }
-
-    //Pass the tween back to the main program
-    return tween;
-  };
-
-  ga.walkCurve = function(
-    sprite,                  //The sprite
-    pathArray,               //2D array of Bezier curves
-    totalFrames,             //The duration, in frames
-    type,                    //The easing type
-    loop,                    //Should the animation loop?
-    yoyo,                    //Should the direction reverse?
-    delayBeforeContinue      //Delay, in milliseconds, between sections
-  ) {
-
-    //Set defaults
-    if (totalFrames === undefined) totalFrames = 300;
-    if (type === undefined) type = ["smoothstep"];
-    if (loop === undefined) loop = false;
-    if (yoyo === undefined) yoyo = false;
-    if (delayBeforeContinue === undefined) delayBeforeContinue = 0;
-
-    //Divide the `totalFrames` into sections for each part of the path
-    var frames = totalFrames / pathArray.length;
-    
-    //Set the current curve to 0, which will be the first one
-    var currentCurve = 0;
-
-    //Make the first path
-    var tween = makePath(currentCurve);
-
-    function makePath(currentCurve) {
-
-      //Use the custom `followCurve` function to make
-      //a sprite follow a curve
-      var tween = followCurve(
-        sprite, 
-        pathArray[currentCurve],
-        frames,
-        type
-      );
-
-      //When the tween is complete, advance the `currentCurve` by one.
-      //Add an optional delay between path segments, and then make the
-      //next path
-      tween.onComplete = function() {
-        currentCurve += 1;
-        if (currentCurve < pathArray.length) {
-          ga.wait(delayBeforeContinue, function() {
-            tween = makePath(currentCurve);
-          });
-        } 
-        
-        //If we've reached the end of the path, optionally
-        //loop and reverse it
-        else {
-          if (loop) {
-            if (yoyo) {
-
-              //Reverse order of the curves in the `pathArray` 
-              pathArray.reverse();
-
-              //Reverse the order of the points in each curve
-              pathArray.forEach(function(curveArray) {
-                curveArray.reverse();
-              });
-            }
-
-            //After an optional delay, reset the sprite to the
-            //beginning of the path and make the next new path
-            ga.wait(delayBeforeContinue, function() {
-              currentCurve = 0;
-              sprite.x = pathArray[0][0];
-              sprite.y = pathArray[0][1];
-              tween = makePath(currentCurve);
-            });
-          }
-        }
-      };
-
-      //Return the path tween to the main function
-      return tween;
-    }
-    
-    //Pass the tween back to the main program
-    return tween;
-  };
-
-  /*
-  Chapter 9: Sound
+  Chapter 8: Sound
   ----------------
   */
 

@@ -61,8 +61,10 @@ function setupTitleScreen() {
   //Make the play button's `press` action
   //start the game when the button is pressed.
   playButton.release = function(){
+    //g.launchFullscreen(playButton);
     g.state = setupGame;
   };
+
 
   g.key.downArrow.press = function(){
     //g.fullscreen.disable("mouseup");
