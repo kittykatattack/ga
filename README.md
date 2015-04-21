@@ -132,6 +132,7 @@ a solar powered laptop, an unlimited supply of
 coconuts, and a copy of `ga.js` you could recreate the entire history of 2D video games,
 from SpaceWar! to Flappy Bird. And all of it would fit on a 3.5 inch
 floppy disk.
+
 <a id='plugins'></a>
 ### The plugins
 
@@ -147,7 +148,9 @@ you'll find in `plugins.js`:
   the versatile `soundEffect` method.
 - Shake sprites or the screen with `shake`.
 - Tween functions for sprite and scene transitions: `slide`,
-  `yoyo`, `fadeIn`, `fadeOut` and `pulse`.
+  `fadeIn`, `fadeOut`, `pulse`, `breathe`, `wobble`, `strobe` and
+  some useful low-level tweening methods to help you create your own
+  custom tweens.
 - A handful of useful convenience functions: `followEase`,
   `followConstant`,
   `angle`, `distance`, `rotateAroundSprite`, `rotateAroundPoint`, `wait`,
