@@ -86,6 +86,7 @@ Here's the table of contents to get you started:
 ### Chapter 2: The tweening module 
 
 `tweens`: An array to store all of Ga's current tweens.
+`updateTweens`: A function that updates all the tweens each frame inside Ga's game loop.
 `ease`: An object that stores references to useful easing functions.
 `tweenProperty`: A generic low-level method that tweens any sprite property.
 `slide`: Make a sprite slide from one x/y position to another.
@@ -1057,8 +1058,8 @@ GA.plugins = function(ga) {
   Chapter 2: The tweening module
   ---------------------------------------------------------
 
-  Ga has some special tween functions to help you manage scene
-  or sprite transitions:
+  Ga has some special tween functions to help you manage scene transitions
+  or to make sprites move in a fixed or repeating way:
 
       `slide`: Make a sprite slide from one x/y position to another.
       `fadeIn`: Fade a sprite in.
@@ -1079,32 +1080,31 @@ GA.plugins = function(ga) {
 
   Most of these methods have a `yoyo` Boolean argument that, if `true`,
   will make the sprite bounce back and
-  forth between its start and end points, forever. You can give supply an
+  forth between its start and end points, forever. You can supply an
   optional `delay` argument that defines how long, in milliseconds, the
   tween should hold its position until it bounces back again. 
 
   All of these special tweens are managed in Ga's `tweens` array. Ga's game loop
   calls each tween object's `update` function each frame.
 
-  See the `tweening.html` file in the `examples` folder for a demonstration of how
+  See the `scenesAndTweening` and `tweening.html` file in the `examples` folder for a demonstration of how
   to use these tweening methods.
 
   */
 
   /*
-  tweens
-  ------
+  ###tweens
   An array to store all the tweens in the game
   */
 
   ga.tweens = [];
 
   /*
-  updateTweens
-  ------------
+  ###updateTweens
+  `updateTweens` loops through all the sprites in `ga.particles`
+  and runs their `updateParticles` functions.
   */
-  //`updateTweens` loops through all the sprites in `ga.particles`
-  //and runs their `updateParticles` functions.
+
   ga.updateTweens = function() {
     
     //Update all the particles in the game.
@@ -1121,7 +1121,10 @@ GA.plugins = function(ga) {
   //`ga.js` file to see how this works.
   ga.updateFunctions.push(ga.updateTweens);
 
-  //Easing functions
+  //###Easing functions
+  //These are low-level functions that you won't use directly.
+  //Instead, their used by the higher-level tweening functions.
+
   //Bezier curve
   ga.cubicBezier = function(t, a, b, c, d) {
     var t2 = t * t;
@@ -1132,6 +1135,7 @@ GA.plugins = function(ga) {
       + (c * 3 - c * 3 * t) * t2 + d * t3;
   }
 
+  //The `ease` object. It stores all the easing functions
   var ease = {
 
     //Linear
@@ -1169,6 +1173,11 @@ GA.plugins = function(ga) {
     }
   };
 
+  //###`tweenProperty`
+  //A low-level function that you can use to tween any sprite
+  //property. It's used by all the higher-level tween functions,
+  //but you can use it to create your own custom tween effects.
+
   ga.tweenProperty = function(
     sprite,                  //Sprite object
     property,                //String property
@@ -1185,6 +1194,7 @@ GA.plugins = function(ga) {
     if (type === undefined) type = "smoothstep";
     if (yoyo === undefined) yoyo = false;
     if (delayBeforeRepeat === undefined) delayBeforeRepeat = 0;
+
     //Create the tween object
     var o = {};
 
@@ -1195,12 +1205,6 @@ GA.plugins = function(ga) {
       o.startMagnitude = parseInt(typeArray[1]);
       o.endMagnitude = parseInt(typeArray[2]);
     }
-    /*
-    if (type[0] === "spline") {
-      o.startMagnitude = type[1];
-      o.endMagnitude = type[2];
-    }
-    */
 
     //Use `o.start` to make a new tween using the current
     //end point values
@@ -1297,7 +1301,8 @@ GA.plugins = function(ga) {
 
   /* High level tween functions */
 
-  //`fadeOut`
+  //###`fadeOut`
+  //Fade a sprite out, over a duration in frames.
   ga.fadeOut = function(sprite, frames) {
     if (frames === undefined) frames = 60;
     return ga.tweenProperty(
@@ -1305,7 +1310,8 @@ GA.plugins = function(ga) {
     );
   }
 
-  //`fadeIn`
+  //###`fadeIn`
+  //Fade a sprite in, over a duration in frames.
   ga.fadeIn = function(sprite, frames) {
     if (frames === undefined) frames = 60;
     return ga.tweenProperty(
@@ -1314,9 +1320,9 @@ GA.plugins = function(ga) {
   }
 
   //`pulse`
-  //Fades the sprite in and out at a steady rate.
-  //Set the `minAlpha` to something greater than 0 if you
-  //don't want the sprite to fade away completely
+  //Fades the sprite in and out at a steady rate over a duration in
+  //frames. Set the `minAlpha` to something greater than 0 if you
+  //don't want the sprite to fade away completely.
   ga.pulse = function(sprite, frames, minAlpha) {
     if (frames === undefined) frames = 60;
     if (minAlpha === undefined) minAlpha = 0;
@@ -1327,7 +1333,9 @@ GA.plugins = function(ga) {
 
   //`makeTween` is a general function for making complex tweens
   //out of multiple `tweenProperty` functions. It's one argument,
-  //`tweensToAdd` is an array containing multiple `tweenProperty` calls
+  //`tweensToAdd` is an array containing multiple `tweenProperty` calls.
+  //(See the `tweenProperty` function above for information on how it
+  //works.)
 
   ga.makeTween = function(tweensToAdd) {
 
@@ -1396,6 +1404,11 @@ GA.plugins = function(ga) {
     return o;
   }
 
+  //###`slide`
+  //Make a sprite slide from one x/y position to another.
+  //Use `slide` like this:
+  //var spriteSlide = g.slide(sprite, 400, 0, 60, "smoothstep", true, 0);
+  
   ga.slide = function(
     sprite, endX, endY, 
     frames, type, yoyo, delayBeforeRepeat
@@ -1417,6 +1430,12 @@ GA.plugins = function(ga) {
 
     ]);
   }
+
+  //###`breathe`
+  //Make a sprite appear to breathe, by changing its scale in a
+  //continuous loop.
+  //Use it like this:
+  //var spriteBreathe = g.breathe(sprite, 1.2, 1.2, 60, true, 300);
 
   ga.breathe = function(
     sprite, endScaleX, endScaleY, 
@@ -1444,6 +1463,9 @@ GA.plugins = function(ga) {
     ]);
   }
 
+  //###`scale` smoothly change a sprite's scale. Use it like this:
+  //var spriteScale = g.scale(sprite, finalScaleX, finalScaleY, frames);
+
   ga.scale = function(sprite, endScaleX, endScaleY, frames) {
     
     //Set defaults
@@ -1465,6 +1487,10 @@ GA.plugins = function(ga) {
     ]);
   }
 
+  //`strobe`
+  //A rapid looping scale effect. Use it like this:
+  //var spriteStrobe = g.strobe(sprite, 1.3, 10, 20, 10);
+  
   ga.strobe = function(
     sprite, scaleFactor, startMagnitude, endMagnitude, 
     frames, yoyo, delayBeforeRepeat
@@ -1495,6 +1521,10 @@ GA.plugins = function(ga) {
       ]
     ]);
   }
+
+  //###`wobble`
+  //Make a sprite wobble like a plate of jelly. Use it like this:
+  //var spriteWobble = g.wobble(sprite, 1.2, 1.2);
 
   ga.wobble = function(
     sprite, 
@@ -1544,12 +1574,12 @@ GA.plugins = function(ga) {
     o.tweens.forEach(function(tween) {
       tween.onComplete = function() {
 
-        //Add friction if the `endValue` is greater than 1
+        //Add friction if the `endValue` is greater than 1.
         if (tween.endValue > 1) {
           tween.endValue *= friction;
 
           //Set the `endValue` to 1 when the effect is finished and 
-          //remove the tween from the global `tweens` array
+          //remove the tween from the global `tweens` array.
           if (tween.endValue <= 1) {
             tween.endValue = 1; 
             ga.removeTween(tween);
@@ -1561,8 +1591,7 @@ GA.plugins = function(ga) {
     return o;
   }
   /*
-  removeTween
-  -----------
+  ###removeTween
   A utility to remove tweens from the game
 
   */
@@ -1625,7 +1654,7 @@ GA.plugins = function(ga) {
 
       //Add the tween to the global `tweens` array. The global `tweens` array is
       //updated on each frame
-      tweens.push(o);
+      ga.tweens.push(o);
     };
 
     //Call `tween.start` to start the first tween
@@ -1688,7 +1717,7 @@ GA.plugins = function(ga) {
       if (o.onComplete) o.onComplete();
 
       //Remove the tween from the global `tweens` array
-      tweens.splice(tweens.indexOf(o), 1);
+      ga.tweens.splice(ga.tweens.indexOf(o), 1);
 
       //If the tween's `yoyo` property is `true`, reverse the array and
       //use it to create a new tween
@@ -1751,7 +1780,7 @@ GA.plugins = function(ga) {
 
       //Use the `makeTween` function to tween the sprite's
       //x and y position
-      var tween = makeTween([ 
+      var tween = ga.makeTween([ 
 
         //Create the x axis tween between the first x value in the
         //current point and the x value in the following point
@@ -1859,7 +1888,7 @@ GA.plugins = function(ga) {
 
       //Use the custom `followCurve` function to make
       //a sprite follow a curve
-      var tween = followCurve(
+      var tween = ga.followCurve(
         sprite, 
         pathArray[currentCurve],
         frames,

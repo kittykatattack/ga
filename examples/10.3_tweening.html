@@ -67,8 +67,13 @@ function setup() {
   /*
   Make the cat move back and forth. Create a new tween object
   using the `slide` method.
+
   `slide` arguments: sprite, endX, endY, durationInFrames,
   easingType, yoyo?, delayInMilleseconsBeforeRepeating
+
+  If you want the effect to repeat in a continuous loop, just
+  set `yoyo` (the 6th argument) to `true`.
+
   (Only the first 3 arguments are required, the rest are optional.)
   The easing type (the 5th argument) can be any of the following
   string values:
@@ -88,13 +93,14 @@ function setup() {
     "inverseSineSquared"
     "inverseSineCubed"
 
-  If you don't what the effect to repeat in a continuous loop, just
-  set `yoyo` (the 6th argument) to `false`.
+  Try using different easing types to see the effect.
   */
+
   var catSlide = g.slide(cat1, 400, 0, 60, "smoothstep", true, 0);
 
   //Tween objects have an `onComplete` callback function that you can
-  //define. It will run when the tween is finished.
+  //define. It will run when the tween is finished. Use it like this:
+
   //catSlide.onComplete = function() {console.log("Cat slide complete")};
 
   //A special easing type (the 5th argument) called "bounce" has two
@@ -115,7 +121,7 @@ function setup() {
   //hedgehogPulse.onComplete = function() {console.log("Hedgehog fade complete")};
 
   /*
-  You can also use `fadeIn` and `fadeOut, using this format:
+  You can also use `fadeIn` and `fadeOut`, using this format:
   var spriteFade = g.fadeIn(sprite, durationInFrames);
   */
 
@@ -128,7 +134,7 @@ function setup() {
   var catBreathe = g.breathe(cat2, 1.2, 1.2, 60, true, 300);
 
   /*
-  You can also use `scale` to smoothly scale a sprite by fixed
+  You can also use `scale` to smoothly scale a sprite by a fixed
   scaled amount. Use this format:
   var spriteScale = g.scale(sprite, finalScaleX, finalScaleY, frames);
   */
@@ -148,7 +154,7 @@ function setup() {
   var hedgehogWobble = g.wobble(hedgehog2, 1.2, 1.2);
 
   //Tweens are updated independently in Ga's internal 
-  //game engine loop, so there's no need to use
+  //game engine loop, so there's no need to update them in
   //your own `play` state to make them work.
   //g.state = play;    
 }

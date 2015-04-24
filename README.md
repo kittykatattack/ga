@@ -86,7 +86,7 @@ Here's Ga's core feature list:
 - Tileset (spritesheet) support using `frame` and `filmstrip` methods to make
   sprites using tileset frames.
 - Built-in texture atlas support for the popular Texture Packer
-- format. Use a sprite's `setTexture` method if you want to change a sprite's image source while the game is running 
+  format. Use a sprite's `setTexture` method if you want to change a sprite's image source while the game is running 
 - A keyframe animation and state manager for sprites. Use `show` to
   display a sprite's image state. Use `play` or `playSequence` to play
   a sequence of frames (in a `loop` if you want to). Use
@@ -114,7 +114,7 @@ Here's Ga's core feature list:
   loading. You can use the `load` state to add a loading progress bar.
 - A fast and focused canvas-based rendering engine.
 - A sophisticated game loop using a fixed timestep with variable rendering
-  and sprite interpolation. That means you get ultra-smooth sprite animations
+  and sprite interpolation. That means you get butter-smooth sprite animations
   at any framerate.
 - A `plugins.js` file full of extra tools. 
 - A compact and powerful "Haiku" style API that's centered on shallow,
@@ -151,6 +151,8 @@ you'll find in `plugins.js`:
   `fadeIn`, `fadeOut`, `pulse`, `breathe`, `wobble`, `strobe` and
   some useful low-level tweening methods to help you create your own
   custom tweens.
+- Make a sprite follow a connected series of waypoints with `walkPath`
+  and `walkCurve`. 
 - A handful of useful convenience functions: `followEase`,
   `followConstant`,
   `angle`, `distance`, `rotateAroundSprite`, `rotateAroundPoint`, `wait`,
@@ -251,14 +253,16 @@ Contributions and Licencing
 ---------------------------
 It's Ga's ambition to be the world's tiniest, cutest and funnest game engine.
 Please help! If you find something that's bad, please help to fix it.
-If you find something good, please help to make it better.  Ga welcomes any and all contributions!  
+If you find something good, please help to make it better.  Ga
+welcomes any and all contributions! 
+
 +1 Bonus Points for removing code and simplifying the architecture. +2 Bonus
 Points for making the code easier to understand. The aim of this
 project is to discover the smallest universal set of reusable
 components required to make
 the widest variety of games possible with the least amount of code.
-We're searching for the primary colors, or fundamental alphabet of game
-design. Sound like fun??
+What is the fundamental alphabet, or the primary colours, of game design?
+That's what we're searching. Can you help?
 
 **Coding style**: Unconventionally, Ga
 uses **functional composition** patterns (the [module
