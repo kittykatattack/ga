@@ -2611,7 +2611,7 @@ It's a quick and easy way to make any games run fullscreen.
 completely takes over the user's screen. And I mean completely: the
 browser disappears and the only thing on the screen is your game. That's cool, but many users
 will find it disorienting and become stressed or panicked if they
-can't figure out how to exit your game. So if do you decide to run your game in fullscreen
+can't figure out how to exit your game. So you do decide to run your game in fullscreen
 mode, be confident that users will know how to exit it. Or, play it
 safe and just use `scaleToWindow`, which still looks great but doesn't
 take over the entire browser UI.)
@@ -2954,7 +2954,7 @@ stream, like those used to create a fountain or rocket engine flames.
 (the sixth argument) determines whether the particles should be spaced 
 evenly (`false`) or randomly (`true`) within this range.
 By carefully choosing the sprite for the particle and finely adjusting 
-each parameter, you can use this all-purpose `particleEffect` function 
+each parameter, you can use this all-purpose `particleEffect` method 
 to simulate everything from liquid to fire. In Flappy Fairy, it's used
 to create fairy dust.
 
@@ -3038,7 +3038,7 @@ A particle emitter is just a simple timer that creates particles at
 fixed intervals. That means instead of just calling the 
 `particleEffect` function once, the emitter calls it periodically.
 Ga has a built-in `emitter` method that let's you do this easily.
-Here’s to use it:
+Here’s how to use it:
 ```
 var particleStream = g.emitter(
   100,                                     //The interval
@@ -3062,7 +3062,7 @@ particleStream.stop();
 The emitter object also has a `playing` property that will be either 
 `true` or `false` depending on the emitter’s current state. (See the
 `particleEmitter.html` file in the `examples` folder for more details
-on how to create an use a particle emitter.)
+on how to create and use a particle emitter.)
 
 A particle emitter is used in Flappy Fairy to make the fairy emit a 
 stream of multicolored particles while she’s flapping her wings. The 
@@ -3111,7 +3111,7 @@ and moves the green pillars that the fairy has to navigate to reach
 the Finish sign.
 
 There are fifteen green pillars in the game. Every five pillars, the 
-gap between the top and bottom sections become narrower. The first five 
+gap between the top and bottom sections becomes narrower. The first five 
 pillars have a gap of four blocks, the next five have a gap of three blocks 
 and the last five have a gap of two blocks. This makes the game increasingly 
 difficult as Flappy Fairy flies further. The exact position of the gap is 
@@ -3175,7 +3175,7 @@ for (var i = 0; i < numberOfPillars; i++) {
   }
 }
 ```
-The last part of the code adds the big finish sprite to the world, which 
+The last part of the code adds the big `finish` sprite to the world, which 
 Flappy Fairy will see if she manages to make it through to the end.
 
 The game loop moves the group of blocks by 2 pixels to the right each 
@@ -3185,16 +3185,16 @@ if (finish.gx > 256) {
   blocks.x -= 2;
 }
 ```
-When the finish sprite scrolls into the center of the canvas, the 
+When the `finish` sprite scrolls into the center of the canvas, the 
 `blocks` container will stop moving. Notice that the code uses the 
-finish sprite’s global x position (gx) to test whether it’s inside 
+`finish` sprite’s global x position (`gx`) to test whether it’s inside 
 the area of the canvas. Because global coordinates are relative to 
 the canvas, not the parent container, they’re really useful for 
 just these kinds of situations where you want to want to find a 
 nested sprite’s position on the canvas.
 
 Make sure you check out the complete Flappy Fairy source code in the
-`examples` folder so that you can see all this code in it's proper context.
+`examples` folder so that you can see all this code in its proper context.
 
 <a id='aguidetotheexamples'></a>
 #Coming soon: A guide to the examples
