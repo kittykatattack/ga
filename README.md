@@ -64,7 +64,15 @@ the best place to start.
     8. [Making the aliens explode](#explodealiens)
     9. [Displaying the score](#displayingscore)
     10. [Ending and resetting the game](#endinggame2)
-  3. [Coming very soon: Flappy Fairy!](#flappyfairy)
+  3. [Flappy Fairy!](#flappyfairy)
+    1. [Launch a game in fullscreen mode](#launchagameinfullscreenmode)
+    2. [Make a button](#makeabutton)
+    3. [Making the fairy fly](#makingthefairyfly)
+    4. [Make a scrolling background](#makeascrollingbackground)
+    5. [The fairy dust explosions](#thefairydustexplosions)
+    6. [Use a particle emitter](#useaparticleemitter)
+    7. [Creating and moving the pillars](#creatingandmovingthepillars)
+8. [A Guide to the examples](#aguidetotheexamples)
 
 <a id='features'></a>
 Features
@@ -2652,7 +2660,7 @@ that you
 can set to `false` if you want to disable the button. (Set `enabled`
 to `true` to re-enable it.) You can also use the button's `state`
 property to find out if the button state is currently `"up"`, `"over"`
-or `"down"`. (These states are strings.)
+or `"down"`. (These state values are strings.)
 
 Important! You can give **any** sprite the qualities of button just by
 setting its `interactive` property to `true`, like this:
@@ -2812,7 +2820,7 @@ function play(){
 ```
 This means that when the next game frame swings around, `oldVy` will still be storing the
 fairy's velocity value from the *previous frame*. And that means you
-can use it to figure out the change in the fairy's velocity from the
+can use that value to figure out the change in the fairy's velocity from the
 previous frame to the current frame. If she's starting to go up (if `vy` is
 greater than `oldVy`), play the fairy's animation: 
 ```
@@ -2852,7 +2860,7 @@ The image has been designed so that the clouds **tile seamlessly**:
 the clouds on the top and left match up with the clouds on the right
 and bottom. That means you can connect multiple instances of the same
 image and they will appear to create a single, unbroken continuous
-image. ([Imagefrom OpenGameArt.](opengameart.org/content/cartoony-sky)) 
+image. ([Image from OpenGameArt.](opengameart.org/content/cartoony-sky)) 
 
 Because this is really useful for games, Ga has a sprite type
 called a `tilingSprite` that's designed just for such infinite
@@ -2867,8 +2875,9 @@ sky = g.tilingSprite(
 The first two arguments are the sprite's width and height, and the
 last is the image your want to use. 
 
-Tiling sprite's have the 
-same properties as normal sprites, with the addition of two new ones:
+Tiling sprites have the 
+same properties as normal sprites, with the addition of two new
+properties:
 `tileX` and `tileY`. Those two properties let you set the image offset from the
 sprite's top left corner. If you want to make a tiling sprite scroll
 continuously, just increase its `tileX` value by some small amount
@@ -3055,7 +3064,7 @@ The emitter object also has a `playing` property that will be either
 `particleEmitter.html` file in the `examples` folder for more details
 on how to create an use a particle emitter.)
 
-A particle emitter is used in Flappy Fairy to make the fairy emits a 
+A particle emitter is used in Flappy Fairy to make the fairy emit a 
 stream of multicolored particles while she’s flapping her wings. The 
 particles are constrained to an angle between 2.4 and 3.6 radians, so 
 they’re emitted in a cone-shaped wedge to the left of the fairy. 
@@ -3112,8 +3121,8 @@ they were right next to each other.
 
 ![The green pillars](/tutorials/screenshots/29.png)
 
-You can see how the gap gradually narrows from four spaces on the right 
-down to two on the left. 
+You can see how the gap gradually narrows from four spaces on the left 
+down to two on the right. 
 
 All the blocks that make up the pillars are in a `group` called
 `blocks`.
@@ -3187,7 +3196,8 @@ nested sprite’s position on the canvas.
 Make sure you check out the complete Flappy Fairy source code in the
 `examples` folder so that you can see all this code in it's proper context.
 
-###Coming soon: A guide to the examples
+<a id='aguidetotheexamples'></a>
+#Coming soon: A guide to the examples
 
 
 
