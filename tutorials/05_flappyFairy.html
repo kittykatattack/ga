@@ -29,7 +29,7 @@ g.enableFullscreen(88, 120);
 
 //Declare any variables shared between functions
 var pointer, canvas, fairy, sky, blocks, 
-    title, playButton, finish, dust, dustFrames;
+    title, goButton, finish, dust, dustFrames;
 
 //The `setup` function will run only once.
 //Use it for initialization tasks
@@ -49,27 +49,22 @@ function setupTitleScreen() {
   g.stage.putCenter(title, 0, -70);
 
   //Create the play button
-  playButton = g.button([
+  goButton = g.button([
     "up.png",
     "over.png",
     "down.png"
   ]);
 
   //Center the play button
-  g.stage.putCenter(playButton, 0, 150);
+  g.stage.putCenter(goButton, 0, 150);
 
   //Make the play button's `press` action
   //start the game when the button is pressed.
-  playButton.release = function(){
-    //g.launchFullscreen(playButton);
+  goButton.release = function(){
     g.state = setupGame;
   };
 
-
-  g.key.downArrow.press = function(){
-    //g.fullscreen.disable("mouseup");
-  };
-
+  //Start the `playTitleScreen` state.
   g.state = playTitleScreen;
 
 }
@@ -86,11 +81,11 @@ function setupGame() {
 
   //Make the title and play button invisible.
   title.visible = false;
-  playButton.visible = false;
+  goButton.visible = false;
 
   //Disable the play button so that it can't be pressed
   //by setting its `enabled` property to `false`.
-  playButton.enabled = false;
+  goButton.enabled = false;
 
   //Make the world
   //Create a `group` for all the blocks
