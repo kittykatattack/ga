@@ -272,6 +272,10 @@ the widest variety of games possible with the least amount of code.
 What is the fundamental alphabet, or the primary colours, of game design?
 That's what we're searching. Can you help?
 
+Checkout the `dev` branch to make experimental changes and bug fixes, and we'll merge it with the `master` branch when we can confirm that everything is stable. Make sure that any code changes you make are compatible with [Google Closure Compiler](http://closure-compiler.appspot.com/home) 
+
+Please feel free to PR (Pull Request) any bug fixes and minor code improvements and optimizations. Any changes to the user-facing public API will need to be discussed in the Issues first. If we make any public API changes, we'll need to commit to updating all affected example and tutorial files as well. Also, any major changes to the engine will need to be discused too.
+
 **Coding style**: Unconventionally, Ga
 uses **functional composition** patterns (the [module
 pattern](http://toddmotto.com/mastering-the-module-pattern/) and
