@@ -2713,4 +2713,4 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 //The `ga` convenience function is just a nice quick way to create an
 //instance of Ga without having the call `Ga.create()` It's really not
 //necessary, but I like it!
-window.ga = GA.create
+window.ga = GA.create;
