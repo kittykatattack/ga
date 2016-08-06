@@ -108,21 +108,12 @@ var GA = GA || {};
 GA.plugins = undefined;
 GA.custom = undefined;
 
-//### ga
-//The `ga` convenience function is just a nice quick way to create an
-//instance of Ga without having the call `Ga.create()` It's really not
-//necessary, but I like it!
-function ga(width, height, setup, assetsToLoad, load) {
-  return GA.create(width, height, setup, assetsToLoad, load);
-}
-
 //### GA.create
 //The entire Ga program exists inside the `Ga.create` method. It
 //creates and returns a new instance of Ga, along with all the core
 //game engine functions. However, Ga won't actually start until you
 //call the `start` method from the applicaiton code, as you can see in
 //all the examples (in the `examples` folder).
-
 GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //The `ga` object is returned by this function. All the game
@@ -2717,3 +2708,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //Return `ga`.
   return ga;
 };
+
+//### ga
+//The `ga` convenience function is just a nice quick way to create an
+//instance of Ga without having the call `Ga.create()` It's really not
+//necessary, but I like it!
+window.ga = GA.create;
