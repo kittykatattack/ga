@@ -560,7 +560,7 @@ GA.plugins = function(ga) {
 
   //### wait
   ga.wait = function(duration, callBack) {
-    setTimeout(callBack, duration);
+    return setTimeout(callBack, duration);
   };
 
   //### worldCamera
