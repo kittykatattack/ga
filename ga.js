@@ -103,6 +103,10 @@ to learn how the engine works.
 //`GA` is the global instance of the program.
 var GA = GA || {};
 
+//### GA.VERSION
+//The current version of the game engine.
+GA.VERSION = '0.0.1';
+
 //Set `plugins` and `custom` to an intial value of `undefined` to make
 //Google Closure Compiler happy
 GA.plugins = undefined;

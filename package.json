@@ -1,6 +1,6 @@
 {
   "name": "Ga!",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "The world's tiniest, cutest and funnest game engine",
   "main": "ga.js",
   "directories": {
