@@ -22,7 +22,8 @@ the best place to start.
 4. [Ga's philosophy and technical constraints](#philosophy)
 5. [Minifying, crushing and compressing](#minifying)
 6. [Contributions and Licencing](#contibutions)
-7. [Tutorials](#tutorials)
+7. [Hexi](#hexi)
+8. [Tutorials](#tutorials)
   1. [Treasure Hunter](#treasure)
     1. [Setting up the HTML container page](#settingup)
     2. [Initializing the Ga engine](#initializing)
@@ -74,7 +75,7 @@ the best place to start.
     5. [The fairy dust explosions](#thefairydustexplosions)
     6. [Use a particle emitter](#useaparticleemitter)
     7. [Creating and moving the pillars](#creatingandmovingthepillars)
-8. [A Guide to the examples](#aguidetotheexamples)
+9. [A Guide to the examples](#aguidetotheexamples)
 
 <a id='features'></a>
 Features
@@ -291,6 +292,11 @@ That means its freer than free.
 
 It's like a pebble.
 You can pick it up and throw into the sea.
+
+<a id='hexi'></a>
+Hexi
+----
+Do you like Ga, but wished that it had a powerful WebGL renderer? Then checkout Ga's sister game engine: [Hexi](https://github.com/kittykatattack/hexi). It uses almost exactly the same API as Ga, but is built on top of the latest stable version of the powerful, full-featured [Pixi](http://www.pixijs.com) renderer. If you don't care about small file sizes, and need a highly flexible, mobile-optimized and production-ready game engine, then check out Hexi!
 
 <a id='tutorials'></a>
 Tutorials
