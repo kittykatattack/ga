@@ -1,3 +1,5 @@
+![Ga](/tutorials/screenshots/logoAndIllustration.png)
+
 Ga
 ===
 
@@ -6,7 +8,7 @@ Ga
 
 *Ga* is a tiny, cute and friendly system for making HTML5 games or any other
 kind interactive media. You can use it to make any kind of 2D action
-game you can imagine, with unbelievably tiny file sizes.
+game you can imagine, with unbelievably tiny file sizes (under 6.5k!)
 
 Take a look at the feature list and the `examples` folder to get
 started. Keep scrolling, and you'll find a complete beginner's
@@ -272,7 +274,7 @@ the widest variety of games possible with the least amount of code.
 What is the fundamental alphabet, or the primary colours, of game design?
 That's what we're searching. Can you help?
 
-Checkout the `dev` branch to make experimental changes and bug fixes, and we'll merge it with the `master` branch when we can confirm that everything is stable. Make sure that any code changes you make are compatible with [Google Closure Compiler](http://closure-compiler.appspot.com/home) 
+Checkout the `dev` branch to make experimental changes and bug fixes, and we'll merge it with the `master` branch when we can confirm that everything is stable. Make sure that any code changes you make are compatible with [Google Closure Compiler](http://closure-compiler.appspot.com/home). 
 
 Please feel free to PR (Pull Request) any bug fixes and minor code improvements and optimizations. Any changes to the user-facing public API will need to be discussed in the Issues first. If we make any public API changes, we'll need to commit to updating all affected example and tutorial files as well. Also, any major changes to the engine will need to be discused too.
 
