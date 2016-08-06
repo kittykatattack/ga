@@ -120,7 +120,6 @@ window.ga = GA.create
 //game engine functions. However, Ga won't actually start until you
 //call the `start` method from the applicaiton code, as you can see in
 //all the examples (in the `examples` folder).
-
 GA.create = function(width, height, setup, assetsToLoad, load) {
 
   //The `ga` object is returned by this function. All the game
