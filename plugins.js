@@ -401,20 +401,19 @@ GA.plugins = function(ga) {
   //Move a sprite or an array of sprites by adding its
   //velocity to its position
   ga.move = function(sprites) {
-    var s;
     if (sprites instanceof Array === false) {
-      s = sprites;
-      s.x += s.vx;
-      s.y += s.vy;
-    }
-    else {
+      internal_move(sprites)
+    } else {
       for (var i = 0; i < sprites.length; i++) {
-        s = sprites[i];
-        s.x += s.vx;
-        s.y += s.vy;
+        internal_move(sprite[i])
       }
     }
   };
+
+  function internal_move(sprite) {
+    sprite.x += sprite.vx | 0;
+    sprite.y += sprite.vy | 0;
+  }
 
   /*
   ### distance
