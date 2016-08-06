@@ -108,12 +108,6 @@ var GA = GA || {};
 GA.plugins = undefined;
 GA.custom = undefined;
 
-//### ga
-//The `ga` convenience function is just a nice quick way to create an
-//instance of Ga without having the call `Ga.create()` It's really not
-//necessary, but I like it!
-window.ga = GA.create
-
 //### GA.create
 //The entire Ga program exists inside the `Ga.create` method. It
 //creates and returns a new instance of Ga, along with all the core
@@ -2714,3 +2708,9 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
   //Return `ga`.
   return ga;
 };
+
+//### ga
+//The `ga` convenience function is just a nice quick way to create an
+//instance of Ga without having the call `Ga.create()` It's really not
+//necessary, but I like it!
+window.ga = GA.create
