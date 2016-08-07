@@ -296,7 +296,7 @@ You can pick it up and throw into the sea.
 <a id='hexi'></a>
 Hexi
 ----
-Do you like Ga, but wished that it had a powerful WebGL renderer and a gazillion other features that you will probably never use? Then checkout Ga's sister game engine: [Hexi](https://github.com/kittykatattack/hexi). It uses almost exactly the same API as Ga, but is built on top of the latest stable version of the powerful, full-featured [Pixi](http://www.pixijs.com) renderer. What that means is that you can prototype your games for js13k, and port 99% of that code unchanged into Hexi to build your prodction version. If you don't care about small file sizes, and need a highly flexible, mobile-optimized and production-ready game engine, then check out Hexi!
+Do you like Ga, but wished that it had a powerful WebGL renderer and a gazillion other features that you will probably never use? Then checkout Ga's sister game engine: [Hexi](https://github.com/kittykatattack/hexi). It uses almost exactly the same API as Ga, but is built on top of the latest stable version of the powerful, full-featured [Pixi](http://www.pixijs.com) renderer. What that means is that you can prototype your games for js13k, and port 99% of that code unchanged into Hexi to build your prodction version. If you don't care about small file sizes, and need a highly flexible, mobile-optimized and production-ready game engine using the world's most streamlined API, then check out Hexi!
 
 <a id='tutorials'></a>
 Tutorials
