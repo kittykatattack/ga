@@ -296,7 +296,7 @@ You can pick it up and throw into the sea.
 <a id='hexi'></a>
 Hexi
 ----
-Do you like Ga, but wished that it had a powerful WebGL renderer? Then checkout Ga's sister game engine: [Hexi](https://github.com/kittykatattack/hexi). It uses almost exactly the same API as Ga, but is built on top of the latest stable version of the powerful, full-featured [Pixi](http://www.pixijs.com) renderer. If you don't care about small file sizes, and need a highly flexible, mobile-optimized and production-ready game engine, then check out Hexi!
+Do you like Ga, but wished that it had a powerful WebGL renderer and a gazillion other features that you will probably never use? Then checkout Ga's sister game engine: [Hexi](https://github.com/kittykatattack/hexi). It uses almost exactly the same API as Ga, but is built on top of the latest stable version of the powerful, full-featured [Pixi](http://www.pixijs.com) renderer. What that means is that you can prototype your games for js13k, and port 99% of that code unchanged into Hexi to build your prodction version. If you don't care about small file sizes, and need a highly flexible, mobile-optimized and production-ready game engine, then check out Hexi!
 
 <a id='tutorials'></a>
 Tutorials
@@ -433,9 +433,9 @@ g.start();
 
 You can see that the result of the `ga` function is being assigned to
 an variable called `g`. 
-
-    var g = ga(
-
+```js
+var g = ga(
+```
 Now, whenever you want to use any of Ga's custom
 methods or objects in your game, just prefix it with `g`. (You don't
 have to use `g` to represent the game engine, you can use any variable
@@ -444,9 +444,9 @@ name you want. `g` is just nice, short, and easy to remember; `g` =
 
 In this example Ga creates a canvas element with a size of 512 by 512
 pixels. That's specified by the first two arguments:
-  
-    512, 512, setup,
-
+```js  
+512, 512, setup,
+```
 The third argument, `setup`, means that as soon as Ga is initialized,
 it should look for and run a function in your game code called `setup`.
 Whatever code is in the `setup` function is entirely up to you, and
@@ -463,7 +463,6 @@ initialization array:
 [
   "sounds/chimes.wav"
 ]
-
 ```
 
 You can list as many game assets as you like here, including images,
@@ -471,9 +470,9 @@ fonts, and JSON files. Ga will load all these assets for you before
 running any of the game code.
 
 The last thing you need to do is call Ga's `start` method. 
-
-    g.start();
-
+```js
+g.start();
+```
 This is the switch that turns the Ga engine on.
 
 <a id='definingglobals'></a>
@@ -556,14 +555,14 @@ You'll remember from the code above that we preloaded a sound file
 into the game called `chimes.wav`. Before you can use it in your game,
 you have to make a reference to it using Ga's `sound` method,
 like this:
-
-    chimes = g.sound("sounds/chimes.wav");
-
+```js
+chimes = g.sound("sounds/chimes.wav");
+```
 Alternatively, you can access any assets that you've loaded via Ga's
 `assets` object, like this:
-
-    g.assets["sounds/chimes.wav"]
-
+```js
+g.assets["sounds/chimes.wav"]
+```
 Any assets that you've preloaded like this are accessible in the
 `assets` object.
 
@@ -586,23 +585,23 @@ learn all about in the next section.) But they're also used for making game scen
 Treasure Hunter uses two game scenes: `gameScene` which is the main game, 
 and `gameOverScene` which is displayed when the game is finished. 
 Here's how the `gameScene` is made using the `group` method:
-
-    gameScene = g.group();
-
+```js
+gameScene = g.group();
+```
 After you've made the group, you can add sprites (game objects) to the `gameScene`, using
 the `addChild` method.
-    
-    gameScene.addChild(anySprite);
-
+```js   
+gameScene.addChild(anySprite);
+```
 Or, you can add multiple sprites at one time with the `add` method, like this:
-
-    gameScene.add(spriteOne, spriteTwo, spriteThree);
-
+```js
+gameScene.add(spriteOne, spriteTwo, spriteThree);
+```
 Or, if you prefer, you can create the game scene after you've made all
 the sprites, and group all the sprites together with one line of code, like this:
-
-    gameScene = g.group(spriteOne, spriteTwp, spriteThree);
-
+```js
+gameScene = g.group(spriteOne, spriteTwp, spriteThree);
+```
 You'll see a few different examples of how to add sprites to groups in
 the examples ahead.
 
@@ -621,28 +620,28 @@ with these basic sprite types. (If they aren't enough, you can also define your 
 sprite types.) This first version of Treasure Hunter
 only uses `rectangle` sprites. You can make a rectangle sprite like
 this:
-
-    var box = g.rectangle(
-      widthInPixels, 
-      heightInPixels, 
-      "fillColor", 
-      "strokeColor", 
-      lineWidth, 
-      xPosition, 
-      yPosition
-    );
-
+```js
+var box = g.rectangle(
+  widthInPixels, 
+  heightInPixels, 
+  "fillColor", 
+  "strokeColor", 
+  lineWidth, 
+  xPosition, 
+  yPosition
+);
+```
 You can use Ga's `circle` method to make a circular shaped sprite:
-
-    var ball = g.circle(
-      diameterInPixels, 
-      "fillColor", 
-      "strokeColor", 
-      lineWidth,
-      xPosition, 
-      yPosition 
-    );
-
+```js
+var ball = g.circle(
+  diameterInPixels, 
+  "fillColor", 
+  "strokeColor", 
+  lineWidth,
+  xPosition, 
+  yPosition 
+);
+```
 It's often useful to prototype a new game using only `rectangle` and
 `circle` sprites, because that can help you focus on the mechanics of your
 game in a pure, elemental way. That's what this first version of
@@ -830,9 +829,9 @@ direction (`vx`) and vertical direction (`vy`).  The enemies in
 Treasure Hunter only move up and down, so they just need a `vy` value.
 Their `vy` is `speed` (2) multiplied by `direction` (which will be
 either `1` or `-1`).
-
-    enemy.vy = speed * direction;
-
+```js
+enemy.vy = speed * direction;
+```
 If `direction` is `1`, the enemy's `vy` will be `2`. That means the
 enemy will move down the screen at a rate of 2 pixels per frame. If
 `direction` is `-1`, the enemy's speed will be `-2`. That means the
@@ -840,14 +839,14 @@ enemy will move up the screen at 2 pixels per frame.
 
 After the enemy's `vy` is set, `direction` is reversed so that the next
 enemy will move in the opposite direction.
-
-    direction *= -1;
-
+```js
+direction *= -1;
+```
 You can see that each enemy that's created is pushed into an array
 called `enemies`.
-
-    enemies.push(enemy);
-
+```js
+enemies.push(enemy);
+```
 Later in the code you'll see how we'll access all the enemies in this
 array to figure out if they're touching the player.
 
@@ -886,15 +885,15 @@ gameScene.addChild(healthBar);
 You can see that a property called `inner` has been added to the
 `healthBar`. It just references the `innerBar` (the green rectangle) so that
 it will be convenient to access later.
-
-    healthBar.inner = innerBar;
-
+```js
+healthBar.inner = innerBar;
+```
 You don't *have* to do this; but, hey why not! It means that if you
 want to control the width of the `innerBar`, you can write some smooth code
 that looks like this:
-
-    healthBar.inner.width = 30;
-
+```js
+healthBar.inner.width = 30;
+```
 That's pretty neat and readable, so we'll keep it!
 
 <a id='gameoverscene'></a>
@@ -918,9 +917,9 @@ var anyText = g.text(
 The first argument, "Hello!" in the above example, is the text content
 you want to display. Use the `content` property to change the text
 sprite's content later.
-
-    anyText.content = "Some new content";
-
+```js
+anyText.content = "Some new content";
+```
 Here's how the game over message text is created in the `setup`
 function. 
 
@@ -1020,9 +1019,9 @@ down, a negative value will make it move up.
 Is that too much typing? Because controlling a player character with 4
 keyboard keys is such a common requirement, Ga has a built-in function called
 `fourKeyController` that accomplishes all this in one line of code.
-
-    g.fourKeyController(player, 5, 38, 39, 40, 37);
-
+```js
+g.fourKeyController(player, 5, 38, 39, 40, 37);
+```
 The first argument is the sprite you want to control: `player`. The
 second argument is the number of pixels that the sprite should move each frame: `5`.
 The last four arguments are the [ascii key code numbers](http://www.asciitable.com) for the top,
@@ -1032,9 +1031,9 @@ order is listed clockwise, starting from the top.)
 Reference to the arrow keys and space key are built-in to Ga, but you
 if want to use other keys, you can easily create and assign your own
 with Ga's `keyboard` method:
-
-    var customKey = g.keyboard(asciiCode);
-
+```js
+var customKey = g.keyboard(asciiCode);
+```
 Your new `customKey` has `press` and `release` methods
 that you can program in the same way as the examples above. 
 
@@ -1046,14 +1045,14 @@ Ga first starts, it runs the `setup` function (or whatever other
 function you specify in Ga's constructor function arguments.) If you
 want to change the game state, assign a new function to Ga's `state`
 property. Here's how:
-
-    g.state = anyFunction;
-
+```js
+g.state = anyFunction;
+```
 In Treasure Hunter, when the `setup` function is finished, the game
 `state` is set to `play`:
-
-    g.state = play;
-
+```
+g.state = play;
+```
 This makes Ga look for and run a function called `play`. By default,
 any function assigned to the game state will run in a continuous loop, at
 60 frames per second. (You can change the frame rate at any time by setting Ga's
@@ -1066,13 +1065,13 @@ spikes in the frame rate.)
 
 If you ever need to pause the loop, just use Ga's `pause`method, like
 this:
-
-    g.pause();
-
+```js
+g.pause();
+```
 You can start the game loop again with the `resume` method, like this:
-
-    g.resume();
-
+```
+g.resume();
+```
 Now let's find out how Treasure Hunter's `play` function works. 
 
 <a id='gamelogic'></a>
@@ -1094,9 +1093,9 @@ so let's find out what the code inside the `play` function does.
 
 Treasure Hunter uses Ga's `move` method inside the `play` function to move the sprites in the
 game.
-
-    g.move(player);
-
+```js
+g.move(player);
+```
 This is the equivalent of writing code like this:
 
 ```js
@@ -1111,9 +1110,9 @@ code.
 
 You can also move a whole array of sprites with one line of code by
 supplying the array as the argument.
-
-    g.move(arrayOfSprites);
-
+```js
+g.move(arrayOfSprites);
+```
 So now you can easily move the player, but what happens when the
 player reaches the edges of the screen?
 
@@ -1122,9 +1121,9 @@ player reaches the edges of the screen?
 
 Use Ga's `contain` method to keep sprites inside the boundaries of
 the screen.
-
-    g.contain(player, g.stage.localBounds);
-
+```js
+g.contain(player, g.stage.localBounds);
+```
 The first argument is the sprite you want to contain, and the second
 argument is any JavaScript object with an `x`, `y`, `width`, and
 `height` property. As a convenience, all Ga sprites have a property
@@ -1182,9 +1181,9 @@ folder. Treasure Hunter only uses one of these collision methods:
 `hitTestRectangle`. It takes two rectangular sprites and tells you
 whether they're overlapping. It will return `true` if they are, and
 `false` if they aren't.
-
-     g.hitTestRectangle(spriteOne, spriteTwo);
-
+```
+g.hitTestRectangle(spriteOne, spriteTwo);
+```
 Here's how the code in the `play` function uses `hitTestRectangle` to
 check for a collision between any of the enemies and the player.
 ```js
@@ -1231,9 +1230,9 @@ if(playerHit) {
 This bit of code creates a variable called `playerHit`, which is
 initialized to `false` just before the `forEach` loop checks all the
 enemies for a collision.
-
-    var playerHit = false;
-
+```js
+var playerHit = false;
+```
 (Because the `play` function runs 60 times per second, `playerHit`
 will be reinitialized to `false` on every new frame.)
 
@@ -1322,9 +1321,9 @@ if (g.hitTestRectangle(player, treasure)) {
 ```
 You can see that the code uses `hitTestRectangle` inside an `if`
 statement to test for a collision between the player and the treasure.
-
-    if (g.hitTestRectangle(player, treasure)) {
-
+```js
+if (g.hitTestRectangle(player, treasure)) {
+```
 If it's `true`, the treasure is centered over the player.
 
 ```js
@@ -1334,9 +1333,9 @@ treasure.y = player.y + 8;
 
 If `treasure.pickedUp` is `false`, then you know that the treasure hasn't already been 
 picked up, and you can play the `chimes` sound:
-
-    chimes.play();
-
+```js
+chimes.play();
+```
 In addition to `play` Ga's sound objects also have a few more methods that you can use to control them:
 `pause`, `restart` and `playFrom`. (Use `playFrom` to start playing
 the sound from a specific second in the sound file, like this:
@@ -1346,20 +1345,20 @@ the 5 second mark.)
 You can also set the sound object's `volume` by assigning
 a value between 0 and 1. Here's how to set the `volume` to mid-level
 (50%).
-
-    soundObject.volume = 0.5;
-
+```js
+soundObject.volume = 0.5;
+```
 You can set the sound object's `pan` by assigning a value between -1 (left speaker)
 to 1 (right speaker). A pan value of 0 makes the sound equal volume in
 both speakers. Here's how you could set the `pan` to be slightly more
 prominent in the left speaker.
-
-    soundObject.pan = -0.2;
-
+```js
+soundObject.pan = -0.2;
+```
 If you want to make a sound repeat continuously, set its `loop` property to `true`.
-
-    soundObject.loop = true;
-
+```js
+soundObject.loop = true;
+```
 Ga uses a [lightweight wrapper for the WebAudio
 API](https://gist.github.com/kittykatattack/cd41b480e94fd32d8ad5) to achieve all these
 effects.
@@ -1367,9 +1366,9 @@ effects.
 Because you don't want to play the `chimes` sound more than once after
 the treasure has been picked up, the code sets `treasure.pickedUp` to
 `true` just after the sound plays.
-
-    treasure.pickedUp = true;
-
+```js
+treasure.pickedUp = true;
+```
 Now that the player has picked up the treasure, how can you check for
 the end of the game?
 
@@ -1431,9 +1430,9 @@ There are three main ways you can use images in your Ga games.
 
 All three ways of making image sprites use Ga's `sprite` method.
 Here's the simplest way of using it to make an image sprite.
-
-    var imageSprite = g.sprite("images/theSpriteImage.png");
-
+```js
+var imageSprite = g.sprite("images/theSpriteImage.png");
+```
 In
 this next section we'll update Treasure Hunter with image sprites, and
 you'll learn all three ways of adding images to your games.
@@ -1488,14 +1487,14 @@ g.start();
 monitor the loading progress of these assets.)
 
 Now you can access any of these images in your game code like this:
-
-    g.image("images/blob.png")
-
+```js
+g.image("images/blob.png")
+```
 This is just a short-cut for accessing the image directly in the
 `assets` object like this:
-
-    g.assets["images/blob.png"]
-
+```js
+g.assets["images/blob.png"]
+```
 You can use whichever style you prefer. In any case, the image file
 is just an ordinary JavaScript `Image` object, so you can use
 it the same way you would any other `Image` object. 
@@ -2010,7 +2009,6 @@ You can do this with some code inside the game's looping `play` function. Use Ga
 `move` method and supply the `bullets` array as an argument:
 ```js
 g.move(bullets);
-
 ```
 The `move` method automatically loops through all the sprites in the
 array and updates their x and y positions with the value of their `vx` and `vy` velocity values.
