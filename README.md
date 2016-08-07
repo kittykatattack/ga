@@ -390,7 +390,7 @@ minimal HTML container page. The HTML page loads `ga.js` and
 features. You'll write all your game code inside the last pair of
 `<script>` tags before the closing `<body>` tag.
 
-```
+```js
 <!doctype html>
 <meta charset="utf-8">
 <title>Treasure hunter</title>
@@ -418,7 +418,7 @@ code below initializes a game with a screen size of 512 by 512 pixels.
 It also pre-loads the `chimes.wav` sound file from the `sounds`
 folder.
 
-```
+```js
 var g = ga(
   512, 512, setup,
   [
@@ -459,7 +459,7 @@ You can see that the full file path to `chimes.wav` is listed as a
 string in the
 initialization array:
 
-```
+```js
 [
   "sounds/chimes.wav"
 ]
@@ -482,7 +482,7 @@ This is the switch that turns the Ga engine on.
 After Ga has been started, declare all the variables that your game
 functions will need to use.
 
-```
+```js
 var dungeon, player, treasure, enemies, chimes, exit,
     healthBar, message, gameScene, gameOverScene;
 ```
@@ -508,7 +508,7 @@ loaded JSON game data.
 Here's an abridged, birds-eye view of the `setup` function in Treasure Hunter,
 and the tasks that it performs.
 
-```
+```js
 function setup() {
   //Set the canvas border and background color
   //Create the `chimes` sound object
@@ -537,7 +537,7 @@ specific code inside the `setup` function does.
 
 The first two lines in the `setup` function give the canvas a black dashed border and set its
 background color to white.
-```
+```js
 g.canvas.style.border = "1px black dashed";
 g.backgroundColor = "white";
 ```
@@ -649,7 +649,7 @@ game in a pure, elemental way. That's what this first version of
 Treasure Hunter does. Here's the code from the `setup` function that
 creates the `exit`, `player` and `treasure` sprites.
 
-```
+```js
 //The exit door
 exit = g.rectangle(48, 48, "green");
 exit.x = 8;
@@ -695,7 +695,7 @@ left corner has `x` and `y` values of 0. That means any
 positive `x` and `y` values you assign to sprites will position them left (`x`) and down
 (`y`) relative to that corner point. For example, Here's the
 code that positions the `exit` door (the green square). 
-```
+```js
 exit.x = 8;
 exit.y = 8;
 ```
@@ -715,14 +715,14 @@ For example, here are the lines from the code above that
 position the treasure sprite (the gold box). The code places the
 treasure 26 pixels to the left of the
 canvas's right edge, and centers it vertically.
-```
+```js
 treasure.x = g.canvas.width - treasure.width - 32;
 treasure.y = g.canvas.height / 2 - treasure.halfHeight;
 ```
 That's a lot of complicated positioning code to write. Instead, you
 could use Ga's built-in `putCenter` method to achieve the same effect
 like this:
-```
+```js
 g.stage.putCenter(treasure, 220, 0);
 ```
 What is the `stage`? It's the root container for all the sprites, and
@@ -733,13 +733,13 @@ all the sprites in your game, as well as any containers those sprites
 might be grouped in (Like the `gameScene`). `putCenter` works by
 centering the `treasure` inside the `stage`, and then offsetting its
 `x` position by 220 pixels. Here's the format for using `putCenter`:
-```
+```js
 anySprite.putCenter(anyOtherSprite, xOffset, yOffset);
 ```
 You can use the other `put` methods in the same way. For example, if
 you wanted to position a sprite directly to the left of another
 sprite, without any offset, you could use `putLeft`, like this:
-```
+```js
 spriteOne.putLeft(spriteTwo);
 ```
 This would place `spriteTwo` directly to the left of `spriteOne`, and
@@ -752,7 +752,7 @@ these tutorials.
 Before we continue, there's one small detail you need to notice. The
 code that creates the sprites also adds a `pickedUp` property to the
 `treasure` sprite:
-```
+```js
 treasure.pickedUp = false;
 ```
 You'll see how we're going to use `treasure.pickedUp` later in the game logic to help us determine the
@@ -766,7 +766,7 @@ spaced evenly horizontally but but have random initial vertical
 positions. All the enemies sprites are created in a `for` loop using
 this code in the `setup` function:
 
-```
+```js
 //Make the enemies
 var numberOfEnemies = 6,
     spacing = 48,
@@ -817,7 +817,7 @@ Here's what this code produces:
 
 The code gives each of the enemies a random `y` position with the help
 of Ga's `randomInt` method:
-```
+```js
 var y = g.randomInt(0, g.canvas.height - enemy.height);
 ```
 `randomInt` will give you a random number between any two integers that you
@@ -865,7 +865,7 @@ position: a black rectangle behind, and a green rectangle in front. They're grou
 together to make a single compound sprite called `healthBar`. The
 `healthBar` is then added to the `gameScene`.
 
-```
+```js
 //Create the health bar
 var outerBar = g.rectangle(128, 16, "black"),
     innerBar = g.rectangle(128, 16, "yellowGreen");
@@ -909,7 +909,7 @@ lost!" depending on the outcome.
 
 How was this made? The text is made with a `text` sprite. 
 
-```
+```js
 var anyText = g.text(
   "Hello!", "CSS font properties", "fillColor", xPosition, yPosition
 );
@@ -924,7 +924,7 @@ sprite's content later.
 Here's how the game over message text is created in the `setup`
 function. 
 
-```
+```js
 //Add some text for the game over message
 message = g.text("Game Over!", "64px Futura", "black", 20, 20);
 message.x = 120;
@@ -934,7 +934,7 @@ Next, a new `group` is created called `gameOverScene`. The `message` text
 is added to it. The `gameOverScene`'s `visible` property is set to
 `false` so that it's not visible when the game first starts.
 
-```
+```js
 //Create a `gameOverScene` group and add the message sprite to it
 gameOverScene = g.group(message);
 
@@ -958,7 +958,7 @@ to the arrow keys and space bar. Access them like this:
 `release` methods that you can define. Here's code in the `setup`
 function that customizes the `press` and `release` methods of   
 Ga's pre-defined arrow keys to control the player character: 
-```
+```js
 //Left arrow key `press` method
 g.key.leftArrow.press = function() {
   //Change the player's velocity when the key is pressed
@@ -1081,7 +1081,7 @@ Now let's find out how Treasure Hunter's `play` function works.
 As you've just learned, everything in the `play` function runs in a
 continuous loop.
 
-```
+```js
 function play() {
   //This code loops from top to bottom 60 times per second  
 }
@@ -1099,7 +1099,7 @@ game.
 
 This is the equivalent of writing code like this:
 
-```
+```js
 player.x += player.vx;
 player.y += player.vy;
 ```
@@ -1136,7 +1136,7 @@ the same width and height as the `canvas`. That means you can use its
 
 But you can alternatively supply a custom object to do the same thing. Here's how:
 
-```
+```js
 g.contain(
   player, 
   {
@@ -1157,7 +1157,7 @@ which edge it reached: "top", "right", "bottom", or "left". Here's how
 you could use this feature to find out which edge of the canvas the
 sprite is touching:
 
-```
+```js
 var playerHitsEdges = g.contain(player, g.stage.localBounds);
 
 //Display the edge of canvas that the player hit
@@ -1187,7 +1187,7 @@ whether they're overlapping. It will return `true` if they are, and
 
 Here's how the code in the `play` function uses `hitTestRectangle` to
 check for a collision between any of the enemies and the player.
-```
+```js
 //Set `playerHit` to `false` before checking for a collision
 var playerHit = false;
 
@@ -1240,7 +1240,7 @@ will be reinitialized to `false` on every new frame.)
 If `hitTestRectangle` returns `true`, the `forEach` loop sets
 `playerHit` to `true`.
 
-```
+```js
 if(g.hitTestRectangle(player, enemy)) {
   playerHit = true;
 }
@@ -1250,7 +1250,7 @@ If the player has been hit, the code makes the player semi-transparent by
 setting its `alpha` value to 0.5. It also reduces the width of the
 `healthBar`'s `inner` sprite by 1 pixel.
 
-```
+```js
 if(playerHit) {
 
   //Make the player semi-transparent
@@ -1276,7 +1276,7 @@ the return value of `contain` to find out if the enemy is hitting the
 top or bottom of the canvas. If it hits the top or bottom, the enemy's direction is
 reversed with the help of this code:
 
-```
+```js
 //Check the enemy's screen boundaries
 var enemyHitsEdges = g.contain(enemy, g.stage.localBounds);
 
@@ -1303,7 +1303,7 @@ moves along with it.
 
 Here's the code from the `play` function that achieves these effects.
 
-```
+```js
 //Check for a collision between the player and the treasure
 if (g.hitTestRectangle(player, treasure)) {
 
@@ -1327,7 +1327,7 @@ statement to test for a collision between the player and the treasure.
 
 If it's `true`, the treasure is centered over the player.
 
-```
+```js
 treasure.x = player.x + 8;
 treasure.y = player.y + 8;
 ```
@@ -1382,7 +1382,7 @@ the treasure to the exit, in which case the game is won. If either of
 these two conditions are met,  the game's `state` is set to `end` and
 the `message` text's `content` displays the outcome. Here's the last
 bit of code in the `play` function that does this:
-```
+```js
 //Does the player have enough health? If the width of the `innerBar`
 //is less than zero, end the game and display "You lost!"
 if (healthBar.inner.width < 0) {
@@ -1400,7 +1400,7 @@ if (g.hitTestRectangle(treasure, exit)) {
 ```
 The `end` function is really simple. It just hides the `gameScene` and
 displays the `gameOverScene`.
-```
+```js
 function end() {
   gameScene.visible = false;
   gameOverScene.visible = true;
@@ -1470,7 +1470,7 @@ Before you can use them to make sprites, you need to pre-load them into
 Ga's `assets`. The easiest way to do this is to list the image names,
 with their full file paths, in Ga's assets array when you first
 initialize the engine.
-```
+```js
 var g = ga(
   512, 512, setup,
   [
@@ -1504,7 +1504,7 @@ Although pre-loading the images and other assets is the simplest way
 to get them into your game, you can also load assets at any other time
 using the `assets` object's `load` method. Just supply an array of strings
 that list the asset names and their file paths.
-```
+```js
 g.assets.load([
   "images/imageOne.png", 
   "images/imageTwo.png",
@@ -1513,7 +1513,7 @@ g.assets.load([
 ```
 Next, assign a callback function called `whenLoaded` that will run when the assets have
 loaded. 
-```
+```js
 g.assets.whenLoaded = function() {
   //Do something when the assets have loaded
 };
@@ -1540,7 +1540,7 @@ would with ordinary rectangle sprites.
 Here's the code from the `setup` function that creates the dungeon
 background, exit door, player and treasure, and adds them all to the
 `gameScene` group. 
-```
+```js
 //The dungeon background
 dungeon = g.sprite("images/dungeon.png");
 
@@ -1590,7 +1590,7 @@ artwork, as shown by the green square in this screen shot:
 This is a very easy modification to make. All you need to do is supply
 the `contain` method with a custom object that defines the size and
 position of the containing rectangle. Here's how:
-```
+```js
 g.contain(
   player,
   {
@@ -1667,7 +1667,7 @@ folder. (Think of the JSON file as extra metadata for the image file.)
 To load the texture atlas into your game, just include the JSON file
 in Ga's assets array when you initialize the game.
 
-```
+```js
 var g = ga(
   512, 512, setup,
   [
@@ -1684,7 +1684,7 @@ Ga which tileset frame (sub-image) to display.
 Now if you want to use a frame from the texture atlas to make a
 sprite, you can do it like this:
 
-```
+```js
 anySprite = g.sprite("frameName.png");
 ```
 Ga will create the sprite and display the correct image from the
@@ -1692,7 +1692,7 @@ texture atlas's tileset.
 
 Here's how to you could create the sprites in Treasure Hunter using
 texture atlas frames:
-```
+```js
 //The dungeon background image
 dungeon = g.sprite("dungeon.png");
 
@@ -1713,7 +1713,7 @@ images, and it displays them directly from the tileset.
 
 If you ever need to access the texture atlas's JSON file in your game,
 you can get it like this:
-```
+```js
 jsonFile = g.json("jsonFileName.json");
 ```
 Take a look at `treasureHunterAtlas.html` file in the `tutorials` folder
@@ -1761,7 +1761,7 @@ Alien Armada uses a custom font called `emulogic.ttf` to display the
 score at the top right corner of the screen. The font file is
 preloaded with the rest of the asset files (sounds and images) in the assets array that
 initializes the game. 
-```
+```js
 var g = ga(
   480, 320, setup,
   [
@@ -1777,7 +1777,7 @@ var g = ga(
 To use the font, create a `text` sprite in the game's `setup`
 function. The `text` method's second argument is a
 string that describes the font's point size and name: "20px emulogic".  
-```
+```js
 scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
 ```
 You can and load and use any fonts in TTF, OTF, TTC or WOFF format.
@@ -1796,7 +1796,7 @@ color. This
 is thanks to one of Ga's built-in features: the
 `scaleToWindow` method. To use it, call `scaleToWindow` just after
 you call Ga's `start` method, like this:
-```
+```js
 g.start();
 g.scaleToWindow();
 ```
@@ -1805,18 +1805,18 @@ game screens are centered vertically. Tall or square screens are
 centered horizontally. If you want to specify your own browser
 background color that borders the game, supply it in `scaleToWindow`'s
 arguments, like this:
-```
+```js
 g.scaleToWindow("seaGreen");
 ```
 For best results, make sure you set the default margins and paddings
 on all your HTML elements to `0`. The following bit of CSS does the
 trick: 
-```
+```js
 <style> * {margin: 0; padding: 0;} </style>
 ```
 Here's how this `<style>` tag is inserted into Alien Armada's HTML
 container page:
-```
+```js
 <!doctype html>
 <meta charset="utf-8">
 <title>Alien Armada</title>
@@ -1825,7 +1825,7 @@ container page:
 Optionally, if you want to make sure that your game dynamically
 re-sizes and re-centers itself if the user changes the browser window
 size, just drop in this bit of code: 
-```
+```js
 window.addEventListener("resize", function(event){ 
   g.scaleToWindow();
 });
@@ -1833,7 +1833,7 @@ window.addEventListener("resize", function(event){
 Add it just after you've
 called `scaleToWindow` the first time. Here's what all this code looks
 like in context:
-```
+```js
 //...Initialize Ga...
 
 g.start();
@@ -1875,7 +1875,7 @@ Let's find out how this works in Alien Armada. The game code tells
 Ga to use a function called `load` during the loading state. It does
 this by listing `load` as the final argument
 in Ga's initialization constructor. (Look for `load` in the code below):
-```
+```js
 var g = ga(
   480, 320, setup,
   [
@@ -1893,7 +1893,7 @@ are loading.
 
 Here's the `load` function from Alien Armada. It creates a `progressBar` object, and then calls the progress bar's
 `update` method each frame. 
-```
+```js
 function load(){
 
     //Use Ga's built in `progressBar` to display a loading progress
@@ -1907,7 +1907,7 @@ function load(){
 After the assets have loaded, the `setup` state runs automatically. The first
 thing it does is call the `progressBar`'s `remove` method to make the
 bar disappear:
-```
+```js
 function setup() {
 
   g.progressBar.remove();
@@ -1936,7 +1936,7 @@ game code removes it.
 
 To implement a bullet-firing system in your game, the first thing you
 need is an array to store the all the bullet sprites.
-```
+```js
 bullets = [];
 ```
 This `bullets` array is initialized in the game's `setup` function.
@@ -1944,7 +1944,7 @@ This `bullets` array is initialized in the game's `setup` function.
 You can then use Ga's custom `shoot` method to make any sprite fire
 bullets in any direction. Here's the general format you can use to
 implement the `shoot` method.
-```
+```js
 g.shoot(
   cannon,      //The shooting sprite
   4.71,        //The angle, in radians, at which to shoot (4.71 is up)
@@ -1967,7 +1967,7 @@ to the right, 1.57 is down, and 3.14 is to the left.
 The last argument is a function that returns a sprite that should be
 used as the bullet. In this example the bullet is created using using the 
 "bullet.png" frame from the game's loaded texture atlas.
-```
+```js
 function() {
   return g.sprite("bullet.png");
 }
@@ -1980,7 +1980,7 @@ whenever you want to make bullets, at any point in your code. In Alien
 Armada, bullets are fired when the player presses the space key. So
 the game implements this by calling `shoot` inside the space key's
 `press` method. Here's how:
-```
+```js
 g.key.space.press = function() {
 
   g.shoot(
@@ -2008,7 +2008,7 @@ You can see that the `press` method also makes the `shootSound` play.
 There's one more thing you need to do: you have to make the bullets move.
 You can do this with some code inside the game's looping `play` function. Use Ga's
 `move` method and supply the `bullets` array as an argument:
-```
+```js
 g.move(bullets);
 
 ```
@@ -2037,18 +2037,18 @@ First, let's take a look at the Alien Armada tileset, shown here:
 You can see two image frames that define these two states: `alien.png`
 and `explosion.png`. Before you create the sprite, first create an
 array that lists these two frames: 
-```
+```js
 var alienFrames = [
   "alien.png", 
   "explosion.png"
 ];
 ```
 Next use the `alienFrames` array to initialize the `alien` sprite.
-```
+```js
 alien = g.sprite(alienFrames);
 ```
 If you prefer, you could combine these two steps into one, like this:
-```
+```js
 alien = g.sprite([
   "alien.png", 
   "explosion.png"
@@ -2060,7 +2060,7 @@ displayed by default by when the sprite is first created.
 
 You can use the sprite's `show` method to display any other frame number on the
 sprite, like this:
-```
+```js
 alien.show(1);
 ```
 The code above will set the alien to frame number one, which is the
@@ -2071,7 +2071,7 @@ your sprite's states in a special `states` object. Give each state a
 name, with a value that corresponds to that state's frame number.
 Here's how you could define two states on the alien: `normal` and
 `destroyed`:
-```
+```js
 alien.states = {
   normal: 0,
   destroyed: 1
@@ -2080,11 +2080,11 @@ alien.states = {
 `alien.states.normal` now has the value `0`, and
 `alien.states.destroyed` now has the value `1`. That means you could
 display the alien's `normal` state like this:
-```
+```js
 alien.show(alien.states.normal);
 ```
 And display the alien's `destroyed` state like this:
-```
+```js
 alien.show(alien.states.destroyed);
 ```
 This makes your code a little more readable because you can tell at a
@@ -2113,13 +2113,13 @@ When the game starts, the first new alien is generated after 100
 frames have elapsed. A variable called `alienFrequency`, initialized in
 the game's `setup` function is used to help track this. it's
 initialized to 100.
-```
+```js
 alienFrequency = 100;
 ```
 Another variable called `alienTimer` is used to count the number of
 of frames that have elapsed between the previously generated alien,
 and the next one. 
-```
+```js
 alienTimer = 0;
 ```
 `alienTimer` is updated by 1 each frame in the `play` function (the game loop).
@@ -2127,7 +2127,7 @@ When `alienTimer` reaches the value of `alienFrequency`, a new alien
 sprite is generated. Here's the code from the `play` function that
 does this. (This code omits the actual code that generates the alien
 sprite - we'll look at that ahead)
-```
+```js
 //Add one to the alienTimer.
 alienTimer++;
 
@@ -2159,7 +2159,7 @@ the next new alien.
 Before we generate any aliens, we need an array to store all the alien
 sprites. An empty array called `aliens` is initialized in the `setup`
 function for this purpose.
-```
+```js
 aliens = [];
 ```
 Each alien is then created in the `play` function, inside the same
@@ -2171,7 +2171,7 @@ Each alien is then created in the `play` function, inside the same
 - And, finally, it pushes the alien into the `aliens` array. 
 
 Here's the full code that does all this:
-```
+```js
 //Add one to the alienTimer.
 alienTimer++;
 
@@ -2220,11 +2220,11 @@ if(alienTimer === alienFrequency) {
 ```
 You can see in the code above that th alien's `y` position places it
 out of sight just above the stage's top boundary.
-```
+```js
 alien.y = 0 - alien.height;
 ```
 It's `x` position, however, is random. 
-``` 
+```js
 alien.x = g.randomInt(0, 14) * alien.width;
 ```
 This code places it in one of 15 possible random positions (0 to 14) above the
@@ -2234,7 +2234,7 @@ top of the stage. Here's an illustration of these positions:
 
 Finally, and very importantly, the code pushes the alien sprite into
 the `aliens` array.
-```
+```js
 aliens.push(alien);
 ```
 All this code starts pumping out aliens at a steadily increasing rate.
@@ -2245,7 +2245,7 @@ All this code starts pumping out aliens at a steadily increasing rate.
 How do we make the aliens move? In exactly the same way made the
 bullets move. You'll notice in the code above that
 each alien is initialized with a `vy` (vertical velocity) value of 1.
-```
+```js
 alien.vy = 1;
 ```
 When this value is applied to the alien's `y` position, it will make the alien move down, towards the bottom of the stage,
@@ -2254,7 +2254,7 @@ the `aliens` array. So to make all of them move you need to loop
 through each sprite in the `aliens` array each frame and add their
 `vy` values to their `y` positions. Some code like this in the `play`
 function would work:
-```
+```js
 aliens.forEach(function(alien){
   alien.y += alien.vy;
 });
@@ -2262,7 +2262,7 @@ aliens.forEach(function(alien){
 However, its easier just to use Ga's convenient built-in `move` function. Just
 supply `move` with the array of sprites that you want to move, like
 this:
-```
+```js
 g.move(aliens);
 ```
 This updates the aliens positions with their velocities automatically.
@@ -2277,7 +2277,7 @@ check for a collision between an alien and bullet. If a collision is detected,
 remove the bullet, show the alien's `destroyed` state, and then remove
 the alien after a delay of one second.
 
-```
+```js
 if (g.hitTestRectangle(alien, bullet)) {
 
   //Remove the bullet sprite.
@@ -2296,17 +2296,17 @@ if (g.hitTestRectangle(alien, bullet)) {
 ```
 You can use Ga's universal `remove` function to remove any sprite from a
 a game, like this:
-```
+```js
 g.remove(anySprite);
 ```
 You can optionally use it to remove more than one sprite at a time by
 listing the sprites to remove in the arguments, like this:
-```
+```js
 g.remove(spriteOne, spriteTwo, spriteThree);
 ```
 You can even use it to remove all the sprites in an array of sprites. Just
 supply the sprite array as `remove`'s only argument:
-```
+```js
 g.remove(arrayOfSprites);
 ```
 This will both make the sprites disappear from the screen, and also
@@ -2316,7 +2316,7 @@ Ga also has a convenient method called `wait` that will run a function
 after any delay (in milliseconds) that you specify. The Alien Armada
 game code uses `wait` to remove the alien after a one second delay,
 like this:
-```
+```js
 g.wait(1000, function(){
   g.remove(alien);
 });
@@ -2335,7 +2335,7 @@ occurs, and updates the score by 1. Here's all the code from the
 game's `play` function that does this. (If you're new to JavaScript's
 `filter` loops, you can [read about how to use them here.](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/filter))
 
-```
+```js
 //Check for a collision between the aliens and the bullets.
 //Filter through each alien in the `aliens` array.
 aliens = aliens.filter(function(alien) {
@@ -2413,18 +2413,18 @@ of the game screen increases by one. How does this work?
 
 Alien Armada initializes a `text` sprite called `scoreDisplay` in the
 game's `setup` function.
-```
+```js
 scoreDisplay = g.text("0", "20px emulogic", "#00FF00", 400, 10);
 ```
 You saw in the previous section
 that 1 is added to the game's `score` variable each time an alien is
 hit:
-```
+```js
 score += 1;
 ```
 To visibly update the score, all you need to do is set the `score`
 value as the `scoreDisplay`'s `content`, like this:
-```
+```js
 scoreDisplay.content = score;
 ```
 And that's all there is to it!
@@ -2439,7 +2439,7 @@ beyond the bottom edge of the stage, in which case the aliens win.
 A simple if statement in the `play` function checks for this. If
 either condition becomes `true`, the `winner` is set to either
 "player" or "aliens" and the game's `state` is changed to `end`.
-```
+```js
 //The player wins if the score matches the value
 //of `scoreNeededToWin`, which is 60
 if (score === scoreNeededToWin) {
@@ -2474,7 +2474,7 @@ touch, the music `volume` is also set to 50%. Then after a
 delay of 3 seconds, a function named `reset` is called. Here's the
 complete `end` function that does all this:
 
-```
+```js
 function end() {
 
   //Pause the game loop.
@@ -2513,7 +2513,7 @@ remove the `gameOverMessage`, and the `cannon` sprite is re-centered
 at the bottom of the stage. Finally, the game `state` is set back to
 `play`, and the game loop is un-paused by calling Ga's `resume`
 method.
-```
+```js
 function reset() {
 
   //Reset the game variables.
@@ -2589,7 +2589,7 @@ find out how they were implemented.
 When you start Flappy Fairy by clicking the "Go" button,
 the game expands to fill your entire screen. This is done with
 the help of a built-in method called `enableFullscreen`.
-```
+```js
 g.enableFullsreen(listOfAsciiExitKeyCodes);
 ```
 It's one optional argument is a list of Ascii key codes. They refer to keyboard
@@ -2597,7 +2597,7 @@ keys that could be used to exit fullscreen mode. For example, if you
 want fullscreen mode to exit if a user presses upper-case "X" or
 lower-case "x", list their Ascii code values in the arguments like
 this:
-```
+```js
 g.enableFullscreen(88, 120);
 ```
 (88 is "X" and 120 is "x".) You can list as many key codes as you
@@ -2606,7 +2606,7 @@ like. If you leave these arguments out, the default `esc` key will do the trick.
 `enableFullscreen`'s behaviour is very simple: it just launches fullscreen mode
 whenever the user releases the pointer (mouse or touch) over the
 canvas. Add it just below your game's `start` method, like this:
-```
+```js
 var g = ga(
   910, 512, setupTitleScreen,
   [
@@ -2634,7 +2634,7 @@ take over the entire browser UI.)
 The game starts when you press the "Go" button. The "Go" button is a special sprite
 called a `button`. `button` sprites have 3 image frame states: up, over and
 down. You can create a `button` with three states like this:
-```
+```js
 goButton = g.button([
   "up.png",
   "over.png",
@@ -2662,7 +2662,7 @@ Buttons have special methods that you can define: `press`,
 `release`,`over`, `out` and `tap`. You can assign any code you like to
 these methods. For example, here's how you could change the game's
 state when the user releases the `playButton`:
-```
+```js
 goButton.release = function(){
   g.state = setupGame;
 };
@@ -2676,7 +2676,7 @@ or `"down"`. (These state values are strings.)
 
 Important! You can give **any** sprite the qualities of button just by
 setting its `interactive` property to `true`, like this:
-```
+```js
 anySprite.interactive = true;
 ```
 This will give the sprite `press`, `release`, `over`, `out` and `tap`
@@ -2686,7 +2686,7 @@ wide variety of interactive games.
 
 You can also make the `stage` object interactive, which turns the whole 
 game screen into an interactive button:
-```
+```js
 g.stage.interactive = true;
 ```
 For more detail on how to use buttons, see the `buttons.html` file
@@ -2709,7 +2709,7 @@ animation?
 
 First, create an array that defines the frames of the animation, like
 this:
-```
+```js
 var fairyFrames = [
   "0.png", 
   "1.png", 
@@ -2717,11 +2717,11 @@ var fairyFrames = [
 ];
 ```
 Then create a sprite using those frames, like this:
-```
+```js
 var fairy = g.sprite(fairyFrames);
 ```
 Or, if you prefer, you can combine this into one step:
-```
+```js
 var fairy = g.sprite([
   "0.png", 
   "1.png", 
@@ -2732,16 +2732,16 @@ var fairy = g.sprite([
 Any sprite with more than one image frame automatically becomes an
 animated sprite. If you want the animation frames to start playing,
 just call the sprite's `play` method:
-```
+```js
 fairy.play();
 ```
 The frames will automatically play in a continuous loop. If you don't want them
 to loop, set `loop` to `false`.
-```
+```js
 fairy.loop = false;
 ```
 Use the `stop` method to stop an animation:
-```
+```js
 fairy.stop();
 ```
 If you want to know whether or not a sprite's animation is currently
@@ -2749,7 +2749,7 @@ playing, use the Boolean (true/false) `playing` property to find out.
 
 How quickly or slowly do you want the animation to play? You can set
 the animation's frames-per-second (`fps`) like this:
-```
+```js
 fairy.fps = 24;
 ```
 A sprite animation's frame rate is independent of the game's frame
@@ -2762,7 +2762,7 @@ For example, imagine that you have a sprite with 30 frames, but you
 only want to play frames 10 to 15 as part of the animation. Use the
 `playSequence` method and supply it with an array containing two
 numbers: the first and last frames of the sequence you want to play.
-```
+```js
 animatedSprite.playSequence([10, 15]);
 ```
 Now only the frames between 10 to 15 will play as part of the animation. To make
@@ -2770,11 +2770,11 @@ this more readable, you can define the sequence as an array that
 describes what those animated frames actually do. For example, perhaps
 they define a character's walk cycle. You could create an array called
 `walkCycle` that defines those frames:
-```
+```js
 var walkCycle = [10, 15];
 ```
 Then use that array with `playSequence`, like this:
-```
+```js
 animatedSprite.playSequence(walkCycle);
 ```
 That's a bit more code to write, but much more readable!
@@ -2792,7 +2792,7 @@ flying animation triggered when you tap on the game screen?
 A value of `0.05`, which represents gravity, is subtracted from the
 fairy's `y` position each frame in the `play` function. This is the
 gravity effect that pulls the fairy to the bottom of the screen. 
-```
+```js
 fairy.vy += -0.05;
 fairy.y -= fairy.vy;
 ```
@@ -2800,7 +2800,7 @@ But when you tap the screen, the fairy flies up. This is thanks to
 Ga's built-in `pointer` object. It has a `tap` method which you can define to
 perform any action you like. In Flappy Fairy, the `tap` method increases the fairy's vertical
 velocity, `vy`, by 1.5 pixels each time you tap.
-```
+```js
 g.pointer.tap = function() {
   fairy.vy += 1.5;
 };  
@@ -2818,7 +2818,7 @@ fairy's vertical velocity (vy) value. The game implements a well-worn
 old trick to help figure this out. The `play` function captures the
 fairy's velocity for this current frame in a new value called `oldVy`. But
 it does this *only after the fairy's position has changed*. 
-```
+```js
 function play(){
 
   //...
@@ -2835,7 +2835,7 @@ fairy's velocity value from the *previous frame*. And that means you
 can use that value to figure out the change in the fairy's velocity from the
 previous frame to the current frame. If she's starting to go up (if `vy` is
 greater than `oldVy`), play the fairy's animation: 
-```
+```js
 if (fairy.vy > fairy.oldVy) {
   if(!fairy.playing) {
     fairy.play();
@@ -2844,7 +2844,7 @@ if (fairy.vy > fairy.oldVy) {
 ```
 If she's starting to go down, stop the animation and just show the
 fairy's first frame.
-```
+```js
 if (fairy.vy < 0 && fairy.oldVy > 0) {
   if (fairy.playing) fairy.stop();
   fairy.show(0);
@@ -2877,7 +2877,7 @@ image. ([Image from OpenGameArt.](opengameart.org/content/cartoony-sky))
 Because this is really useful for games, Ga has a sprite type
 called a `tilingSprite` that's designed just for such infinite
 scrolling effects. Here's how to create a `tilingSprite`: 
-```
+```js
 sky = g.tilingSprite(
   g.canvas.width,        //The width
   g.canvas.height,       //The height
@@ -2894,7 +2894,7 @@ properties:
 sprite's top left corner. If you want to make a tiling sprite scroll
 continuously, just increase its `tileX` value by some small amount
 each frame in the game loop, like this:
-```
+```js
 sky.tileX -= 1;
 ```
 And that's all you need to do to make an infinitely scrolling
@@ -2915,7 +2915,7 @@ of special effects for games.
 Ga has a versatile built-in method called `particleEffect` that can
 create most kinds of particle effects you'll need for games. Here's
 the format for using it:
-```
+```js
 particleEffect(
   pointer.x,                                     //The particle’s starting x position
   pointer.y,                                     //The particle’s starting y position
@@ -2938,7 +2938,7 @@ particles that should be created, and add optional gravity.
 You can make particles using any sprites by customizing the third argument.
 Just supply a function that returns the kind of sprite you want to use
 for each particle:
-```
+```js
 function(){return sprite("images/star.png")},
 ```
 If you supply a sprite that has multiple frames, the `particleEffect` 
@@ -2947,7 +2947,7 @@ The minimum and maximum angle values are important for defining the
 circular spread of particles as they radiate out from the origin point. 
 For a completely circular explosion effect, use a minimum angle of 0 and 
 a maximum angle of 6.28.
-```
+```js
 0, 6.28,
 ```
 (These values are radians; the equivalent in degrees is 0 and 360.) 
@@ -2957,7 +2957,7 @@ If you want to constrain the particle range to a narrower angle, just
 supply the minimum and maximum values that describe that range. Here are 
 values you could use to constrain the angle to a pizza-slice with the 
 crust pointing left.
-```
+```js
 2.4, 3.6,
 ```
 You could use a constrained angle range like this to create a particle
@@ -2985,7 +2985,7 @@ As you learned above, the `particleEffect` method will randomly
 display a frame on a sprite, if that sprite contains multiple frames. 
 To make this work, first define an array of texture atlas frames that 
 you want to use for the fairy's dust explosion:
-```
+```js
 dustFrames = [
   "pink.png",
   "yellow.png",
@@ -2999,7 +2999,7 @@ method. The code loops through the `blocks.children` array and tests for
 a collision between each green block and the fairy. If `hitTestRectangle` 
 returns `true`, the loop quits and a collision object called
 `fairyVsBlock` becomes `true`.
-```
+```js
 var fairyVsBlock = blocks.children.some(function(block){
   return g.hitTestRectangle(fairy, block, true);  
 });
@@ -3014,7 +3014,7 @@ to use their positions relative to the canvas.
 If `fairyVsBlock` is `true`, and the fairy is currently visible, the 
 collision code runs. It makes the fairy invisible, creates the particle 
 explosion, and calls the game’s `reset` function after a delay of 3 seconds.
-```
+```js
 if (fairyVsBlock && fairy.visible) {
 
   //Make the fairy invisible
@@ -3051,7 +3051,7 @@ fixed intervals. That means instead of just calling the
 `particleEffect` function once, the emitter calls it periodically.
 Ga has a built-in `emitter` method that let's you do this easily.
 Here’s how to use it:
-```
+```js
 var particleStream = g.emitter(
   100,                                     //The interval
   function() {return g.particleEffect(     //The `particleEffect` function
@@ -3067,7 +3067,7 @@ The `emitter` method returns an object with `play` and `stop` methods
 that you can use to control the particle stream. You can use them 
 just like the `play` and `stop` methods you use to control a sprite’s 
 animation.
-```
+```js
 particleStream.play();
 particleStream.stop();
 ```
@@ -3087,7 +3087,7 @@ The particle stream randomly emits pink, yellow, green, or violet
 particles, each of which is a separate frame on the texture atlas.
 
 Here's the code that creates this effect: 
-```
+```js
 dust = g.emitter(
   300,                                   //The interval
   function() {
@@ -3138,7 +3138,7 @@ down to two on the right.
 
 All the blocks that make up the pillars are in a `group` called
 `blocks`.
-```
+```js
 blocks = g.group();
 ```
 A nested for loop creates each block and adds it to the blocks container. 
@@ -3146,7 +3146,7 @@ The outer loop runs 15 times; once to create each pillar. The inner loop
 runs eight times; once for each block in the pillar. The blocks are only 
 added if they’re not occupying the range that’s been randomly chosen for 
 the gap. Every fifth time the outer loop runs, the size of the gap narrows by one.
-```
+```js
 //What should the initial size of the gap be between the pillars?
 var gapSize = 4;
 
@@ -3192,7 +3192,7 @@ Flappy Fairy will see if she manages to make it through to the end.
 
 The game loop moves the group of blocks by 2 pixels to the right each 
 frame, but only while the finish sprite is off-screen:
-```
+```js
 if (finish.gx > 256) {
   blocks.x -= 2;
 }
