@@ -2098,6 +2098,10 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
         //Find the file extension of the asset.
         var extension = source.split('.').pop();
+        //Check if it is base64 encoded image
+        var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+        var srcSplit = source.split(',').pop();
+        var isBase64 = base64regex.test(srcSplit)
 
         //#### Images
         //Load images that have file extensions that match
@@ -2211,7 +2215,27 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
           //Send the request to load the file.
           xhr.send();
-        }
+        }        
+        else if (isBase64 == true) {
+            //Create a new image and add a loadHandler
+            var image = new Image();
+            image.addEventListener("load", function() {
+                //Get the image file name.
+                image.name = source;
+                self[image.name] = {
+                    source: image,
+                    frame: {
+                        x: 0,
+                        y: 0,
+                        w: image.width,
+                        h: image.height
+                    }
+                };
+                self.loadHandler();
+            }, false);
+            //Set the image's src property so we can start loading the image.
+            image.src = source;
+                }
 
         //Display a message if a file type isn't recognized.
         else {
