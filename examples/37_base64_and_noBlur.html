@@ -1,0 +1,60 @@
+<!doctype html> 
+<meta charset = "utf-8"> 
+<title>Base64 and noBlur</title>
+<body>
+<script src="../ga.js"></script>
+<script src="../plugins.js"></script>
+<script>
+
+/*
+This file requires these convenience functions from `plugins.js`:
+`noBlurScale`
+*/
+
+/*
+Hello! 
+I used Ga for my entry to the js13kGames 2016 competition: Glitchicken
+You can play it here: http://www.mattiafortunati.com/games/glitchicken/index.html
+Or check the source code here: https://github.com/MattiaFortunati/glitchicken
+
+For this purpose I had to add support for base64 encoded images and 
+disable the default blur effect for scaled images, to support my game's pixel art
+
+I hope this can be helpful for your projects, too!
+Cheers!
+
+Mattia Fortunati
+http://www.mattiafortunati.com
+*/
+
+
+
+//here's a base64 encoded image
+//its size is 12x12 pixels
+var CHICKEN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMBAMAAACkW0HUAAAAD1BMVEUAAAD///8AAADAwMDHx8cZgFxgAAAAAXRSTlMAQObYZgAAADJJREFUCNdjgAEmJSUFIKVsbGwE5AgKGwsqACkgUGBQFARCICUs6CIMFwSKCgrB9KECANcBBJRue748AAAAAElFTkSuQmCC"
+
+//Create a new GA instance, and start it.
+var g = ga(512, 512, setup, 
+  [
+    CHICKEN,
+  ]
+);
+g.start();
+
+//disable the blur effect
+g.noBlurScale()
+
+function setup() {
+	//create the sprite
+	var sprite = g.sprite(CHICKEN)
+	//move it a bit to the center
+	sprite.x = 170
+	sprite.y = 170
+	//resize it
+	sprite.width = 150
+	sprite.height = 150
+}
+
+</script>
+</body>
+
