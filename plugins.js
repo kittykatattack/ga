@@ -405,7 +405,7 @@ GA.plugins = function(ga) {
       internal_move(sprites)
     } else {
       for (var i = 0; i < sprites.length; i++) {
-        internal_move(sprite[i])
+        internal_move(sprites[i])
       }
     }
   };
