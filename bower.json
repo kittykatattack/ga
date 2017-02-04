@@ -1,0 +1,16 @@
+{
+	"name": "ga",
+	"dependencies": {},
+	"devDependencies": {},
+	"main": [
+		"ga.js",
+		"plugins.js"
+	],
+	"ignore": [
+		"**/.*",
+		"tutorials",
+		"examples",
+		"src",
+		"Gruntfile.js"
+	]
+}
