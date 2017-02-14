@@ -2073,7 +2073,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     loaded: 0,
 
     //File extensions for different types of assets.
-    imageExtensions: ["png", "jpg", "gif"],
+    imageExtensions: ["png", "jpg", "gif", "webp"],
     fontExtensions: ["ttf", "otf", "ttc", "woff"],
     audioExtensions: ["mp3", "ogg", "wav", "webm"],
     jsonExtensions: ["json"],
