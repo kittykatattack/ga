@@ -156,6 +156,7 @@ Here's the table of contents to get you started:
 `exitFullscreen`: used by `enableFullscreen` to exit fullsrcreen mode.
 `alignFullscreen`: Used by `enableFullscreen` to scale and center the canvas in fullscreen mode.
 `enableFullscreen`: Enables fullscreen mode when the user clicks or touches the canvas.
+`noBlurScale`: disable blur effect for scaled images, to support scaled pixel art
 
 ### Chapter 8: Sound
 
@@ -5371,5 +5372,18 @@ GA.plugins = function(ga) {
     //Return the `impulse`.
     return impulse;
   };
+
+
+  //### noBlurScale
+  /*
+  disable blur effect for scaled images, to support pixel art
+  */
+      ga.noBlurScale = function() {
+        ga.canvas.ctx.imageSmoothingEnabled = false;
+        ga.canvas.ctx.mozImageSmoothingEnabled = false;
+        ga.canvas.ctx.imageSmoothingEnabled = false; /// future
+    }
+
+
 //plugins ends
 };
