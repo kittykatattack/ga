@@ -249,6 +249,8 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
 
       //Run the code for each frame.
       update();
+	    ga.render(ga.canvas, 0);
+      
     }
 
     //If `fps` has been set, clamp the frame rate to that upper limit.
