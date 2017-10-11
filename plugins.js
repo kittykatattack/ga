@@ -1968,6 +1968,7 @@ GA.plugins = function(ga) {
 
     //Push the bullet into the
     bulletArray.push(bullet);
+    return bullet;
   };
 
 
