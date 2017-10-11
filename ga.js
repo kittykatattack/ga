@@ -1067,7 +1067,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     o.x = 0;
     o.y = 0;
 
-    //Make the stage its own parent
+    //The stage has no parent
     o.parent = undefined;
     return o;
   }
