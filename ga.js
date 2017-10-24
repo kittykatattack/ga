@@ -692,7 +692,7 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       xOffset = xOffset || 0;
       yOffset = yOffset || 0;
       b.x = (a.x + a.halfWidth - b.halfWidth) + xOffset;
-      b.y = (a.x - b.height) + yOffset;
+      b.y = (a.y - b.height) + yOffset;
 
       //Compensate for the parent's position
       o.compensateForParentPosition(a, b);
