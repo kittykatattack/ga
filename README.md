@@ -15,7 +15,7 @@ started. Keep scrolling, and you'll find a complete beginner's
 tutorial ahead. If you've never made a game before, the tutorials are
 the best place to start.
 
-### Table of contents:
+### Table of contents are as follows:
 1. [Features](#features)
 2. [The Plugins](#plugins)
 3. [Coming soon...](#comingsoon)
