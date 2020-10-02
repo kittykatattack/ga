@@ -15,6 +15,8 @@ started. Keep scrolling, and you'll find a complete beginner's
 tutorial ahead. If you've never made a game before, the tutorials are
 the best place to start.
 
+Ga is "finsihed" software. It's perfect and bug-free, which is why there have been so few recent updates. Go ahead and use it - forever! 
+
 ### Table of contents:
 1. [Features](#features)
 2. [The Plugins](#plugins)
