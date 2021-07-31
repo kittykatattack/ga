@@ -4556,7 +4556,7 @@ GA.plugins = function(ga) {
   //`requestFullscreen` is used by `enableFullscreen` to launch
   //fullscreen mode.
   ga.requestFullScreen = function() {
-    if (!document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && document.fullscreenElement === null) {
       ga.canvas.requestFullscreen();
     }
   };
@@ -4564,7 +4564,7 @@ GA.plugins = function(ga) {
   //`exitFullscreen` is used by `enableFullscreen` to exit
   //fullscreen mode.
   ga.exitFullScreen = function() {
-    if (document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && document.fullscreenElement !== null) {
       document.exitFullscreen();
     }
   };
