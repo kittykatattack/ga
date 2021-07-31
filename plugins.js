@@ -1156,7 +1156,7 @@ GA.plugins = function(ga) {
     //Sine
     sine: function(x) {return Math.sin(x * Math.PI / 2);},
     sineSquared: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
-    sineCubed: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 2);},
+    sineCubed: function(x) {return Math.pow(Math.sin(x * Math.PI / 2), 3);},
     inverseSine: function(x) {return 1 - Math.sin((1 - x) * Math.PI / 2);},
     inverseSineSquared: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 2);},
     inverseSineCubed: function(x) {return 1 - Math.pow(Math.sin((1 - x) * Math.PI / 2), 3);},
