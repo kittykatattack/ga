@@ -4556,7 +4556,7 @@ GA.plugins = function(ga) {
   //`requestFullscreen` is used by `enableFullscreen` to launch
   //fullscreen mode.
   ga.requestFullScreen = function() {
-    if (!document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && document.fullscreenElement === null) {
       ga.canvas.requestFullscreen();
     }
   };
@@ -4564,7 +4564,7 @@ GA.plugins = function(ga) {
   //`exitFullscreen` is used by `enableFullscreen` to exit
   //fullscreen mode.
   ga.exitFullScreen = function() {
-    if (document.fullscreenEnabled) {
+    if (document.fullscreenEnabled && document.fullscreenElement !== null) {
       document.exitFullscreen();
     }
   };
@@ -4695,7 +4695,7 @@ GA.plugins = function(ga) {
   //to `fullscreen.scale`. If not, and the canvas hasn't already
   //been scaled, the scale reverts back to 1.   
   ga.scaleFullscreen = function() {
-    if(document.fullscreenEnabled) {
+    if(document.fullscreenElement != null) {
       ga.scale = ga.fullscreenScale;
       ga.pointer.scale = ga.fullscreenScale;
     } else {
